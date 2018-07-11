@@ -4,7 +4,7 @@ class MDDArc(object):
     """MDDArc represents a single arc in the MDD.
 
     MDDArc represents a single arc in the MDD.  An MDDArc is uniquely
-    identified by its head/tail nodes and its label.
+    identified by its head/tail nodes, label, and weight.
     """
 
     def __init__(self, label, weight, tail, head):
@@ -36,15 +36,17 @@ class MDDArc(object):
     # derived from the first two
     def __eq__(self, other):
         """Return self == other."""
-        return self.tail == other.tail and self.label == other.label and self.head == other.head
+        return self.tail == other.tail and self.label == other.label and self.head == other.head and self.weight == other.weight
     def __lt__(self, other):
         """Return self < other."""
         if self.tail != other.tail:
             return self.tail < other.tail
         elif self.label != other.label:
             return self.label < other.label
-        else:
+        elif self.head != other.head:
             return self.head < other.head
+        else:
+            return self.weight < other.weight
     def __ne__(self, other):
         """Return self != other."""
         return not self.__eq__(other)
@@ -405,7 +407,7 @@ class MDD(object):
             # Cluster nodes by their outNeighbors
             outDict = dict()
             for v in self.allnodes_in_layer(j):
-                outNeighbors = frozenset([(a.label, a.head) for a in self.nodes[j][v].outgoing])
+                outNeighbors = frozenset([(a.label, a.head, a.weight) for a in self.nodes[j][v].outgoing])
                 if outNeighbors not in outDict.keys():
                     outDict[outNeighbors] = []
                 outDict[outNeighbors].append(v)
