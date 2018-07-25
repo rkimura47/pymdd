@@ -3,23 +3,24 @@ from pymdd.mdd import *
 from os import system
 
 # Maximum Independent Set Problem Example from Section 3.5 of Bergman et. al, Decision Diagrams for Optimization
-G = [[(0,1), (0,2)], [(1,0), (1,2), (1,3)], [(2,0), (2,1), (2,3)], [(3,1), (3,2), (3,4)], [(4,3)]]
-neighbors = [ [v for (u,v) in G[i]] for i in range(5) ]
+G = [[(1,2), (1,3)], [(2,1), (2,3), (2,4)], [(3,1), (3,2), (3,4)], [(4,2), (4,3), (4,5)], [(5,4)]]
+neighbors = [ [v for (u,v) in G[j]] for j in range(5) ]
 weight = [3, 4, 2, 2, 7]
 numLayers = 5
-domain = lambda i: (0,1)
-rootState = frozenset([0,1,2,3,4])
-def trFunc(s,d,i):
+domain = lambda j: (0,1)
+rootState = frozenset([1,2,3,4,5])
+def trFunc(s,d,j):
     if d == 1:
-        if i in s:
-            return s - {i} - set(neighbors[i])
+        if j+1 in s:
+            return s - {j+1} - set(neighbors[j])
         else:
             return None
     else:
-        return s - {i}
-costFunc = lambda s,d,i: d*weight[i]
+        return s - {j+1}
+costFunc = lambda s,d,j: d*weight[j]
 isFeas = lambda s: s is not None
 mergeFunc = lambda slist: frozenset(set.intersection(*(set(s) for s in slist)))
+adjFunc = lambda w,os,ms: w
 name = 'misp'
 
 
@@ -28,13 +29,13 @@ name = 'misp'
 mymdd = MDD(name)
 # Perform DP-based top-down compilation
 mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas)
-mymdd.reduce_bottom_up(mergeFunc)
+mymdd.reduce_bottom_up(mergeFunc, adjFunc)
 
 # Print the contents
 print(mymdd)
 print(mymdd.find_longest_path())
 
 # Display MDD with GraphViz
-mymdd.output_to_dot(nodeDotFunc=lambda s: '[label="{' + ', '.join(str(i) for i in s)  + '}"];', arcSortArgs=MDD._default_arcsortargs, nodeSortArgs=MDD._default_nodesortargs)
+mymdd.output_to_dot(nodeDotFunc=lambda s: '[label="{' + ', '.join(str(i) for i in s)  + '}"];')
 system('dot -Tps ' + name + '.gv -o ' + name + '.ps')
 system('gv ' + name + '.ps')

@@ -234,8 +234,9 @@ class MDD(object):
         self.nodes[rmvarc.tail.layer][rmvarc.tail].outgoing.remove(rmvarc)
         self.nodes[rmvarc.head.layer][rmvarc.head].incoming.remove(rmvarc)
 
-    # Add a node to the MDD, without sanity checks.  NOTE: If an identical
-    # node already exists, its incoming/outgoing arcs will be ERASED!!!
+    # Add a node to the MDD, without sanity checks.
+    # NOTE: If an identical node already exists, its incoming and outgoing
+    # arcs will be ERASED!!!
     def _add_node(self, newnode):
         self.nodes[newnode.layer][newnode] = MDDNodeInfo()
 
@@ -247,6 +248,86 @@ class MDD(object):
         for arc in self.nodes[rmvlayer][rmvnode].outgoing:
             self.nodes[rmvlayer+1][arc.head].incoming.remove(arc)
         del self.nodes[rmvlayer][rmvnode]
+
+    # Default inarcfun, outarcfun methods
+    @staticmethod
+    def _default_inarcfun(mgnode, inarc):
+        return MDDArc(inarc.label, inarc.weight, inarc.tail, mgnode)
+    @staticmethod
+    def _default_outarcfun(mgnode, outarc):
+        return MDDArc(outarc.label, outarc.weight, mgnode, outarc.head)
+
+    # Merge specified nodes into a new node, without sanity checks.
+    # Args:
+    #     mnodes (list(MDDNode)): nodes to be merged together
+    #     mlayer (int): layer containing merged nodes
+    #         NOTE: all nodes in mnodes must be in layer mlayer
+    #     nodefun (list(MDDNode) -> MDDNode): nodefun(vlist) returns the node
+    #         resulting from merging nodes in vlist
+    #     inarcfun ((MDDNode, MDDArc) -> MDDArc): inarcfun(mgnode, inarc)
+    #         returns the arc (corresponding to inarc) incoming to the new
+    #         merged node mgnode; if inarcfun is None (default), the original
+    #         inarc data is used unchanged
+    #         NOTE: head of returned arc must be mgnode
+    #     outarcfun ((MDDNode, MDDArc) -> MDDArc): outarcfun(mgnode, outarc)
+    #         returns the arc (corresponding to outarc) outgoing from the new
+    #         merged node mgnode; if outarcfun is None (default), the original
+    #         outarc data is used unchanged
+    #         NOTE: tail of returned arc must be mgnode
+    #
+    def _merge_nodes(self, mnodes, mlayer, nodefun, inarcfun=None, outarcfun=None):
+        # Use default inarcfun/outarcfun if unspecified
+        if inarcfun is None:
+            inarcfun = self._default_inarcfun
+        if outarcfun is None:
+            outarcfun = self._default_outarcfun
+
+        # Enumerate incoming/outgoing arcs
+        mIncoming = set(chain.from_iterable(self.nodes[mlayer][v].incoming for v in mnodes))
+        mOutgoing = set(chain.from_iterable(self.nodes[mlayer][v].outgoing for v in mnodes))
+
+        # Create the new supernode and its arcs
+        mNode = nodefun(mnodes)
+        self._add_node(mNode)
+        for arc in mIncoming:
+            self._add_arc(inarcfun(mNode, arc))
+        for arc in mOutgoing:
+            self._add_arc(outarcfun(mNode, arc))
+
+        # Delete merged nodes (with different state)
+        for v in mnodes:
+            if v.state != mNode.state:
+                self._remove_node(v)
+
+
+    def merge_nodes(self, mNodes, mLayer, mergeFunc, adjFunc):
+        """Merge specified nodes into a new node.
+
+        Merge all nodes in mNodes (in layer mLayer) into a single new node
+        with the appropriate arcs.  The state of the new node is determined
+        by mergeFunc and the weight of arcs coming into the new node is
+        adjusted by adjFunc.
+
+        Args:
+            mNodes (list(MDDNode)): nodes to be merged together
+            mLayer (int): layer containing merged nodes
+            mergeFunc (list(object) -> object): mergeFunc(slist) returns the
+                the node state resulting from merging node states in 'slist'
+            adjFunc ((float, object, object) -> float): adjFunc(w,os,ms) returns
+                the adjusted weight of an arc with weight w, tail node state os,
+                and head node (i.e., merged supernode) state ms
+
+        Raises:
+            RuntimeError: all nodes in mNodes must be in layer mLayer
+        """
+        if any(v.layer != mLayer for v in mNodes):
+            raise RuntimeError('all nodes in mNodes must be in layer mLayer')
+            return
+        def nodefun(vlist):
+            return MDDNode(mLayer, mergeFunc([v.state for v in vlist]))
+        def inarcfun(mgnode, inarc):
+            return MDDArc(inarc.label, adjFunc(inarc.weight, inarc.tail.state, mgnode.state), inarc.tail, mgnode)
+        self._merge_nodes(mNodes, mLayer, nodefun, inarcfun)
 
     # Append a new layer to the MDD.
     def _append_new_layer(self):
@@ -309,45 +390,6 @@ class MDD(object):
             for u in prnnodes:
                 self._remove_node(u)
 
-    def merge_nodes(self, mnodes, mergeFunc):
-        """Merge specified nodes into a new node.
-
-        Merge all nodes in mnodes into a single new node with the appropriate
-        arcs.  The state of the new node is determined by mergeFunc.
-
-        Args:
-            mnodes (collection of MDDNodes): nodes to be merged together
-            mergeFunc(list(object) -> object): mergeFunc(slist) returns the
-                the node state resulting from merging node states in 'slist'
-
-        Raises:
-            RuntimeError: cannot merge nodes in different layers
-        """
-        # Check that all nodes are on the same layer
-        mLayer = set([v.layer for v in mnodes])
-        if len(mLayer) > 1:
-            raise RuntimeError('cannot merge nodes in different layers')
-            return
-        mLayer = mnodes[0].layer
-
-        # Enumerate incoming/outgoing arcs
-        mIncoming = set(chain.from_iterable(self.nodes[mLayer][v].incoming for v in mnodes))
-        mOutgoing = set(chain.from_iterable(self.nodes[mLayer][v].outgoing for v in mnodes))
-
-        # Create the new supernode
-        mState = mergeFunc([v.state for v in mnodes])
-        mNode = MDDNode(mLayer, mState)
-        self._add_node(mNode)
-        for arc in mIncoming:
-            self._add_arc(MDDArc(arc.label, arc.weight, arc.tail, mNode))
-        for arc in mOutgoing:
-            self._add_arc(MDDArc(arc.label, arc.weight, mNode, arc.head))
-
-        # Delete merged nodes (with different state)
-        for v in mnodes:
-            if v.state != mState:
-                self._remove_node(v)
-
     def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas):
         """Compile the MDD top-down according to a DP formulation.
 
@@ -392,15 +434,19 @@ class MDD(object):
                         # Add appropriate arc
                         self._add_arc(MDDArc(d, costFunc(u.state, d, j), u, v))
 
-    def reduce_bottom_up(self, mergeFunc):
+    def reduce_bottom_up(self, mergeFunc, adjFunc):
         """Reduce the MDD bottom-up by merging equivalent nodes.
         
         Merge all equivalent nodes in the MDD, i.e., nodes which have the same
-        suffix set.  The state of the new node is specified by mergeFunc.
+        suffix set.  The state of the new node is determined by mergeFunc and
+        the weight of arcs coming into the new node is adjusted by adjFunc.
 
         Args:
-            mergeFunc(list(object) -> object): mergeFunc(slist) returns the
+            mergeFunc (list(object) -> object): mergeFunc(slist) returns the
                 the node state resulting from merging node states in 'slist'
+            adjFunc ((float, object, object) -> float): adjFunc(w,os,ms) returns
+                the adjusted weight of an arc with weight w, tail node state os,
+                and head node (i.e., merged supernode) state ms
         """
         # Merge from bottom up
         for j in range(self.numLayers, 0, -1):
@@ -414,9 +460,11 @@ class MDD(object):
 
             # Nodes that have the same outNeighbors can be merged together
             for mnodes in outDict.values():
-                self.merge_nodes(mnodes, mergeFunc)
+                self.merge_nodes(mnodes, j, mergeFunc, adjFunc)
 
     # Find an 'optimal' root-terminal path in the MDD.
+    # Args:
+    #     longest (bool): True/False if computing longest/shortest path resp
     def _find_opt_path(self, longest):
         if longest:
             (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
