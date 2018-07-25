@@ -18,9 +18,9 @@ def trFunc(s,d,j):
     else:
         return s - {j+1}
 costFunc = lambda s,d,j: d*weight[j]
-isFeas = lambda s: s is not None
-mergeFunc = lambda slist: frozenset(set.intersection(*(set(s) for s in slist)))
-adjFunc = lambda w,os,ms: w
+isFeas = lambda s,j: s is not None
+mergeFunc = lambda slist,j: frozenset(set.intersection(*(set(s) for s in slist)))
+adjFunc = lambda w,os,ms,j: w
 name = 'misp'
 
 

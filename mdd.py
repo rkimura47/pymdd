@@ -300,34 +300,34 @@ class MDD(object):
                 self._remove_node(v)
 
 
-    def merge_nodes(self, mNodes, mLayer, mergeFunc, adjFunc):
+    def merge_nodes(self, mnodes, mlayer, mergefun, adjfun):
         """Merge specified nodes into a new node.
 
-        Merge all nodes in mNodes (in layer mLayer) into a single new node
+        Merge all nodes in mnodes (in layer mlayer) into a single new node
         with the appropriate arcs.  The state of the new node is determined
-        by mergeFunc and the weight of arcs coming into the new node is
-        adjusted by adjFunc.
+        by mergefun and the weight of arcs coming into the new node is
+        adjusted by adjfun.
 
         Args:
-            mNodes (list(MDDNode)): nodes to be merged together
-            mLayer (int): layer containing merged nodes
-            mergeFunc (list(object) -> object): mergeFunc(slist) returns the
-                the node state resulting from merging node states in 'slist'
-            adjFunc ((float, object, object) -> float): adjFunc(w,os,ms) returns
+            mnodes (list(MDDNode)): nodes to be merged together
+            mlayer (int): layer containing merged nodes
+            mergefun (list(object) -> object): mergefun(slist) returns the
+                node state resulting from merging node states in 'slist'
+            adjfun ((float, object, object) -> float): adjfun(w,os,ms) returns
                 the adjusted weight of an arc with weight w, tail node state os,
                 and head node (i.e., merged supernode) state ms
 
         Raises:
-            RuntimeError: all nodes in mNodes must be in layer mLayer
+            RuntimeError: all nodes in mnodes must be in layer mlayer
         """
-        if any(v.layer != mLayer for v in mNodes):
-            raise RuntimeError('all nodes in mNodes must be in layer mLayer')
+        if any(v.layer != mlayer for v in mnodes):
+            raise RuntimeError('all nodes in mnodes must be in layer mlayer')
             return
         def nodefun(vlist):
-            return MDDNode(mLayer, mergeFunc([v.state for v in vlist]))
+            return MDDNode(mlayer, mergefun([v.state for v in vlist]))
         def inarcfun(mgnode, inarc):
-            return MDDArc(inarc.label, adjFunc(inarc.weight, inarc.tail.state, mgnode.state), inarc.tail, mgnode)
-        self._merge_nodes(mNodes, mLayer, nodefun, inarcfun)
+            return MDDArc(inarc.label, adjfun(inarc.weight, inarc.tail.state, mgnode.state), inarc.tail, mgnode)
+        self._merge_nodes(mnodes, mlayer, nodefun, inarcfun)
 
     # Append a new layer to the MDD.
     def _append_new_layer(self):
@@ -409,8 +409,8 @@ class MDD(object):
                 cost of selecting domain value 'd' at current state 's',
                 current layer 'j'
             rootState (object): state of the root node
-            isFeas (object -> bool): isFeas(s) returns True if node state 's' is
-                feasible and False otherwise
+            isFeas ((object, int) -> bool): isFeas(s,j) returns True if node
+                state 's' in layer j is feasible and False otherwise
         """
         # First, clear the MDD
         self._clear()
@@ -426,7 +426,7 @@ class MDD(object):
                     # Apply transition function
                     vstate = trFunc(u.state, d, j)
                     # Add if node is feasible
-                    if isFeas(vstate):
+                    if isFeas(vstate, j):
                         v = MDDNode(j+1, vstate)
                         # Check if equivalent node exists
                         if v not in self.allnodes_in_layer(j+1):
@@ -442,11 +442,13 @@ class MDD(object):
         the weight of arcs coming into the new node is adjusted by adjFunc.
 
         Args:
-            mergeFunc (list(object) -> object): mergeFunc(slist) returns the
+            mergeFunc ((list(object), int) -> object): mergeFunc(slist,j) returns
                 the node state resulting from merging node states in 'slist'
-            adjFunc ((float, object, object) -> float): adjFunc(w,os,ms) returns
-                the adjusted weight of an arc with weight w, tail node state os,
-                and head node (i.e., merged supernode) state ms
+                in layer j
+            adjFunc ((float, object, object, int) -> float): adjFunc(w,os,ms,j)
+                returns the adjusted weight of an arc with weight w, tail node
+                state os, and head node (i.e., merged supernode in layer j)
+                state ms
         """
         # Merge from bottom up
         for j in range(self.numLayers, 0, -1):
@@ -460,7 +462,7 @@ class MDD(object):
 
             # Nodes that have the same outNeighbors can be merged together
             for mnodes in outDict.values():
-                self.merge_nodes(mnodes, j, mergeFunc, adjFunc)
+                self.merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), lambda w,os,ms: adjFunc(w,os,ms,j))
 
     # Find an 'optimal' root-terminal path in the MDD.
     # Args:

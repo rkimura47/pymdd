@@ -12,9 +12,9 @@ domain = lambda i: (0,1)
 rootState = capacity
 trFunc = lambda s,d,i: s-d*weight[i]
 costFunc = lambda s,d,i: d*profit[i]
-isFeas = lambda s: s >= 0
-mergeFunc = lambda slist: min(slist)
-adjFunc = lambda w,os,ms: w
+isFeas = lambda s,i: s >= 0
+mergeFunc = lambda slist,i: min(slist)
+adjFunc = lambda w,os,ms,i: w
 name = 'knapsack'
 
 
