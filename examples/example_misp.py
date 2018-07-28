@@ -19,7 +19,9 @@ def trFunc(s,d,j):
         return s - {j+1}
 costFunc = lambda s,d,j: d*weight[j]
 isFeas = lambda s,j: s is not None
-mergeFunc = lambda slist,j: frozenset(set.intersection(*(set(s) for s in slist)))
+maxWidth = lambda j: 2
+nodeSelFunc = lambda vlist,j: [min(vlist), max(vlist)]
+mergeFunc = lambda slist,j: frozenset(set.union(*(set(s) for s in slist)))
 adjFunc = lambda w,os,ms,j: w
 name = 'misp'
 
@@ -27,9 +29,13 @@ name = 'misp'
 
 # Construct the MDD
 mymdd = MDD(name)
-# Perform DP-based top-down compilation
+# Perform DP-based top-down exact compilation
 mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas)
-mymdd.reduce_bottom_up(mergeFunc, adjFunc)
+# Merge nodes
+#mymdd.merge_nodes([MDDNode(2,frozenset([5])), MDDNode(2,frozenset([3,4,5]))], lambda l: mergeFunc(l,2))
+
+# Perform DP-based top-down relaxed compilation
+#mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas, maxWidth, nodeSelFunc, mergeFunc, adjFunc)
 
 # Print the contents
 print(mymdd)

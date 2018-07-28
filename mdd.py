@@ -61,7 +61,7 @@ class MDDArc(object):
         return self.__eq__(other) or not self.__lt__(other)
 
     def __str__(self):
-        return 'A(' + str(self.tail) + ',' + str(self.head) + ':' + str(self.label) + ')'
+        return 'A(' + str(self.label) + ',' + str(self.weight) + ':' + str(self.tail) + ',' + str(self.head) + ')'
 
     def __repr__(self):
         s = 'MDDArc('
@@ -257,7 +257,13 @@ class MDD(object):
     def _default_outarcfun(mgnode, outarc):
         return MDDArc(outarc.label, outarc.weight, mgnode, outarc.head)
 
-    # Merge specified nodes into a new node, without sanity checks.
+    # Merge specified nodes into a new node, with MDDNode/MDDArc functions.
+    #
+    # Merge specified nodes into a new supernode and modify arcs appropriately.
+    # The difference between this function and _merge_nodes is that nodefun,
+    # inarcfun, and outarcfun directly return MDDNodes and MDDArcs (as opposed
+    # to returning the new node state and new arc weights).
+    #
     # Args:
     #     mnodes (list(MDDNode)): nodes to be merged together
     #     mlayer (int): layer containing merged nodes
@@ -275,7 +281,7 @@ class MDD(object):
     #         outarc data is used unchanged
     #         NOTE: tail of returned arc must be mgnode
     #
-    def _merge_nodes(self, mnodes, mlayer, nodefun, inarcfun=None, outarcfun=None):
+    def _merge_nodes_internal(self, mnodes, mlayer, nodefun, inarcfun=None, outarcfun=None):
         # Use default inarcfun/outarcfun if unspecified
         if inarcfun is None:
             inarcfun = self._default_inarcfun
@@ -286,48 +292,62 @@ class MDD(object):
         mIncoming = set(chain.from_iterable(self.nodes[mlayer][v].incoming for v in mnodes))
         mOutgoing = set(chain.from_iterable(self.nodes[mlayer][v].outgoing for v in mnodes))
 
-        # Create the new supernode and its arcs
+        # Create new supernode, and new incoming/outgoing arcs
         mNode = nodefun(mnodes)
-        self._add_node(mNode)
-        for arc in mIncoming:
-            self._add_arc(inarcfun(mNode, arc))
-        for arc in mOutgoing:
-            self._add_arc(outarcfun(mNode, arc))
-
-        # Delete merged nodes (with different state)
+        newIncoming = [inarcfun(mNode, arc) for arc in mIncoming]
+        newOutgoing = [outarcfun(mNode, arc) for arc in mOutgoing]
+        # Delete merged nodes
         for v in mnodes:
-            if v.state != mNode.state:
-                self._remove_node(v)
+            self._remove_node(v)
+        # Add supernode and its arcs to MDD
+        self._add_node(mNode)
+        for arc in newIncoming:
+            self._add_arc(arc)
+        for arc in newOutgoing:
+            self._add_arc(arc)
 
+    # Default awfun method
+    @staticmethod
+    def _default_awfun(w,ns,nt):
+        return w
 
-    def merge_nodes(self, mnodes, mlayer, mergefun, adjfun):
-        """Merge specified nodes into a new node.
+    # Merge specified nodes into a new node, with state/weight functions.
+    #
+    # Merge specified nodes into a new supernode and modify arcs appropriately.
+    # The difference between this function and _merge_nodes_internal is that
+    # nsfun, awinfun, and awoutfun return the new node state and new arc weights
+    # for the merged supernode (as opposed to directly returning MDDNodes and
+    # MDDArcs).
+    #
+    # Args:
+    #     mnodes (list(MDDNode)): nodes to be merged together
+    #     mlayer (int): layer containing merged nodes
+    #     nsfun (list(object) -> object): nsfun(slist) returns the node state
+    #         resulting from merging node states in 'slist'
+    #     awinfun ((float, object, object) -> float): awinfun(w,os,ms) returns
+    #         the adjusted weight of an arc with weight w, old head node state
+    #         os, and new head node (i.e., merged supernode) state ms; if
+    #         awinfun is None (default), the original weight is used
+    #     awoutfun ((float, object, object) -> float): awoutfun(w,os,ms) returns
+    #         the adjusted weight of an arc with weight w, old tail node state
+    #         os, and new tail node (i.e., merged supernode) state ms; if
+    #         awoutfun is None (default), the original weight is used
+    #
+    def _merge_nodes(self, mnodes, mlayer, nsfun, awinfun=None, awoutfun=None):
+        # Use default awfun if unspecified
+        if awinfun is None:
+            awinfun = self._default_awfun
+        if awoutfun is None:
+            awoutfun = self._default_awfun
 
-        Merge all nodes in mnodes (in layer mlayer) into a single new node
-        with the appropriate arcs.  The state of the new node is determined
-        by mergefun and the weight of arcs coming into the new node is
-        adjusted by adjfun.
-
-        Args:
-            mnodes (list(MDDNode)): nodes to be merged together
-            mlayer (int): layer containing merged nodes
-            mergefun (list(object) -> object): mergefun(slist) returns the
-                node state resulting from merging node states in 'slist'
-            adjfun ((float, object, object) -> float): adjfun(w,os,ms) returns
-                the adjusted weight of an arc with weight w, tail node state os,
-                and head node (i.e., merged supernode) state ms
-
-        Raises:
-            RuntimeError: all nodes in mnodes must be in layer mlayer
-        """
-        if any(v.layer != mlayer for v in mnodes):
-            raise RuntimeError('all nodes in mnodes must be in layer mlayer')
-            return
         def nodefun(vlist):
-            return MDDNode(mlayer, mergefun([v.state for v in vlist]))
+            return MDDNode(mlayer, nsfun([v.state for v in vlist]))
         def inarcfun(mgnode, inarc):
-            return MDDArc(inarc.label, adjfun(inarc.weight, inarc.tail.state, mgnode.state), inarc.tail, mgnode)
-        self._merge_nodes(mnodes, mlayer, nodefun, inarcfun)
+            return MDDArc(inarc.label, awinfun(inarc.weight, inarc.head.state, mgnode.state), inarc.tail, mgnode)
+        def outarcfun(mgnode, outarc):
+            return MDDArc(outarc.label, awoutfun(outarc.weight, outarc.tail.state, mgnode.state), mgnode, outarc.head)
+        self._merge_nodes_internal(mnodes, mlayer, nodefun, inarcfun, outarcfun)
+
 
     # Append a new layer to the MDD.
     def _append_new_layer(self):
@@ -378,6 +398,36 @@ class MDD(object):
             raise RuntimeError('cannot add proposed node; duplicate node already exists')
         self._add_node(newnode)
 
+    def merge_nodes(self, mnodes, nsfun, awinfun=None, awoutfun=None):
+        """Merge specified nodes into a new node.
+
+        Merge nodes in mnodes into a new supernode.  The state of the new
+        merged node is specified by nsfun, while the weights of incoming
+        and/or outgoing arcs are specified by awinfun/awoutfun.
+
+        Args:
+            mnodes (list(MDDNode)): nodes to be merged together
+            nsfun (list(object) -> object): nsfun(slist) returns the node state
+                resulting from merging node states in 'slist'
+            awinfun ((float, object, object) -> float): awinfun(w,os,ms)
+                returns the adjusted weight of an arc with weight w, old head
+                node state os, and new head node (i.e., merged supernode) state
+                ms; if awinfun is None (default), the original weight is used
+            awoutfun ((float, object, object) -> float): awoutfun(w,os,ms)
+                returns the adjusted weight of an arc with weight w, old tail
+                node state os, and new tail node (i.e., merged supernode) state
+                ms; if awoutfun is None (default), the original weight is used
+
+        Raises:
+            RuntimeError: cannot merge nodes in different layers
+        """
+        # Check all nodes in mnodes are on same layer
+        mlayer = [v.layer for v in mnodes]
+        if len(set(mlayer)) > 1:
+            raise RuntimeError('cannot merge nodes in different layers')
+            return
+        self._merge_nodes(mnodes, mlayer[0], nsfun, awinfun, awoutfun)
+
     def prune_dead_nodes(self):
         """Prune nodes from the MDD that cannot reach the last layer.
 
@@ -390,7 +440,7 @@ class MDD(object):
             for u in prnnodes:
                 self._remove_node(u)
 
-    def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas):
+    def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas, maxWidth=lambda j: 100, nodeSelFunc=None, mergeFunc=None, adjFunc=None):
         """Compile the MDD top-down according to a DP formulation.
 
         Perform a top-down compilation of the MDD according to a dynamic
@@ -411,13 +461,47 @@ class MDD(object):
             rootState (object): state of the root node
             isFeas ((object, int) -> bool): isFeas(s,j) returns True if node
                 state 's' in layer j is feasible and False otherwise
+            maxWidth (int -> int): maxWidth(j) returns the maximum allowable
+                width for layer j of the MDD; if None (default), the maximum
+                width is set to 100 for all layers
+            nodeSelFunc ((list(MDDNode), int) -> list(MDDNode)):
+                nodeSelFunc(vlist,j) returns a list of nodes selected from
+                vlist in layer j to be either merged (if mergeFunc and adjFunc
+                are defined) or removed (if mergeFunc and adjFunc are None)
+                (default: None)
+            mergeFunc ((list(object), int) -> object): mergeFunc(slist,j)
+                returns the node state resulting from merging node states in
+                'slist' in layer j (default: None)
+            adjFunc ((float, object, object, int) -> float): adjFunc(w,os,ms,j)
+                returns the adjusted weight of an arc with weight w, old head
+                node state os, and new head node (i.e., merged supernode in
+
+        Raises:
+            RuntimeError: mergeFunc and adjFunc must be defined together
         """
+        # Basic parameter checks
+        if not nodeSelFunc is None:
+            if mergeFunc is None != adjFunc is None:
+                return RuntimeError('mergeFunc and adjFunc must be defined together')
+                return
         # First, clear the MDD
         self._clear()
         # Create first layer, containing only the root
         self._append_new_layer()
         self._add_node(MDDNode(0, rootState))
         for j in range(numLayers):
+            # Merge/Remove until current layer is under maxWidth
+            if not nodeSelFunc is None:
+                currLayer = [u for u in self.allnodes_in_layer(j)]
+                while len(currLayer) > maxWidth(j):
+                    mnodes = nodeSelFunc(currLayer,j)
+                    if mergeFunc is None:   # Remove
+                        for u in mnodes:
+                            self._remove_node(u)
+                    else:                   # Merge
+                        self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), lambda w,os,ms: adjFunc(w,os,ms,j))
+                    currLayer = [u for u in self.allnodes_in_layer(j)]
+
             # Create the next layer of nodes
             self._append_new_layer()
             # For each node in the current layer and each possible assignment...
@@ -434,21 +518,26 @@ class MDD(object):
                         # Add appropriate arc
                         self._add_arc(MDDArc(d, costFunc(u.state, d, j), u, v))
 
-    def reduce_bottom_up(self, mergeFunc, adjFunc):
+    def reduce_bottom_up(self, mergeFunc, adjInFunc=None, adjOutFunc=None):
         """Reduce the MDD bottom-up by merging equivalent nodes.
         
         Merge all equivalent nodes in the MDD, i.e., nodes which have the same
-        suffix set.  The state of the new node is determined by mergeFunc and
-        the weight of arcs coming into the new node is adjusted by adjFunc.
+        suffix set.  The state of the new node is determined by mergeFunc, and
+        the weight of incoming and outgoing arcs of the new node is adjusted by
+        adjInFunc and adjOutFunc respectively.
 
         Args:
-            mergeFunc ((list(object), int) -> object): mergeFunc(slist,j) returns
-                the node state resulting from merging node states in 'slist'
-                in layer j
-            adjFunc ((float, object, object, int) -> float): adjFunc(w,os,ms,j)
-                returns the adjusted weight of an arc with weight w, tail node
-                state os, and head node (i.e., merged supernode in layer j)
-                state ms
+            mergeFunc ((list(object), int) -> object): mergeFunc(slist,j)
+                returns the node state resulting from merging node states in
+                'slist' in layer j
+            adjInFunc ((float, object, object, int) -> float):
+                adjInFunc(w,os,ms,j) returns the adjusted weight of an arc with
+                weight w, old head node state os, and new head node (i.e.,
+                merged supernode in layer j) state ms (default: None)
+            adjOutFunc ((float, object, object, int) -> float):
+                adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with
+                weight w, old tail node state os, and new tail node (i.e.,
+                merged supernode in layer j) state ms (default: None)
         """
         # Merge from bottom up
         for j in range(self.numLayers, 0, -1):
@@ -460,9 +549,11 @@ class MDD(object):
                     outDict[outNeighbors] = []
                 outDict[outNeighbors].append(v)
 
+            adjinfun = (lambda w,os,ms: adjInFunc(w,os,ms,j)) if not adjInFunc is None else None
+            adjoutfun = (lambda w,os,ms: adjOutFunc(w,os,ms,j)) if not adjOutFunc is None else None
             # Nodes that have the same outNeighbors can be merged together
             for mnodes in outDict.values():
-                self.merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), lambda w,os,ms: adjFunc(w,os,ms,j))
+                self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), adjinfun, adjoutfun)
 
     # Find an 'optimal' root-terminal path in the MDD.
     # Args:

@@ -14,7 +14,6 @@ trFunc = lambda s,d,i: s-d*weight[i]
 costFunc = lambda s,d,i: d*profit[i]
 isFeas = lambda s,i: s >= 0
 mergeFunc = lambda slist,i: min(slist)
-adjFunc = lambda w,os,ms,i: w
 name = 'knapsack'
 
 
@@ -23,7 +22,7 @@ name = 'knapsack'
 mymdd = MDD(name)
 # Perform DP-based top-down compilation
 mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas)
-mymdd.reduce_bottom_up(mergeFunc, adjFunc)
+mymdd.reduce_bottom_up(mergeFunc)
 
 # Print the contents
 print(mymdd)
