@@ -11,7 +11,7 @@ weight = [3, 3, 4, 6]
 domain = lambda i: (0,1)
 rootState = capacity
 trFunc = lambda s,d,i: s-d*weight[i]
-costFunc = lambda s,d,i: d*profit[i]
+costFunc = lambda s,d,i,ns: d*profit[i]
 isFeas = lambda s,i: s >= 0
 mergeFunc = lambda slist,i: min(slist)
 name = 'knapsack'

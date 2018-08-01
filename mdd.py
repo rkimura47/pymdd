@@ -455,9 +455,10 @@ class MDD(object):
             trFunc ((object, int, int) -> object): trFunc(s,d,j) returns the
                 state transitioned to when domain value 'd' is selected at
                 current state 's', current layer 'j'
-            costFunc ((object, int, int) -> float): costFunc(s,d,j) returns the
-                cost of selecting domain value 'd' at current state 's',
-                current layer 'j'
+            costFunc ((object, int, int, object) -> float): costFunc(s,d,j,ns)
+                returns the cost of selecting domain value 'd' at current state
+                's', current layer 'j', resutling in next state 'ns' (i.e., the
+                output of trFunc(s,d,j))
             rootState (object): state of the root node
             isFeas ((object, int) -> bool): isFeas(s,j) returns True if node
                 state 's' in layer j is feasible and False otherwise
@@ -516,7 +517,7 @@ class MDD(object):
                         if v not in self.allnodes_in_layer(j+1):
                             self._add_node(v)
                         # Add appropriate arc
-                        self._add_arc(MDDArc(d, costFunc(u.state, d, j), u, v))
+                        self._add_arc(MDDArc(d, costFunc(u.state, d, j, vstate), u, v))
 
     def reduce_bottom_up(self, mergeFunc, adjInFunc=None, adjOutFunc=None):
         """Reduce the MDD bottom-up by merging equivalent nodes.

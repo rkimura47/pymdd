@@ -17,7 +17,7 @@ def trFunc(s,d,j):
             return None
     else:
         return s - {j+1}
-costFunc = lambda s,d,j: d*weight[j]
+costFunc = lambda s,d,j,ns: d*weight[j]
 isFeas = lambda s,j: s is not None
 maxWidth = lambda j: 2
 nodeSelFunc = lambda vlist,j: [min(vlist), max(vlist)]

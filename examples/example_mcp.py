@@ -17,7 +17,7 @@ def trFunc(s,d,k):
         return tuple(s[l] + wght[k][l] if l > k else 0 for l in range(numVrt))
     else:
         return tuple(s[l] - wght[k][l] if l > k else 0 for l in range(numVrt))
-def costFunc(s,d,k):
+def costFunc(s,d,k,ns):
     if k == 0:
         return rootValue
     else:
