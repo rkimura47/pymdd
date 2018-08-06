@@ -564,6 +564,7 @@ class MDD(object):
             (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
         else:
             (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
+        # Initialize tmp attribute
         # Remember there are self.numLayers ARC layers, and therefore
         # self.numLayers + 1 NODE layers
         for j in range(self.numLayers+1):
@@ -605,6 +606,32 @@ class MDD(object):
     def find_shortest_path(self):
         """Find a shortest root-terminal path in the MDD."""
         return self._find_opt_path(False)
+
+    def enumerate_all_paths(self):
+        """Enumerate all root-terminal paths in the MDD."""
+        # Initialize tmp attribute
+        for j in range(self.numLayers+1):
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                ui._tmp = []
+        # Set up root node
+        for (u, ui) in self.allnodeitems_in_layer(0):
+            for a in ui.outgoing:
+                self.nodes[1][a.head]._tmp.append([a.label])
+        # Compute paths, layer by layer.
+        for j in range(1, self.numLayers):
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                for a in ui.outgoing:
+                    self.nodes[j+1][a.head]._tmp.extend( [x + [a.label] for x in ui._tmp] )
+        # Enumerate paths
+        paths = []
+        for (u, ui) in self.allnodeitems_in_layer(self.numLayers):
+            paths.extend(ui._tmp)
+        # Reset tmp attribute
+        for j in range(self.numLayers+1):
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                ui._tmp = None
+
+        return paths
 
     # Default functions/args for GraphViz output
     @staticmethod
