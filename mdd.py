@@ -616,12 +616,12 @@ class MDD(object):
         # Set up root node
         for (u, ui) in self.allnodeitems_in_layer(0):
             for a in ui.outgoing:
-                self.nodes[1][a.head]._tmp.append([a.label])
+                self.nodes[1][a.head]._tmp.append((a.weight, [a.label]))
         # Compute paths, layer by layer.
         for j in range(1, self.numLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in ui.outgoing:
-                    self.nodes[j+1][a.head]._tmp.extend( [x + [a.label] for x in ui._tmp] )
+                    self.nodes[j+1][a.head]._tmp.extend( [(x[0] + a.weight, x[1] + [a.label]) for x in ui._tmp] )
         # Enumerate paths
         paths = []
         for (u, ui) in self.allnodeitems_in_layer(self.numLayers):
