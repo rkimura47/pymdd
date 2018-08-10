@@ -74,8 +74,9 @@ class MDDArc(object):
 class MDDNode(object):
     """MDDNode represents a single node in the MDD.
 
-    MDDNode represents a single in the MDD.  An MDDNode is uniquely identified
-    by its layer and state.  The node state must be a hashable object.
+    MDDNode represents a single node in the MDD.  An MDDNode is uniquely
+    identified by its layer and state.  The (node) state must be a hashable
+    object.
     """
 
     def __init__(self, layer, state):
@@ -359,6 +360,12 @@ class MDD(object):
         self.nodes = []
         self.numLayers = -1
 
+    # Reset tmp attribute
+    def _reset_tmp(self):
+        for j in range(self.numLayers+1):
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                ui._tmp = None
+
     def allnodes(self):
         """Return all MDDNodes in the MDD."""
         return chain.from_iterable(l.keys() for l in self.nodes)
@@ -436,6 +443,7 @@ class MDD(object):
         # Go up the MDD, from second to last layer to top
         for j in range(self.numLayers-1, 0, -1):
             # Delete nodes without any outgoing arcs
+            # bool(set()) = False, so if x is a set, 'x is empty' == not x
             prnnodes = [u for (u, ui) in self.allnodeitems_in_layer(j) if not ui.outgoing]
             for u in prnnodes:
                 self._remove_node(u)
@@ -444,7 +452,7 @@ class MDD(object):
         """Compile the MDD top-down according to a DP formulation.
 
         Perform a top-down compilation of the MDD according to a dynamic
-        programming (DP) formulation. For the DP-specifying functions
+        programming (DP) formulation.  For the DP-specifying functions
         domainFunc, trFunc, and costFunc, layers should be numbered
         0, 1, ..., numLayers-1.
 
@@ -457,7 +465,7 @@ class MDD(object):
                 current state 's', current layer 'j'
             costFunc ((object, int, int, object) -> float): costFunc(s,d,j,ns)
                 returns the cost of selecting domain value 'd' at current state
-                's', current layer 'j', resutling in next state 'ns' (i.e., the
+                's', current layer 'j', resulting in next state 'ns' (i.e., the
                 output of trFunc(s,d,j))
             rootState (object): state of the root node
             isFeas ((object, int) -> bool): isFeas(s,j) returns True if node
@@ -518,6 +526,97 @@ class MDD(object):
                             self._add_node(v)
                         # Add appropriate arc
                         self._add_arc(MDDArc(d, costFunc(u.state, d, j, vstate), u, v))
+
+    def compile_trivial(self, numLayers, domainFunc, costFunc, nodeStateFunc):
+        """Compile a trivial MDD.
+
+        Compile a trivial MDD, i.e., one that represents all possible solutions
+        based on the given domains and costs.  This MDD contains one node in
+        each layer, and an arc for every possible domain value.  For domainFunc
+        costFunc, and nodeStateFunc, the layers should be numbered 0, 1, ...,
+        numLayers-1.
+
+        Args:
+            numLayers (int): number of layers (i.e., variables)
+            domainFunc (int -> list of ints): domainFunc(j) returns the domain
+                of layer 'j'
+            costFunc ((int, int) -> float): costFunc(d,j) returns the cost of
+                selecting domain value 'd' at current layer 'j'
+            nodeStateFunc (int -> object): nodeStateFunc(j) returns the node
+                state of the node in layer 'j'
+        """
+        # First, clear the MDD
+        self._clear()
+        # Create root node
+        self._append_new_layer()
+        self._add_node(MDDNode(0, nodeStateFunc(0)))
+        # Create each layer
+        for j in range(numLayers):
+            self._append_new_layer()
+            u = MDDNode(j, nodeStateFunc(j))
+            v = MDDNode(j+1, nodeStateFunc(j+1))
+            self._add_node(v)
+            for d in domainFunc(j):
+                self._add_arc(MDDArc(d, costFunc(d, j), u, v))
+
+    def filter_and_refine_constraint(self, trFunc, rootState, isFeas, maxWidth=lambda j: 100):
+        """Filter and refine MDD for a constraint.
+
+        Perform incremental refinement of a particular constraint on the MDD.
+
+        Args:
+            trFunc ((object, int, int) -> object): trFunc(s,d,j) returns the
+                state transitioned to when domain value 'd' is selected at
+                current state 's', current layer 'j'
+            rootState (object): state assigned to root node
+            isFeas ((object, int) -> bool): isFeas(s,j) returns True if node
+                state 's' in layer 'j' is feasible and False otherwise
+        """
+        # Reset tmp attribute
+        self._reset_tmp()
+        # Set up root node
+        for (u, ui) in self.allnodeitems_in_layer(0):
+            ui._tmp = rootState
+        for j in range(self.numLayers):
+            # Filtering
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                for a in list(ui.outgoing):
+                    if not isFeas(trFunc(ui._tmp, a.label, j), j):
+                        self._remove_arc(a)
+
+            # Prune nodes that are no longer reachable
+            for (u, ui) in list(self.allnodeitems_in_layer(j)):
+                if not ui.outgoing:
+                    self._remove_node(u)
+            for (u, ui) in list(self.allnodeitems_in_layer(j+1)):
+                if not ui.incoming:
+                    self._remove_node(u)
+
+            # Refinement
+            numNodes = len(self.allnodes_in_layer(j+1))
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                for a in list(ui.outgoing):
+                    ns = trFunc(ui._tmp, a.label, j)
+                    vi = self.nodes[j+1][a.head]
+                    if vi._tmp is None:
+                        vi._tmp = ns
+                    elif vi._tmp != ns and numNodes < maxWidth(j+1):
+                        # Redirect arc to a new node
+                        w = MDDNode(j+1, ns)
+                        self._add_node(w)
+                        self.nodes[j+1][w]._tmp = ns
+                        self._add_arc(MDDArc(a.label,a.weight,u,w))
+                        self._remove_arc(a)
+                        # Copy outgoing arcs from v, to w
+                        for aa in vi.outgoing:
+                            self._add_arc(MDDArc(aa.label, aa.weight, w, aa.head))
+                        numNodes += 1
+                    else:
+                        # Update
+                        vi._tmp = ns
+
+        # Reset tmp attribute
+        self._reset_tmp()
 
     def reduce_bottom_up(self, mergeFunc, adjInFunc=None, adjOutFunc=None):
         """Reduce the MDD bottom-up by merging equivalent nodes.
@@ -592,11 +691,7 @@ class MDD(object):
             lpath.append(optArc.label)
             optNode = optArc.tail
 
-        # Reset tmp attribute
-        for j in range(self.numLayers+1):
-            for (u, ui) in self.allnodeitems_in_layer(j):
-                ui._tmp = None
-
+        self._reset_tmp()
         return (list(reversed(lpath)), optVal)
 
     def find_longest_path(self):
@@ -626,11 +721,8 @@ class MDD(object):
         paths = []
         for (u, ui) in self.allnodeitems_in_layer(self.numLayers):
             paths.extend(ui._tmp)
-        # Reset tmp attribute
-        for j in range(self.numLayers+1):
-            for (u, ui) in self.allnodeitems_in_layer(j):
-                ui._tmp = None
 
+        self._reset_tmp()
         return paths
 
     # Default functions/args for GraphViz output
