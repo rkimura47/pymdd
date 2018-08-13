@@ -553,13 +553,13 @@ class MDD(object):
         # Create each layer
         for j in range(numLayers):
             self._append_new_layer()
-            u = MDDNode(j, nodeStateFunc(j))
-            v = MDDNode(j+1, nodeStateFunc(j+1))
-            self._add_node(v)
-            for d in domainFunc(j):
-                self._add_arc(MDDArc(d, costFunc(d, j), u, v))
+            for u in self.allnodes_in_layer(j):
+                v = MDDNode(j+1, nodeStateFunc(j+1))
+                self._add_node(v)
+                for d in domainFunc(j):
+                    self._add_arc(MDDArc(d, costFunc(d, j), u, v))
 
-    def filter_and_refine_constraint(self, trFunc, rootState, isFeas, maxWidth=lambda j: 100):
+    def filter_and_refine_constraint(self, trFunc, rootState, isFeas, nodeStateFunc, maxWidth=lambda j: 100):
         """Filter and refine MDD for a constraint.
 
         Perform incremental refinement of a particular constraint on the MDD.
@@ -571,6 +571,9 @@ class MDD(object):
             rootState (object): state assigned to root node
             isFeas ((object, int) -> bool): isFeas(s,j) returns True if node
                 state 's' in layer 'j' is feasible and False otherwise
+            nodeStateFunc ((object, int) -> object): nodeStateFunc(s,j)
+                returns the node state resulting from transitioning to state
+                's' in layer 'j'
         """
         # Reset tmp attribute
         self._reset_tmp()
@@ -602,7 +605,7 @@ class MDD(object):
                         vi._tmp = ns
                     elif vi._tmp != ns and numNodes < maxWidth(j+1):
                         # Redirect arc to a new node
-                        w = MDDNode(j+1, ns)
+                        w = MDDNode(j+1, nodeStateFunc(ns, j+1))
                         self._add_node(w)
                         self.nodes[j+1][w]._tmp = ns
                         self._add_arc(MDDArc(a.label,a.weight,u,w))
