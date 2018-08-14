@@ -5,17 +5,16 @@ class MDDArc(object):
 
     MDDArc represents a single arc in the MDD.  An MDDArc is uniquely
     identified by its head/tail nodes, label, and weight.
+
+    Args:
+        label (object): label of arc (e.g., assigned value)
+        weight (float): weight of arc (e.g., coefficient)
+        tail (MDDNode): tail/source node
+        head (MDDNode): head/destination node
     """
 
     def __init__(self, label, weight, tail, head):
-        """Construct a new 'MDDArc' object.
-
-        Args:
-            label (object): label of arc (e.g., assigned value)
-            weight (float): weight of arc (e.g., coefficient)
-            tail (MDDNode): tail/source node
-            head (MDDNode): head/destination node
-        """
+        """Construct a new 'MDDArc' object."""
         self.label = label
         self.weight = weight
         self.tail = tail
@@ -23,13 +22,7 @@ class MDDArc(object):
 
     # Allows MDDArcs to be used as dictionary keys.
     def __hash__(self):
-        """Return the hash value.
-
-        Return the hash value of the 'MDDArc' object.
-
-        Returns:
-            int: hash value
-        """
+        """Return the hash value."""
         return hash((self.label, self.tail, self.head))
 
     # Rich comparison methods: here the latter four are automatically
@@ -77,27 +70,20 @@ class MDDNode(object):
     MDDNode represents a single node in the MDD.  An MDDNode is uniquely
     identified by its layer and state.  The (node) state must be a hashable
     object.
+
+    Args:
+        layer (int): layer the node is in
+        state (object): state associated with node
     """
 
     def __init__(self, layer, state):
-        """Construct a new 'MDDNode' object.
-
-        Args:
-            layer (int): layer the node is in
-            state (object): state associated with node
-        """
+        """Construct a new 'MDDNode' object."""
         self.layer = layer
         self.state = state
 
     # Allows MDDNodes to be used as dictionary keys.
     def __hash__(self):
-        """Return the hash value.
-
-        Return the hash value of the 'MDDArc' object.
-
-        Returns:
-            int: hash value
-        """
+        """Return the hash value."""
         return hash((self.layer, self.state))
 
     # Rich comparison methods: here the latter four are automatically
@@ -134,15 +120,14 @@ class MDDNodeInfo(object):
     """MDDNodeInfo represents information associated with an MDDNode.
 
     MDDNodeInfo represents information associated with an MDDNode.
+
+    Args:
+        incoming (set): set of incoming arcs (default: set())
+        outgoing (set): set of outgoing arcs (default: set())
     """
 
     def __init__(self, incoming=None, outgoing=None):
-        """Construct a new 'MDDNode' object.
-
-        Args:
-            incoming (set): set of incoming arcs
-            outgoing (set): set of outgoing arcs
-        """
+        """Construct a new 'MDDNode' object."""
         # NOTE: the sets incoming and outgoing are NOT logically linked!!!
         # This means that it is the PROGRAMMER'S responsibility to ensure that
         # each arc in the MDD is represented twice, in both head.incoming and
@@ -151,7 +136,7 @@ class MDDNodeInfo(object):
             self.incoming = set()
         if outgoing is None:
             self.outgoing = set()
-        # _tmp is an internal attribute that is used as a placeholder during
+        # _tmp is an internal attribute that is used as temporary storage for
         # various MDD calculations (e.g., shortest/longest path)
         self._tmp = None
 
@@ -165,18 +150,19 @@ class MDD(object):
     """MDD represents a multivalued decision diagram (MDD).
 
     MDD represents a multivalued decision diagram, or MDD.
+
+    Args:
+        name (str): name of MDD (default: 'mdd')
     """
 
     def __init__(self, name='mdd'):
-        """Construct a new 'MDD' object.
-
-        Args:
-            name (str): name of MDD (default: 'mdd')
-
-        """
+        """Construct a new 'MDD' object."""
+        # 'nodes' contains numLayers+1 entries (one for each node layer),
+        # and each entry is a dict containing the nodes in that layer;
+        # each node is represented as a (MDDNode, MDDNodeInfo) key-value pair
         self.nodes = []
-        # Note numLayers = number of ARC layers
-        # Number of NODE layers is numLayers+1,
+        # 'numLayers' is the number of ARC layers,
+        # so the number of NODE layers is numLayers+1,
         # i.e., 0, 1, ..., numLayers!!!
         self.numLayers = -1
         self.name = name
@@ -187,8 +173,8 @@ class MDD(object):
         Return a (human-readable) string representation of the MDD.
 
         Args:
-            showLong: use more vertical space (default: False)
-            showIncoming: show incoming arcs (default: False)
+            showLong (bool): use more vertical space (default: False)
+            showIncoming (bool): show incoming arcs (default: False)
 
         Returns:
             str: string representation of MDD
@@ -225,24 +211,24 @@ class MDD(object):
     def __repr__(self):
         return repr(self.nodes) + '\nnumLayers = ' + repr(self.numLayers)
 
-    # Add an arc to the MDD, without sanity checks.
     def _add_arc(self, newarc):
+        """Add an arc to the MDD, without sanity checks."""
         self.nodes[newarc.tail.layer][newarc.tail].outgoing.add(newarc)
         self.nodes[newarc.head.layer][newarc.head].incoming.add(newarc)
 
-    # Remove an arc from the MDD, without sanity checks.
     def _remove_arc(self, rmvarc):
+        """Remove an arc from the MDD, without sanity checks."""
         self.nodes[rmvarc.tail.layer][rmvarc.tail].outgoing.remove(rmvarc)
         self.nodes[rmvarc.head.layer][rmvarc.head].incoming.remove(rmvarc)
 
-    # Add a node to the MDD, without sanity checks.
-    # NOTE: If an identical node already exists, its incoming and outgoing
-    # arcs will be ERASED!!!
     def _add_node(self, newnode):
+        """Add a node to the MDD, without sanity checks."""
+        # NOTE: If an identical node already exists, its incoming and outgoing
+        # arcs will be ERASED!!!
         self.nodes[newnode.layer][newnode] = MDDNodeInfo()
 
-    # Remove a node from the MDD, without sanity checks.
     def _remove_node(self, rmvnode):
+        """Remove a node from the MDD, without sanity checks."""
         rmvlayer = rmvnode.layer
         for arc in self.nodes[rmvlayer][rmvnode].incoming:
             self.nodes[rmvlayer-1][arc.tail].outgoing.remove(arc)
@@ -258,31 +244,34 @@ class MDD(object):
     def _default_outarcfun(mgnode, outarc):
         return MDDArc(outarc.label, outarc.weight, mgnode, outarc.head)
 
-    # Merge specified nodes into a new node, with MDDNode/MDDArc functions.
-    #
-    # Merge specified nodes into a new supernode and modify arcs appropriately.
-    # The difference between this function and _merge_nodes is that nodefun,
-    # inarcfun, and outarcfun directly return MDDNodes and MDDArcs (as opposed
-    # to returning the new node state and new arc weights).
-    #
-    # Args:
-    #     mnodes (list(MDDNode)): nodes to be merged together
-    #     mlayer (int): layer containing merged nodes
-    #         NOTE: all nodes in mnodes must be in layer mlayer
-    #     nodefun (list(MDDNode) -> MDDNode): nodefun(vlist) returns the node
-    #         resulting from merging nodes in vlist
-    #     inarcfun ((MDDNode, MDDArc) -> MDDArc): inarcfun(mgnode, inarc)
-    #         returns the arc (corresponding to inarc) incoming to the new
-    #         merged node mgnode; if inarcfun is None (default), the original
-    #         inarc data is used unchanged
-    #         NOTE: head of returned arc must be mgnode
-    #     outarcfun ((MDDNode, MDDArc) -> MDDArc): outarcfun(mgnode, outarc)
-    #         returns the arc (corresponding to outarc) outgoing from the new
-    #         merged node mgnode; if outarcfun is None (default), the original
-    #         outarc data is used unchanged
-    #         NOTE: tail of returned arc must be mgnode
     #
     def _merge_nodes_internal(self, mnodes, mlayer, nodefun, inarcfun=None, outarcfun=None):
+        """Merge specified nodes into a new node, with MDDNode/MDDArc functions.
+
+        Merge specified nodes into new supernode and modify arcs appropriately.
+        The difference between this function and _merge_nodes is that nodefun,
+        inarcfun, and outarcfun directly return MDDNodes and MDDArcs (as opposed
+        to returning the new node state and new arc weights).
+
+        Args:
+            mnodes (List[MDDNode]): nodes to be merged together
+            mlayer (int): layer containing merged nodes
+                NOTE: all nodes in mnodes must be in layer mlayer
+            nodefun (Callable[[List[MDDNode]], MDDNode]): nodefun(vlist) returns
+                the node resulting from merging nodes in 'vlist'
+            inarcfun (Callable[[MDDNode, MDDArc], MDDArc]):
+                inarcfun(mgnode, inarc) returns the arc (corresponding to
+                'inarc') incoming to the new merged node 'mgnode';
+                if inarcfun is None (default), the original 'inarc' data is
+                used unchanged
+                NOTE: head of returned arc must be 'mgnode'
+            outarcfun (Callable[[MDDNode, MDDArc], MDDArc]):
+                outarcfun(mgnode, outarc) returns the arc (corresponding to
+                'outarc') outgoing from the new merged node 'mgnode';
+                if outarcfun is None (default), the original 'outarc' data is
+                used unchanged
+                NOTE: tail of returned arc must be 'mgnode'
+        """
         # Use default inarcfun/outarcfun if unspecified
         if inarcfun is None:
             inarcfun = self._default_inarcfun
@@ -312,29 +301,31 @@ class MDD(object):
     def _default_awfun(w,ns,nt):
         return w
 
-    # Merge specified nodes into a new node, with state/weight functions.
-    #
-    # Merge specified nodes into a new supernode and modify arcs appropriately.
-    # The difference between this function and _merge_nodes_internal is that
-    # nsfun, awinfun, and awoutfun return the new node state and new arc weights
-    # for the merged supernode (as opposed to directly returning MDDNodes and
-    # MDDArcs).
-    #
-    # Args:
-    #     mnodes (list(MDDNode)): nodes to be merged together
-    #     mlayer (int): layer containing merged nodes
-    #     nsfun (list(object) -> object): nsfun(slist) returns the node state
-    #         resulting from merging node states in 'slist'
-    #     awinfun ((float, object, object) -> float): awinfun(w,os,ms) returns
-    #         the adjusted weight of an arc with weight w, old head node state
-    #         os, and new head node (i.e., merged supernode) state ms; if
-    #         awinfun is None (default), the original weight is used
-    #     awoutfun ((float, object, object) -> float): awoutfun(w,os,ms) returns
-    #         the adjusted weight of an arc with weight w, old tail node state
-    #         os, and new tail node (i.e., merged supernode) state ms; if
-    #         awoutfun is None (default), the original weight is used
-    #
     def _merge_nodes(self, mnodes, mlayer, nsfun, awinfun=None, awoutfun=None):
+        """Merge specified nodes into a new node, with state/weight functions.
+
+        Merge specified nodes into new supernode and modify arcs appropriately.
+        The difference between this function and _merge_nodes_internal is that
+        nsfun, awinfun, and awoutfun return the new node state and new arc
+        weights for the merged supernode (as opposed to directly returning
+        MDDNodes and MDDArcs).
+
+        Args:
+            mnodes (List[MDDNode]): nodes to be merged together
+            mlayer (int): layer containing merged nodes
+            nsfun (Callable[[List[object]], object]): nsfun(slist) returns the
+                node state resulting from merging node states in 'slist'
+            awinfun (Callable[[float, object, object], float]):
+                awinfun(w,os,ms) returns the adjusted weight of an arc with
+                weight 'w', old head node state 'os', and new head node (i.e.,
+                merged supernode) state 'ms'; if awinfun is None (default),
+                the original weight is used
+            awoutfun (Callable[[float, object, object], float]):
+                awoutfun(w,os,ms) returns the adjusted weight of an arc with
+                weight 'w', old tail node state 'os', and new tail node (i.e.,
+                merged supernode) state 'ms'; if awoutfun is None (default),
+                the original weight is used
+        """
         # Use default awfun if unspecified
         if awinfun is None:
             awinfun = self._default_awfun
@@ -350,18 +341,18 @@ class MDD(object):
         self._merge_nodes_internal(mnodes, mlayer, nodefun, inarcfun, outarcfun)
 
 
-    # Append a new layer to the MDD.
     def _append_new_layer(self):
+        """Append a new layer to the MDD."""
         self.nodes.append(dict())
         self.numLayers = self.numLayers + 1
         
-    # Reset the MDD.
     def _clear(self):
+        """Reset the MDD."""
         self.nodes = []
         self.numLayers = -1
 
-    # Reset tmp attribute
     def _reset_tmp(self):
+        """Reset tmp attribute."""
         for j in range(self.numLayers+1):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 ui._tmp = None
@@ -413,17 +404,19 @@ class MDD(object):
         and/or outgoing arcs are specified by awinfun/awoutfun.
 
         Args:
-            mnodes (list(MDDNode)): nodes to be merged together
-            nsfun (list(object) -> object): nsfun(slist) returns the node state
-                resulting from merging node states in 'slist'
-            awinfun ((float, object, object) -> float): awinfun(w,os,ms)
-                returns the adjusted weight of an arc with weight w, old head
-                node state os, and new head node (i.e., merged supernode) state
-                ms; if awinfun is None (default), the original weight is used
-            awoutfun ((float, object, object) -> float): awoutfun(w,os,ms)
-                returns the adjusted weight of an arc with weight w, old tail
-                node state os, and new tail node (i.e., merged supernode) state
-                ms; if awoutfun is None (default), the original weight is used
+            mnodes (List[MDDNode]): nodes to be merged together
+            nsfun (Callable[[List[object]], object]): nsfun(slist) returns the
+                node state resulting from merging node states in 'slist'
+            awinfun (Callable[[float, object, object], float]):
+                awinfun(w,os,ms) returns the adjusted weight of an arc with
+                weight 'w', old head node state 'os', and new head node (i.e.,
+                merged supernode) state 'ms'; if awinfun is None (default), the
+                original weight is used
+            awoutfun (Callable[[float, object, object], float]):
+                awoutfun(w,os,ms) returns the adjusted weight of an arc with
+                weight 'w', old tail node state 'os', and new tail node (i.e.,
+                merged supernode) state 'ms'; if awoutfun is None (default), the
+                original weight is used
 
         Raises:
             RuntimeError: cannot merge nodes in different layers
@@ -448,7 +441,7 @@ class MDD(object):
             for u in prnnodes:
                 self._remove_node(u)
 
-    def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas, maxWidth=lambda j: 100, nodeSelFunc=None, mergeFunc=None, adjFunc=None):
+    def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas, maxWidth=None, nodeSelFunc=None, mergeFunc=None, adjFunc=None):
         """Compile the MDD top-down according to a DP formulation.
 
         Perform a top-down compilation of the MDD according to a dynamic
@@ -458,37 +451,41 @@ class MDD(object):
 
         Args:
             numLayers (int): number of layers (i.e., variables)
-            domainFunc (int -> list of ints): domainFunc(j) returns the domain
-                of layer 'j'
-            trFunc ((object, int, int) -> object): trFunc(s,d,j) returns the
-                state transitioned to when domain value 'd' is selected at
-                current state 's', current layer 'j'
-            costFunc ((object, int, int, object) -> float): costFunc(s,d,j,ns)
-                returns the cost of selecting domain value 'd' at current state
-                's', current layer 'j', resulting in next state 'ns' (i.e., the
-                output of trFunc(s,d,j))
+            domainFunc (Callable[[int], List[int]]): domainFunc(j) returns the
+                domain of layer 'j'
+            trFunc (Callable[[object, int, int], object]): trFunc(s,d,j)
+                returns the state transitioned to when domain value 'd' is
+                selected at current state 's', current layer 'j'
+            costFunc (Callable[[object, int, int, object], float]):
+                costFunc(s,d,j,ns) returns the cost of selecting domain value
+                'd' at current state 's', current layer 'j', resulting in next
+                state 'ns' (i.e., the output of trFunc(s,d,j))
             rootState (object): state of the root node
-            isFeas ((object, int) -> bool): isFeas(s,j) returns True if node
-                state 's' in layer j is feasible and False otherwise
-            maxWidth (int -> int): maxWidth(j) returns the maximum allowable
-                width for layer j of the MDD; if None (default), the maximum
-                width is set to 100 for all layers
-            nodeSelFunc ((list(MDDNode), int) -> list(MDDNode)):
+            isFeas (Callable[[object, int], bool]): isFeas(s,j) returns True if
+                node state 's' in layer 'j' is feasible and False otherwise
+            maxWidth (Callable[[int], int]): maxWidth(j) returns the maximum
+                allowable width for layer 'j' of the MDD; if None (default),
+                the maximum width is set to 100 for all layers
+            nodeSelFunc (Callable[[List[MDDNode], int], List[MDDNode]]):
                 nodeSelFunc(vlist,j) returns a list of nodes selected from
-                vlist in layer j to be either merged (if mergeFunc and adjFunc
-                are defined) or removed (if mergeFunc and adjFunc are None)
-                (default: None)
-            mergeFunc ((list(object), int) -> object): mergeFunc(slist,j)
-                returns the node state resulting from merging node states in
-                'slist' in layer j (default: None)
-            adjFunc ((float, object, object, int) -> float): adjFunc(w,os,ms,j)
-                returns the adjusted weight of an arc with weight w, old head
-                node state os, and new head node (i.e., merged supernode in
+                'vlist' in layer 'j' to be either merged (if mergeFunc and
+                adjFunc are defined) or removed (if mergeFunc and adjFunc
+                are None) (default: None)
+            mergeFunc (Callable[[List[object], int], object]):
+                mergeFunc(slist,j) returns the node state resulting from
+                merging node states in 'slist' in layer 'j' (default: None)
+            adjFunc (Callable[[float, object, object, int], float]):
+                adjFunc(w,os,ms,j) returns the adjusted weight of an arc with
+                weight 'w', old head node state 'os', and new head node (i.e.,
+                merged supernode in layer 'j') state 'ms'; if adjFunc is None
+                (default), the original weight is used
 
         Raises:
             RuntimeError: mergeFunc and adjFunc must be defined together
         """
-        # Basic parameter checks
+        # Basic parameter checks and default settings
+        if maxWidth is None:
+            maxWidth = lambda j: 100
         if not nodeSelFunc is None:
             if mergeFunc is None != adjFunc is None:
                 return RuntimeError('mergeFunc and adjFunc must be defined together')
@@ -538,12 +535,12 @@ class MDD(object):
 
         Args:
             numLayers (int): number of layers (i.e., variables)
-            domainFunc (int -> list of ints): domainFunc(j) returns the domain
-                of layer 'j'
-            costFunc ((int, int) -> float): costFunc(d,j) returns the cost of
-                selecting domain value 'd' at current layer 'j'
-            nodeStateFunc (int -> object): nodeStateFunc(j) returns the node
-                state of the node in layer 'j'
+            domainFunc (Callable[[int], List[int]]): domainFunc(j) returns the
+                domain of layer 'j'
+            costFunc (Callable[[int, int], float]): costFunc(d,j) returns the
+                cost of selecting domain value 'd' at current layer 'j'
+            nodeStateFunc (Callable[[int], object]): nodeStateFunc(j) returns
+                the node state of the node in layer 'j'
         """
         # First, clear the MDD
         self._clear()
@@ -559,22 +556,27 @@ class MDD(object):
                 for d in domainFunc(j):
                     self._add_arc(MDDArc(d, costFunc(d, j), u, v))
 
-    def filter_and_refine_constraint(self, trFunc, rootState, isFeas, nodeStateFunc, maxWidth=lambda j: 100):
+    def filter_and_refine_constraint(self, trFunc, rootState, isFeas, nodeStateFunc, maxWidth=None):
         """Filter and refine MDD for a constraint.
 
         Perform incremental refinement of a particular constraint on the MDD.
 
         Args:
-            trFunc ((object, int, int) -> object): trFunc(s,d,j) returns the
-                state transitioned to when domain value 'd' is selected at
+            trFunc (Callable[[object, int, int], object]): trFunc(s,d,j) returns
+                the state transitioned to when domain value 'd' is selected at
                 current state 's', current layer 'j'
             rootState (object): state assigned to root node
-            isFeas ((object, int) -> bool): isFeas(s,j) returns True if node
-                state 's' in layer 'j' is feasible and False otherwise
-            nodeStateFunc ((object, int) -> object): nodeStateFunc(s,j)
+            isFeas (Callable[[object, int], bool]): isFeas(s,j) returns True if
+                node state 's' in layer 'j' is feasible and False otherwise
+            nodeStateFunc (Callable[[object, int], object]): nodeStateFunc(s,j)
                 returns the node state resulting from transitioning to state
                 's' in layer 'j'
+            maxWidth (Callable[[int], int]): maxWidth(j) returns the maximum
+                allowable width for layer 'j' of the MDD; if None (default),
+                the maximum width is set to 100 for all layers
         """
+        if maxWidth is None:
+            maxWidth = lambda j: 100
         # Reset tmp attribute
         self._reset_tmp()
         # Set up root node
@@ -630,17 +632,17 @@ class MDD(object):
         adjInFunc and adjOutFunc respectively.
 
         Args:
-            mergeFunc ((list(object), int) -> object): mergeFunc(slist,j)
-                returns the node state resulting from merging node states in
-                'slist' in layer j
-            adjInFunc ((float, object, object, int) -> float):
+            mergeFunc (Callable[[List[object], int], object]):
+                mergeFunc(slist,j) returns the node state resulting from merging
+                node states in 'slist' in layer 'j'
+            adjInFunc (Callable[[float, object, object, int], float]):
                 adjInFunc(w,os,ms,j) returns the adjusted weight of an arc with
-                weight w, old head node state os, and new head node (i.e.,
-                merged supernode in layer j) state ms (default: None)
-            adjOutFunc ((float, object, object, int) -> float):
+                weight 'w', old head node state 'os', and new head node (i.e.,
+                merged supernode in layer 'j') state 'ms' (default: None)
+            adjOutFunc (Callable[[float, object, object, int], float]):
                 adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with
-                weight w, old tail node state os, and new tail node (i.e.,
-                merged supernode in layer j) state ms (default: None)
+                weight 'w', old tail node state 'os', and new tail node (i.e.,
+                merged supernode in layer 'j') state 'ms' (default: None)
         """
         # Merge from bottom up
         for j in range(self.numLayers, 0, -1):
@@ -658,10 +660,15 @@ class MDD(object):
             for mnodes in outDict.values():
                 self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), adjinfun, adjoutfun)
 
-    # Find an 'optimal' root-terminal path in the MDD.
-    # Args:
-    #     longest (bool): True/False if computing longest/shortest path resp
     def _find_opt_path(self, longest):
+        """Find an 'optimal' root-terminal path in the MDD.
+
+        Args:
+            longest (bool): True/False if computing longest/shortest path resp
+
+        Returns:
+            Tuple[float, List[object]]: optimal weight and optimal path
+        """
         if longest:
             (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
         else:
@@ -695,18 +702,30 @@ class MDD(object):
             optNode = optArc.tail
 
         self._reset_tmp()
-        return (list(reversed(lpath)), optVal)
+        return (optVal, list(reversed(lpath)))
 
     def find_longest_path(self):
-        """Find a longest root-terminal path in the MDD."""
+        """Find a longest root-terminal path in the MDD.
+
+        Returns:
+            Tuple[float, List[object]]: maximum weight and longest path
+        """
         return self._find_opt_path(True)
 
     def find_shortest_path(self):
-        """Find a shortest root-terminal path in the MDD."""
+        """Find a shortest root-terminal path in the MDD.
+
+        Returns:
+            Tuple[float, List[object]]: minimum weight and shortest path
+        """
         return self._find_opt_path(False)
 
     def enumerate_all_paths(self):
-        """Enumerate all root-terminal paths in the MDD."""
+        """Enumerate all root-terminal paths in the MDD.
+
+        Returns:
+            List[Tuple[float, List[object]]]: list of path weights/paths
+        """
         # Initialize tmp attribute
         for j in range(self.numLayers+1):
             for (u, ui) in self.allnodeitems_in_layer(j):
@@ -750,12 +769,12 @@ class MDD(object):
         the DOT language.  The MDD can then be visualized with GraphViz.
 
         Args:
-            nodeDotFunc (object -> str): nodeDotFunc(s) returns a string with
-                the DOT options to use given node state 's'; if None (default),
-                a sensible default is used
-            arcDotFunc (object, float -> str): arcDotFunc(l,w) returns a string
-                with the DOT options to use given arc label 'l' and arc weight
-                'w'; if None (default), a sensible default is used
+            nodeDotFunc (Callable[[object], str]): nodeDotFunc(s) returns a
+                string with the DOT options to use given node state 's'; if
+                None (default), a sensible default is used
+            arcDotFunc (Callable[[object, float], str]): arcDotFunc(l,w) returns
+                a string with the DOT options to use given arc label 'l' and arc
+                weight 'w'; if None (default), a sensible default is used
             arcSortArgs (dict): arguments specifying how to sort a list of arcs
                 via list.sort() (i.e., 'key' and, optionally, 'reverse');
                 GraphViz then attempts to order the arcs accordingly in the
