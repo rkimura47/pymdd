@@ -442,7 +442,7 @@ class MDD(object):
         self._add_node(newnode)
 
     def remove_node(self, rmvnode):
-        "Remove a node from the MDD.
+        """Remove a node from the MDD.
 
         Remove a node from the MDD (with sanity checks).
 
