@@ -164,8 +164,17 @@ class MDD(object):
         # 'numLayers' is the number of ARC layers,
         # so the number of NODE layers is numLayers+1,
         # i.e., 0, 1, ..., numLayers!!!
-        self.numLayers = -1
         self.name = name
+
+    @property
+    def numNodeLayers(self):
+        """Number of node layers; equal to number of 'variables' + 1."""
+        return len(self.nodes)
+    @property
+    def numArcLayers(self):
+        """Number of arc layers; equal to number of 'variables'."""
+        return len(self.nodes)-1
+
 
     def __str__(self, showLong=False, showIncoming=False):
         """Return str(self).
@@ -179,7 +188,7 @@ class MDD(object):
         Returns:
             str: string representation of MDD
         """
-        s = '== MDD (' + self.name + ', ' + str(self.numLayers) + ' layers) ==\n'
+        s = '== MDD (' + self.name + ', ' + str(self.numArcLayers) + ' layers) ==\n'
         if showLong:
             # Long form
             s += '# Nodes\n'
@@ -209,7 +218,7 @@ class MDD(object):
         return s
 
     def __repr__(self):
-        return repr(self.nodes) + '\nnumLayers = ' + repr(self.numLayers)
+        return repr(self.nodes) + '\nnumArcLayers = ' + repr(self.numArcLayers)
 
     def _add_arc(self, newarc):
         """Add an arc to the MDD, without sanity checks."""
@@ -344,16 +353,14 @@ class MDD(object):
     def _append_new_layer(self):
         """Append a new layer to the MDD."""
         self.nodes.append(dict())
-        self.numLayers = self.numLayers + 1
         
     def _clear(self):
         """Reset the MDD."""
         self.nodes = []
-        self.numLayers = -1
 
     def _reset_tmp(self):
         """Reset tmp attribute."""
-        for j in range(self.numLayers+1):
+        for j in range(self.numNodeLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 ui._tmp = None
 
@@ -371,11 +378,11 @@ class MDD(object):
 
     def alloutgoingarcs(self):
         """Return all outgoing arcs in the MDD."""
-        return chain.from_iterable(ui.outgoing for j in range(self.numLayers) for ui in self.nodes[j].values())
+        return chain.from_iterable(ui.outgoing for j in range(self.numArcLayers) for ui in self.nodes[j].values())
 
     def allincomingarcs(self):
         """Return all incoming arcs in the MDD."""
-        return chain.from_iterable(ui.incoming for j in range(self.numLayers) for ui in self.nodes[j+1].values())
+        return chain.from_iterable(ui.incoming for j in range(self.numArcLayers) for ui in self.nodes[j+1].values())
     
     def add_node(self, newnode):
         """Add a new node to the MDD.
@@ -389,7 +396,7 @@ class MDD(object):
             IndexError: the MDD does not contain the specified node layer
             RuntimeError: a duplicate node already exists in the MDD
         """
-        if newnode.layer > self.numLayers or newnode.layer < 0:
+        if newnode.layer > self.numArcLayers or newnode.layer < 0:
             raise IndexError('node layer %d does not exist' % newnode.layer)
             return
         if newnode in self.allnodes_in_layer(newnode.layer):
@@ -434,7 +441,7 @@ class MDD(object):
         Prune nodes from the MDD that do not have a path to the last layer.
         """
         # Go up the MDD, from second to last layer to top
-        for j in range(self.numLayers-1, 0, -1):
+        for j in range(self.numArcLayers-1, 0, -1):
             # Delete nodes without any outgoing arcs
             # bool(set()) = False, so if x is a set, 'x is empty' == not x
             prnnodes = [u for (u, ui) in self.allnodeitems_in_layer(j) if not ui.outgoing]
@@ -450,7 +457,7 @@ class MDD(object):
         0, 1, ..., numLayers-1.
 
         Args:
-            numLayers (int): number of layers (i.e., variables)
+            numLayers (int): number of (arc) layers (i.e., variables)
             domainFunc (Callable[[int], List[int]]): domainFunc(j) returns the
                 domain of layer 'j'
             trFunc (Callable[[object, int, int], object]): trFunc(s,d,j)
@@ -534,7 +541,7 @@ class MDD(object):
         numLayers-1.
 
         Args:
-            numLayers (int): number of layers (i.e., variables)
+            numLayers (int): number of (arc) layers (i.e., variables)
             domainFunc (Callable[[int], List[int]]): domainFunc(j) returns the
                 domain of layer 'j'
             costFunc (Callable[[int, int], float]): costFunc(d,j) returns the
@@ -582,7 +589,7 @@ class MDD(object):
         # Set up root node
         for (u, ui) in self.allnodeitems_in_layer(0):
             ui._tmp = rootState
-        for j in range(self.numLayers):
+        for j in range(self.numArcLayers):
             # Filtering
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in list(ui.outgoing):
@@ -645,7 +652,7 @@ class MDD(object):
                 merged supernode in layer 'j') state 'ms' (default: None)
         """
         # Merge from bottom up
-        for j in range(self.numLayers, 0, -1):
+        for j in range(self.numArcLayers, 0, -1):
             # Cluster nodes by their outNeighbors
             outDict = dict()
             for v in self.allnodes_in_layer(j):
@@ -674,16 +681,14 @@ class MDD(object):
         else:
             (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
         # Initialize tmp attribute
-        # Remember there are self.numLayers ARC layers, and therefore
-        # self.numLayers + 1 NODE layers
-        for j in range(self.numLayers+1):
+        for j in range(self.numNodeLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 if j == 0:
                     ui._tmp = (0, None)
                 else:
                     ui._tmp = (limVal, None)
         # Compute the optimal path, layer by layer
-        for j in range(self.numLayers):
+        for j in range(self.numArcLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in ui.outgoing:
                     if limCmp(self.nodes[j+1][a.head]._tmp[0], ui._tmp[0] + a.weight):
@@ -691,12 +696,12 @@ class MDD(object):
         # Identify the optimal path, layer by layer
         optVal = limVal
         optNode = None
-        for (u, ui) in self.allnodeitems_in_layer(self.numLayers):
+        for (u, ui) in self.allnodeitems_in_layer(self.numArcLayers):
             if limCmp(optVal, ui._tmp[0]):
                 optVal = ui._tmp[0]
                 optNode = u
         lpath = []
-        for j in range(self.numLayers, 0, -1):
+        for j in range(self.numArcLayers, 0, -1):
             optArc = self.nodes[j][optNode]._tmp[1]
             lpath.append(optArc.label)
             optNode = optArc.tail
@@ -727,7 +732,7 @@ class MDD(object):
             List[Tuple[float, List[object]]]: list of path weights/paths
         """
         # Initialize tmp attribute
-        for j in range(self.numLayers+1):
+        for j in range(self.numNodeLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 ui._tmp = []
         # Set up root node
@@ -735,13 +740,13 @@ class MDD(object):
             for a in ui.outgoing:
                 self.nodes[1][a.head]._tmp.append((a.weight, [a.label]))
         # Compute paths, layer by layer.
-        for j in range(1, self.numLayers):
+        for j in range(1, self.numArcLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in ui.outgoing:
                     self.nodes[j+1][a.head]._tmp.extend( [(x[0] + a.weight, x[1] + [a.label]) for x in ui._tmp] )
         # Enumerate paths
         paths = []
-        for (u, ui) in self.allnodeitems_in_layer(self.numLayers):
+        for (u, ui) in self.allnodeitems_in_layer(self.numArcLayers):
             paths.extend(ui._tmp)
 
         self._reset_tmp()
@@ -799,7 +804,7 @@ class MDD(object):
             outf.write('ordering=out;\n')
         for v in self.allnodes():
             outf.write(str(hash(v)) + nodeDotFunc(v.state) + '\n')
-        for j in range(self.numLayers):
+        for j in range(self.numArcLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 if arcSortArgs is not None:
                     arcsinlayer = [a for a in ui.outgoing]
@@ -810,7 +815,7 @@ class MDD(object):
                     for arc in ui.outgoing:
                         outf.write(str(hash(arc.tail)) + ' -> ' + str(hash(arc.head)) + arcDotFunc(arc.label, arc.weight) + '\n')
         if nodeSortArgs is not None:
-            for j in range(self.numLayers+1):
+            for j in range(self.numNodeLayers):
                 nodesinlayer = [v for v in self.allnodes_in_layer(j)]
                 if len(nodesinlayer) > 1:
                     nodesinlayer.sort(**nodeSortArgs)
