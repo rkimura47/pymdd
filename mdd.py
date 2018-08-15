@@ -161,9 +161,6 @@ class MDD(object):
         # and each entry is a dict containing the nodes in that layer;
         # each node is represented as a (MDDNode, MDDNodeInfo) key-value pair
         self.nodes = []
-        # 'numLayers' is the number of ARC layers,
-        # so the number of NODE layers is numLayers+1,
-        # i.e., 0, 1, ..., numLayers!!!
         self.name = name
 
     @property
