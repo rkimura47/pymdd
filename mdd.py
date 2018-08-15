@@ -157,8 +157,8 @@ class MDD(object):
 
     def __init__(self, name='mdd'):
         """Construct a new 'MDD' object."""
-        # 'nodes' contains numLayers+1 entries (one for each node layer),
-        # and each entry is a dict containing the nodes in that layer;
+        # 'nodes' is a list of dicts (one for each node layer),
+        # and each dict stores the nodes in that layer;
         # each node is represented as a (MDDNode, MDDNodeInfo) key-value pair
         self.nodes = []
         self.name = name
@@ -380,25 +380,84 @@ class MDD(object):
     def allincomingarcs(self):
         """Return all incoming arcs in the MDD."""
         return chain.from_iterable(ui.incoming for j in range(self.numArcLayers) for ui in self.nodes[j+1].values())
+
+    def add_arc(self, newarc):
+        """Add an arc to the MDD.
+
+        Add an arc to the MDD (with sanity checks).
+
+        Args:
+            newarc (MDDArc): arc to be added
+
+        Raises:
+            RuntimeError: head/tail node of arc does not exist
+            ValueError: head and tail nodes must be one layer apart
+        """
+        if not newarc.tail in self.allnodes_in_layer(newarc.tail.layer):
+            raise RuntimeError('tail node of arc does not exist')
+        if not newarc.head in self.allnodes_in_layer(newarc.head.layer):
+            raise RuntimeError('head node of arc does not exist')
+        if newarc.head.layer != newarc.tail.layer + 1:
+            raise ValueError('head and tail must be one layer apart (%d != %d + 1)' % (newarc.head.layer, newarc.tail.layer))
+        self._add_arc(newarc)
+
+    def remove_arc(self, rmvarc):
+        """Remove an arc from the MDD.
+
+        Remove an arc from the MDD (with sanity checks).
+
+        Args:
+            rmvarc (MDDArc): arc to be removed
+
+        Raises:
+            RuntimeError: head/tail node of arc does not exist
+            KeyError: no such incoming/outgoing arc exists in the MDD
+        """
+        if not rmvarc.tail in self.allnodes_in_layer(rmvarc.tail.layer):
+            raise RuntimeError('tail node of arc does not exist')
+        if not rmvarc.head in self.allnodes_in_layer(rmvarc.head.layer):
+            raise RuntimeError('head node of arc does not exist')
+        if not rmvarc in self.nodes[rmvarc.tail.layer][rmvarc.tail].outgoing:
+            raise KeyError('cannot remove non-existent outgoing arc')
+        if not rmvarc in self.nodes[rmvarc.head.layer][rmvarc.head].incoming:
+            raise KeyError('cannot remove non-existent incoming arc')
+        self._remove_arc(rmvarc)
     
     def add_node(self, newnode):
         """Add a new node to the MDD.
 
-        Add a new node to the MDD.
+        Add a new node to the MDD (with sanity checks).
         
         Args:
             newnode (MDDNode): node to be added
 
         Raises:
             IndexError: the MDD does not contain the specified node layer
-            RuntimeError: a duplicate node already exists in the MDD
+            ValueError: a duplicate node already exists in the MDD
         """
         if newnode.layer > self.numArcLayers or newnode.layer < 0:
             raise IndexError('node layer %d does not exist' % newnode.layer)
-            return
         if newnode in self.allnodes_in_layer(newnode.layer):
-            raise RuntimeError('cannot add proposed node; duplicate node already exists')
+            raise ValueError('cannot add proposed node; duplicate node already exists')
         self._add_node(newnode)
+
+    def remove_node(self, rmvnode):
+        "Remove a node from the MDD.
+
+        Remove a node from the MDD (with sanity checks).
+
+        Args:
+            rmvnode (MDDNode): node to be removed
+
+        Raises:
+            IndexError: the MDD does not contain the specified node layer
+            KeyError: no such node exists in the MDD
+        """
+        if rmvnode.layer > self.numArcLayers or rmvnode.layer < 0:
+            raise IndexError('node layer %d does not exist' % rmvnode.layer)
+        if not rmvnode in self.allnodes_in_layer(rmvnode.layer):
+            raise KeyError('cannot remove non-existent node')
+        self._remove_node(rmvnode)
 
     def merge_nodes(self, mnodes, nsfun, awinfun=None, awoutfun=None):
         """Merge specified nodes into a new node.
@@ -423,13 +482,12 @@ class MDD(object):
                 original weight is used
 
         Raises:
-            RuntimeError: cannot merge nodes in different layers
+            ValueError: cannot merge nodes in different layers
         """
         # Check all nodes in mnodes are on same layer
         mlayer = [v.layer for v in mnodes]
         if len(set(mlayer)) > 1:
-            raise RuntimeError('cannot merge nodes in different layers')
-            return
+            raise ValueError('cannot merge nodes in different layers')
         self._merge_nodes(mnodes, mlayer[0], nsfun, awinfun, awoutfun)
 
     def prune_dead_nodes(self):
@@ -492,8 +550,7 @@ class MDD(object):
             maxWidth = lambda j: 100
         if not nodeSelFunc is None:
             if mergeFunc is None != adjFunc is None:
-                return RuntimeError('mergeFunc and adjFunc must be defined together')
-                return
+                raise RuntimeError('mergeFunc and adjFunc must be defined together')
         # First, clear the MDD
         self._clear()
         # Create first layer, containing only the root
