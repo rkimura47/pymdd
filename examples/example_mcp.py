@@ -59,7 +59,7 @@ print(mymdd)
 print(mymdd.find_longest_path())
 
 # Display MDD with GraphViz
-def adf(l,w):
+def adf(l,w,j):
     if l == 'S':
         return '[style=dotted,label="' + str(w) + '"];'
     else:

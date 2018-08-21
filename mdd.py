@@ -532,15 +532,16 @@ class MDD(object):
                 nodeSelFunc(vlist,j) returns a list of nodes selected from
                 'vlist' in layer 'j' to be either merged (if mergeFunc and
                 adjFunc are defined) or removed (if mergeFunc and adjFunc
-                are None) (default: None)
+                are None); if nodeSelFunc is None (default), the parameters
+                maxWidth, mergeFunc, and adjFunc are ignored and
+                compile_top_down(...) returns an exact MDD
             mergeFunc (Callable[[List[object], int], object]):
                 mergeFunc(slist,j) returns the node state resulting from
                 merging node states in 'slist' in layer 'j' (default: None)
             adjFunc (Callable[[float, object, object, int], float]):
                 adjFunc(w,os,ms,j) returns the adjusted weight of an arc with
                 weight 'w', old head node state 'os', and new head node (i.e.,
-                merged supernode in layer 'j') state 'ms'; if adjFunc is None
-                (default), the original weight is used
+                merged supernode in layer 'j') state 'ms' (default: None)
 
         Raises:
             RuntimeError: mergeFunc and adjFunc must be defined together
@@ -548,7 +549,7 @@ class MDD(object):
         # Basic parameter checks and default settings
         if maxWidth is None:
             maxWidth = lambda j: 100
-        if not nodeSelFunc is None:
+        if nodeSelFunc is not None:
             if mergeFunc is None != adjFunc is None:
                 raise RuntimeError('mergeFunc and adjFunc must be defined together')
         # First, clear the MDD
@@ -558,7 +559,7 @@ class MDD(object):
         self._add_node(MDDNode(0, rootState))
         for j in range(numLayers):
             # Merge/Remove until current layer is under maxWidth
-            if not nodeSelFunc is None:
+            if nodeSelFunc is not None:
                 currLayer = [u for u in self.allnodes_in_layer(j)]
                 while len(currLayer) > maxWidth(j):
                     mnodes = nodeSelFunc(currLayer,j)
@@ -715,8 +716,8 @@ class MDD(object):
                     outDict[outNeighbors] = []
                 outDict[outNeighbors].append(v)
 
-            adjinfun = (lambda w,os,ms: adjInFunc(w,os,ms,j)) if not adjInFunc is None else None
-            adjoutfun = (lambda w,os,ms: adjOutFunc(w,os,ms,j)) if not adjOutFunc is None else None
+            adjinfun = (lambda w,os,ms: adjInFunc(w,os,ms,j)) if adjInFunc is not None else None
+            adjoutfun = (lambda w,os,ms: adjOutFunc(w,os,ms,j)) if adjOutFunc is not None else None
             # Nodes that have the same outNeighbors can be merged together
             for mnodes in outDict.values():
                 self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), adjinfun, adjoutfun)
@@ -808,11 +809,11 @@ class MDD(object):
 
     # Default functions/args for GraphViz output
     @staticmethod
-    def _default_nodedotfunc(state):
+    def _default_nodedotfunc(state, lyr):
         return '[label="' + str(state) + '"];'
 
     @staticmethod
-    def _default_arcdotfunc(label, weight):
+    def _default_arcdotfunc(label, weight, lyr):
         if label == 0:
             return '[style=dotted,label="' + str(weight) + '"];'
         else:
@@ -828,12 +829,13 @@ class MDD(object):
         the DOT language.  The MDD can then be visualized with GraphViz.
 
         Args:
-            nodeDotFunc (Callable[[object], str]): nodeDotFunc(s) returns a
-                string with the DOT options to use given node state 's'; if
-                None (default), a sensible default is used
-            arcDotFunc (Callable[[object, float], str]): arcDotFunc(l,w) returns
-                a string with the DOT options to use given arc label 'l' and arc
-                weight 'w'; if None (default), a sensible default is used
+            nodeDotFunc (Callable[[object, int], str]): nodeDotFunc(s,j)
+                returns a string with the DOT options to use given node state
+                's' in layer 'j'; if None (default), a sensible default is used
+            arcDotFunc (Callable[[object, float, int], str]): arcDotFunc(l,w,j)
+                returns a string with the DOT options to use given arc label
+                'l', arc weight 'w', and tail node layer 'j'; if None (default),
+                a sensible default is used
             arcSortArgs (dict): arguments specifying how to sort a list of arcs
                 via list.sort() (i.e., 'key' and, optionally, 'reverse');
                 GraphViz then attempts to order the arcs accordingly in the
@@ -857,17 +859,14 @@ class MDD(object):
         if arcSortArgs is not None:
             outf.write('ordering=out;\n')
         for v in self.allnodes():
-            outf.write(str(hash(v)) + nodeDotFunc(v.state) + '\n')
+            outf.write(str(hash(v)) + nodeDotFunc(v.state, v.layer) + '\n')
         for j in range(self.numArcLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
+                arcsinlayer = [a for a in ui.outgoing]
                 if arcSortArgs is not None:
-                    arcsinlayer = [a for a in ui.outgoing]
                     arcsinlayer.sort(**arcSortArgs)
-                    for arc in arcsinlayer:
-                        outf.write(str(hash(arc.tail)) + ' -> ' + str(hash(arc.head)) + arcDotFunc(arc.label, arc.weight) + '\n')
-                else:
-                    for arc in ui.outgoing:
-                        outf.write(str(hash(arc.tail)) + ' -> ' + str(hash(arc.head)) + arcDotFunc(arc.label, arc.weight) + '\n')
+                for arc in arcsinlayer:
+                    outf.write(str(hash(arc.tail)) + ' -> ' + str(hash(arc.head)) + arcDotFunc(arc.label, arc.weight, arc.tail.layer) + '\n')
         if nodeSortArgs is not None:
             for j in range(self.numNodeLayers):
                 nodesinlayer = [v for v in self.allnodes_in_layer(j)]
