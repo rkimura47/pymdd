@@ -4,7 +4,7 @@ A simple Python implementation of a multivalued decision diagram (MDD), for use 
 # Installation
 1. Create a new directory named 'pymdd' in your working directory.
 2. Create a copy of mdd.py in pymdd/.
-3. If you using Python 2, create an empty file called '__init__.py' in pymdd/
+3. If you using Python 2, create an empty file called '\_\_init\_\_.py' in pymdd/
     (this ensures  that python will recognize mdd.py as a module).
 
 # Usage
