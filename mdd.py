@@ -277,7 +277,13 @@ class MDD(object):
                 if outarcfun is None (default), the original 'outarc' data is
                 used unchanged
                 NOTE: tail of returned arc must be 'mgnode'
+
+        Raises:
+            ValueError: cannot merge < 2 nodes
         """
+        # Basic check
+        if len(mnodes) < 2:
+            raise ValueError('Cannot merge < 2 nodes: %s' % str(mnodes))
         # Use default inarcfun/outarcfun if unspecified
         if inarcfun is None:
             inarcfun = self._default_inarcfun
@@ -720,7 +726,8 @@ class MDD(object):
             adjoutfun = (lambda w,os,ms: adjOutFunc(w,os,ms,j)) if adjOutFunc is not None else None
             # Nodes that have the same outNeighbors can be merged together
             for mnodes in outDict.values():
-                self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), adjinfun, adjoutfun)
+                if len(mnodes) >= 2:
+                    self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), adjinfun, adjoutfun)
 
     def _find_opt_path(self, longest):
         """Find an 'optimal' root-terminal path in the MDD.
