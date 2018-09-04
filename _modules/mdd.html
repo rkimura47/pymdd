@@ -1,0 +1,975 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mdd &mdash; pymdd 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pymdd 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mdd</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span> <span class="c1"># used in various places</span>
+
+<div class="viewcode-block" id="MDDArc"><a class="viewcode-back" href="../index.html#mdd.MDDArc">[docs]</a><span class="k">class</span> <span class="nc">MDDArc</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;MDDArc represents a single arc in the MDD.</span>
+
+<span class="sd">    MDDArc represents a single arc in the MDD.  An MDDArc is uniquely</span>
+<span class="sd">    identified by its head/tail nodes, label, and weight.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        label (object): label of arc (e.g., assigned value)</span>
+<span class="sd">        weight (float): weight of arc (e.g., coefficient)</span>
+<span class="sd">        tail (MDDNode): tail/source node</span>
+<span class="sd">        head (MDDNode): head/destination node</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">tail</span><span class="p">,</span> <span class="n">head</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct a new &#39;MDDArc&#39; object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="n">tail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">head</span>
+
+    <span class="c1"># Allows MDDArcs to be used as dictionary keys.</span>
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the hash value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">))</span>
+
+    <span class="c1"># Rich comparison methods: here the latter four are automatically</span>
+    <span class="c1"># derived from the first two</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self == other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tail</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">tail</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">label</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">head</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">weight</span>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self &lt; other.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tail</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tail</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">tail</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">label</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">label</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">head</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">head</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">weight</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self != other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self &gt; other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lt__</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self &lt;= other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lt__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self &gt;= other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lt__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;A(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;MDDArc(&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+<div class="viewcode-block" id="MDDNode"><a class="viewcode-back" href="../index.html#mdd.MDDNode">[docs]</a><span class="k">class</span> <span class="nc">MDDNode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;MDDNode represents a single node in the MDD.</span>
+
+<span class="sd">    MDDNode represents a single node in the MDD.  An MDDNode is uniquely</span>
+<span class="sd">    identified by its layer and state.  The (node) state must be a hashable</span>
+<span class="sd">    object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        layer (int): layer the node is in</span>
+<span class="sd">        state (object): state associated with node</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct a new &#39;MDDNode&#39; object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
+
+    <span class="c1"># Allows MDDNodes to be used as dictionary keys.</span>
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the hash value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">))</span>
+
+    <span class="c1"># Rich comparison methods: here the latter four are automatically</span>
+    <span class="c1"># derived from the first two</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self == other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">layer</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">state</span>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self &lt; other.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">layer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">layer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">state</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self != other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self &gt; other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lt__</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self &lt;= other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lt__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self &gt;= other.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lt__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;N_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;MDDNode(&#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span></div>
+
+<div class="viewcode-block" id="MDDNodeInfo"><a class="viewcode-back" href="../index.html#mdd.MDDNodeInfo">[docs]</a><span class="k">class</span> <span class="nc">MDDNodeInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;MDDNodeInfo represents information associated with an MDDNode.</span>
+
+<span class="sd">    MDDNodeInfo represents information associated with an MDDNode.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        incoming (set): set of incoming arcs (default: set())</span>
+<span class="sd">        outgoing (set): set of outgoing arcs (default: set())</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incoming</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">outgoing</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct a new &#39;MDDNode&#39; object.&quot;&quot;&quot;</span>
+        <span class="c1"># NOTE: the sets incoming and outgoing are NOT logically linked!!!</span>
+        <span class="c1"># This means that it is the PROGRAMMER&#39;S responsibility to ensure that</span>
+        <span class="c1"># each arc in the MDD is represented twice, in both head.incoming and</span>
+        <span class="c1"># tail.outgoing!</span>
+        <span class="k">if</span> <span class="n">incoming</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">outgoing</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outgoing</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="c1"># _tmp is an internal attribute that is used as temporary storage for</span>
+        <span class="c1"># various MDD calculations (e.g., shortest/longest path)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;in=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, out=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outgoing</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;MDDNodeInfo(&#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outgoing</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span></div>
+
+<div class="viewcode-block" id="MDD"><a class="viewcode-back" href="../index.html#mdd.MDD">[docs]</a><span class="k">class</span> <span class="nc">MDD</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;MDD represents a multivalued decision diagram (MDD).</span>
+
+<span class="sd">    MDD represents a multivalued decision diagram, or MDD.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): name of MDD (default: &#39;mdd&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mdd&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct a new &#39;MDD&#39; object.&quot;&quot;&quot;</span>
+        <span class="c1"># &#39;nodes&#39; is a list of dicts (one for each node layer),</span>
+        <span class="c1"># and each dict stores the nodes in that layer;</span>
+        <span class="c1"># each node is represented as a (MDDNode, MDDNodeInfo) key-value pair</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">numNodeLayers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of node layers; equal to number of &#39;variables&#39; + 1.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">numArcLayers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of arc layers; equal to number of &#39;variables&#39;.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showLong</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">showIncoming</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return str(self).</span>
+<span class="sd">        </span>
+<span class="sd">        Return a (human-readable) string representation of the MDD.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            showLong (bool): use more vertical space (default: False)</span>
+<span class="sd">            showIncoming (bool): show incoming arcs (default: False)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: string representation of MDD</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;== MDD (&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; layers) ==</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="n">showLong</span><span class="p">:</span>
+            <span class="c1"># Long form</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;# Nodes</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)):</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;L&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;:</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;: &lt;&#39;</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;in={&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}, &#39;</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;out={&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;# (Outgoing) Arcs</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alloutgoingarcs</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">showIncoming</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># (Incoming) Arcs</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allincomingarcs</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Short form</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;# Nodes</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)):</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;L&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;# (Outgoing) Arcs</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alloutgoingarcs</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">showIncoming</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># (Incoming) Arcs</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allincomingarcs</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">numArcLayers = &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_arc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newarc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add an arc to the MDD, without sanity checks.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">newarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">newarc</span><span class="o">.</span><span class="n">tail</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newarc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">newarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">newarc</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newarc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_remove_arc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmvarc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove an arc from the MDD, without sanity checks.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">tail</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rmvarc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rmvarc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newnode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a node to the MDD, without sanity checks.&quot;&quot;&quot;</span>
+        <span class="c1"># NOTE: If an identical node already exists, its incoming and outgoing</span>
+        <span class="c1"># arcs will be ERASED!!!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">newnode</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">newnode</span><span class="p">]</span> <span class="o">=</span> <span class="n">MDDNodeInfo</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_remove_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmvnode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove a node from the MDD, without sanity checks.&quot;&quot;&quot;</span>
+        <span class="n">rmvlayer</span> <span class="o">=</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span>
+        <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvlayer</span><span class="p">][</span><span class="n">rmvnode</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvlayer</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">arc</span><span class="o">.</span><span class="n">tail</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvlayer</span><span class="p">][</span><span class="n">rmvnode</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvlayer</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">arc</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvlayer</span><span class="p">][</span><span class="n">rmvnode</span><span class="p">]</span>
+
+    <span class="c1"># Default inarcfun, outarcfun methods</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_default_inarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">inarc</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">inarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">inarc</span><span class="o">.</span><span class="n">tail</span><span class="p">,</span> <span class="n">mgnode</span><span class="p">)</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_default_outarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="k">def</span> <span class="nf">_merge_nodes_internal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">,</span> <span class="n">nodefun</span><span class="p">,</span> <span class="n">inarcfun</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">outarcfun</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge specified nodes into a new node, with MDDNode/MDDArc functions.</span>
+
+<span class="sd">        Merge specified nodes into new supernode and modify arcs appropriately.</span>
+<span class="sd">        The difference between this function and _merge_nodes is that nodefun,</span>
+<span class="sd">        inarcfun, and outarcfun directly return MDDNodes and MDDArcs (as opposed</span>
+<span class="sd">        to returning the new node state and new arc weights).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mnodes (List[MDDNode]): nodes to be merged together</span>
+<span class="sd">            mlayer (int): layer containing merged nodes</span>
+<span class="sd">                NOTE: all nodes in mnodes must be in layer mlayer</span>
+<span class="sd">            nodefun (Callable[[List[MDDNode]], MDDNode]): nodefun(vlist) returns</span>
+<span class="sd">                the node resulting from merging nodes in &#39;vlist&#39;</span>
+<span class="sd">            inarcfun (Callable[[MDDNode, MDDArc], MDDArc]):</span>
+<span class="sd">                inarcfun(mgnode, inarc) returns the arc (corresponding to</span>
+<span class="sd">                &#39;inarc&#39;) incoming to the new merged node &#39;mgnode&#39;;</span>
+<span class="sd">                if inarcfun is None (default), the original &#39;inarc&#39; data is</span>
+<span class="sd">                used unchanged</span>
+<span class="sd">                NOTE: head of returned arc must be &#39;mgnode&#39;</span>
+<span class="sd">            outarcfun (Callable[[MDDNode, MDDArc], MDDArc]):</span>
+<span class="sd">                outarcfun(mgnode, outarc) returns the arc (corresponding to</span>
+<span class="sd">                &#39;outarc&#39;) outgoing from the new merged node &#39;mgnode&#39;;</span>
+<span class="sd">                if outarcfun is None (default), the original &#39;outarc&#39; data is</span>
+<span class="sd">                used unchanged</span>
+<span class="sd">                NOTE: tail of returned arc must be &#39;mgnode&#39;</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: cannot merge &lt; 2 nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Basic check</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mnodes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot merge &lt; 2 nodes: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mnodes</span><span class="p">))</span>
+        <span class="c1"># Use default inarcfun/outarcfun if unspecified</span>
+        <span class="k">if</span> <span class="n">inarcfun</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">inarcfun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_inarcfun</span>
+        <span class="k">if</span> <span class="n">outarcfun</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outarcfun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_outarcfun</span>
+
+        <span class="c1"># Enumerate incoming/outgoing arcs</span>
+        <span class="n">mIncoming</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">mlayer</span><span class="p">][</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">))</span>
+        <span class="n">mOutgoing</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">mlayer</span><span class="p">][</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">))</span>
+
+        <span class="c1"># Create new supernode, and new incoming/outgoing arcs</span>
+        <span class="n">mNode</span> <span class="o">=</span> <span class="n">nodefun</span><span class="p">(</span><span class="n">mnodes</span><span class="p">)</span>
+        <span class="n">newIncoming</span> <span class="o">=</span> <span class="p">[</span><span class="n">inarcfun</span><span class="p">(</span><span class="n">mNode</span><span class="p">,</span> <span class="n">arc</span><span class="p">)</span> <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">mIncoming</span><span class="p">]</span>
+        <span class="n">newOutgoing</span> <span class="o">=</span> <span class="p">[</span><span class="n">outarcfun</span><span class="p">(</span><span class="n">mNode</span><span class="p">,</span> <span class="n">arc</span><span class="p">)</span> <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">mOutgoing</span><span class="p">]</span>
+        <span class="c1"># Delete merged nodes</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="c1"># Add supernode and its arcs to MDD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">mNode</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">newIncoming</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">newOutgoing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
+
+    <span class="c1"># Default awfun method</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_default_awfun</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">nt</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">w</span>
+
+    <span class="k">def</span> <span class="nf">_merge_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">,</span> <span class="n">nsfun</span><span class="p">,</span> <span class="n">awinfun</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">awoutfun</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge specified nodes into a new node, with state/weight functions.</span>
+
+<span class="sd">        Merge specified nodes into new supernode and modify arcs appropriately.</span>
+<span class="sd">        The difference between this function and _merge_nodes_internal is that</span>
+<span class="sd">        nsfun, awinfun, and awoutfun return the new node state and new arc</span>
+<span class="sd">        weights for the merged supernode (as opposed to directly returning</span>
+<span class="sd">        MDDNodes and MDDArcs).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mnodes (List[MDDNode]): nodes to be merged together</span>
+<span class="sd">            mlayer (int): layer containing merged nodes</span>
+<span class="sd">            nsfun (Callable[[List[object]], object]): nsfun(slist) returns the</span>
+<span class="sd">                node state resulting from merging node states in &#39;slist&#39;</span>
+<span class="sd">            awinfun (Callable[[float, object, object], float]):</span>
+<span class="sd">                awinfun(w,os,ms) returns the adjusted weight of an arc with</span>
+<span class="sd">                weight &#39;w&#39;, old head node state &#39;os&#39;, and new head node (i.e.,</span>
+<span class="sd">                merged supernode) state &#39;ms&#39;; if awinfun is None (default),</span>
+<span class="sd">                the original weight is used</span>
+<span class="sd">            awoutfun (Callable[[float, object, object], float]):</span>
+<span class="sd">                awoutfun(w,os,ms) returns the adjusted weight of an arc with</span>
+<span class="sd">                weight &#39;w&#39;, old tail node state &#39;os&#39;, and new tail node (i.e.,</span>
+<span class="sd">                merged supernode) state &#39;ms&#39;; if awoutfun is None (default),</span>
+<span class="sd">                the original weight is used</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use default awfun if unspecified</span>
+        <span class="k">if</span> <span class="n">awinfun</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">awinfun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_awfun</span>
+        <span class="k">if</span> <span class="n">awoutfun</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">awoutfun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_awfun</span>
+
+        <span class="k">def</span> <span class="nf">nodefun</span><span class="p">(</span><span class="n">vlist</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">MDDNode</span><span class="p">(</span><span class="n">mlayer</span><span class="p">,</span> <span class="n">nsfun</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">state</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vlist</span><span class="p">]))</span>
+        <span class="k">def</span> <span class="nf">inarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">inarc</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">awinfun</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">inarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">mgnode</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">inarc</span><span class="o">.</span><span class="n">tail</span><span class="p">,</span> <span class="n">mgnode</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">outarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">awoutfun</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">mgnode</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes_internal</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">,</span> <span class="n">nodefun</span><span class="p">,</span> <span class="n">inarcfun</span><span class="p">,</span> <span class="n">outarcfun</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_append_new_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Append a new layer to the MDD.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">())</span>
+        
+    <span class="k">def</span> <span class="nf">_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the MDD.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_reset_tmp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset tmp attribute.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="MDD.allnodes"><a class="viewcode-back" href="../index.html#mdd.MDD.allnodes">[docs]</a>    <span class="k">def</span> <span class="nf">allnodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all MDDNodes in the MDD.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.allnodeitems_in_layer"><a class="viewcode-back" href="../index.html#mdd.MDD.allnodeitems_in_layer">[docs]</a>    <span class="k">def</span> <span class="nf">allnodeitems_in_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all (MDDNode, MDDNodeInfo) pairs in a particular layer.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MDD.allnodes_in_layer"><a class="viewcode-back" href="../index.html#mdd.MDD.allnodes_in_layer">[docs]</a>    <span class="k">def</span> <span class="nf">allnodes_in_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all MDDNodes in a particular layer.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MDD.alloutgoingarcs"><a class="viewcode-back" href="../index.html#mdd.MDD.alloutgoingarcs">[docs]</a>    <span class="k">def</span> <span class="nf">alloutgoingarcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all outgoing arcs in the MDD.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">)</span> <span class="k">for</span> <span class="n">ui</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="MDD.allincomingarcs"><a class="viewcode-back" href="../index.html#mdd.MDD.allincomingarcs">[docs]</a>    <span class="k">def</span> <span class="nf">allincomingarcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all incoming arcs in the MDD.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">incoming</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">)</span> <span class="k">for</span> <span class="n">ui</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="MDD.add_arc"><a class="viewcode-back" href="../index.html#mdd.MDD.add_arc">[docs]</a>    <span class="k">def</span> <span class="nf">add_arc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newarc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add an arc to the MDD.</span>
+
+<span class="sd">        Add an arc to the MDD (with sanity checks).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            newarc (MDDArc): arc to be added</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: head/tail node of arc does not exist</span>
+<span class="sd">            ValueError: head and tail nodes must be one layer apart</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">newarc</span><span class="o">.</span><span class="n">tail</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">newarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;tail node of arc does not exist&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">newarc</span><span class="o">.</span><span class="n">head</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">newarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">layer</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;head node of arc does not exist&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">newarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">layer</span> <span class="o">!=</span> <span class="n">newarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;head and tail must be one layer apart (</span><span class="si">%d</span><span class="s1"> != </span><span class="si">%d</span><span class="s1"> + 1)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">newarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">newarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">newarc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.remove_arc"><a class="viewcode-back" href="../index.html#mdd.MDD.remove_arc">[docs]</a>    <span class="k">def</span> <span class="nf">remove_arc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmvarc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove an arc from the MDD.</span>
+
+<span class="sd">        Remove an arc from the MDD (with sanity checks).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            rmvarc (MDDArc): arc to be removed</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: head/tail node of arc does not exist</span>
+<span class="sd">            KeyError: no such incoming/outgoing arc exists in the MDD</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rmvarc</span><span class="o">.</span><span class="n">tail</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;tail node of arc does not exist&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rmvarc</span><span class="o">.</span><span class="n">head</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">layer</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;head node of arc does not exist&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rmvarc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">tail</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;cannot remove non-existent outgoing arc&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rmvarc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">rmvarc</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;cannot remove non-existent incoming arc&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_arc</span><span class="p">(</span><span class="n">rmvarc</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="MDD.add_node"><a class="viewcode-back" href="../index.html#mdd.MDD.add_node">[docs]</a>    <span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newnode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a new node to the MDD.</span>
+
+<span class="sd">        Add a new node to the MDD (with sanity checks).</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            newnode (MDDNode): node to be added</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexError: the MDD does not contain the specified node layer</span>
+<span class="sd">            ValueError: a duplicate node already exists in the MDD</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span> <span class="ow">or</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;node layer </span><span class="si">%d</span><span class="s1"> does not exist&#39;</span> <span class="o">%</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">newnode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">newnode</span><span class="o">.</span><span class="n">layer</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot add proposed node; duplicate node already exists&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">newnode</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.remove_node"><a class="viewcode-back" href="../index.html#mdd.MDD.remove_node">[docs]</a>    <span class="k">def</span> <span class="nf">remove_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmvnode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove a node from the MDD.</span>
+
+<span class="sd">        Remove a node from the MDD (with sanity checks).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            rmvnode (MDDNode): node to be removed</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexError: the MDD does not contain the specified node layer</span>
+<span class="sd">            KeyError: no such node exists in the MDD</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span> <span class="ow">or</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;node layer </span><span class="si">%d</span><span class="s1"> does not exist&#39;</span> <span class="o">%</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rmvnode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;cannot remove non-existent node&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">rmvnode</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.merge_nodes"><a class="viewcode-back" href="../index.html#mdd.MDD.merge_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">merge_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mnodes</span><span class="p">,</span> <span class="n">nsfun</span><span class="p">,</span> <span class="n">awinfun</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">awoutfun</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge specified nodes into a new node.</span>
+
+<span class="sd">        Merge nodes in mnodes into a new supernode.  The state of the new</span>
+<span class="sd">        merged node is specified by nsfun, while the weights of incoming</span>
+<span class="sd">        and/or outgoing arcs are specified by awinfun/awoutfun.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mnodes (List[MDDNode]): nodes to be merged together</span>
+<span class="sd">            nsfun (Callable[[List[object]], object]): nsfun(slist) returns the</span>
+<span class="sd">                node state resulting from merging node states in &#39;slist&#39;</span>
+<span class="sd">            awinfun (Callable[[float, object, object], float]):</span>
+<span class="sd">                awinfun(w,os,ms) returns the adjusted weight of an arc with</span>
+<span class="sd">                weight &#39;w&#39;, old head node state &#39;os&#39;, and new head node (i.e.,</span>
+<span class="sd">                merged supernode) state &#39;ms&#39;; if awinfun is None (default), the</span>
+<span class="sd">                original weight is used</span>
+<span class="sd">            awoutfun (Callable[[float, object, object], float]):</span>
+<span class="sd">                awoutfun(w,os,ms) returns the adjusted weight of an arc with</span>
+<span class="sd">                weight &#39;w&#39;, old tail node state &#39;os&#39;, and new tail node (i.e.,</span>
+<span class="sd">                merged supernode) state &#39;ms&#39;; if awoutfun is None (default), the</span>
+<span class="sd">                original weight is used</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: cannot merge nodes in different layers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check all nodes in mnodes are on same layer</span>
+        <span class="n">mlayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">layer</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">mlayer</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot merge nodes in different layers&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nsfun</span><span class="p">,</span> <span class="n">awinfun</span><span class="p">,</span> <span class="n">awoutfun</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.prune_dead_nodes"><a class="viewcode-back" href="../index.html#mdd.MDD.prune_dead_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">prune_dead_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prune nodes from the MDD that cannot reach the last layer.</span>
+
+<span class="sd">        Prune nodes from the MDD that do not have a path to the last layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Go up the MDD, from second to last layer to top</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># Delete nodes without any outgoing arcs</span>
+            <span class="c1"># bool(set()) = False, so if x is a set, &#39;x is empty&#39; == not x</span>
+            <span class="n">prnnodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">prnnodes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.compile_top_down"><a class="viewcode-back" href="../index.html#mdd.MDD.compile_top_down">[docs]</a>    <span class="k">def</span> <span class="nf">compile_top_down</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numLayers</span><span class="p">,</span> <span class="n">domainFunc</span><span class="p">,</span> <span class="n">trFunc</span><span class="p">,</span> <span class="n">costFunc</span><span class="p">,</span> <span class="n">rootState</span><span class="p">,</span> <span class="n">isFeas</span><span class="p">,</span> <span class="n">maxWidth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nodeSelFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adjFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compile the MDD top-down according to a DP formulation.</span>
+
+<span class="sd">        Perform a top-down compilation of the MDD according to a dynamic</span>
+<span class="sd">        programming (DP) formulation.  For the DP-specifying functions</span>
+<span class="sd">        domainFunc, trFunc, and costFunc, layers should be numbered</span>
+<span class="sd">        0, 1, ..., numLayers-1.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            numLayers (int): number of (arc) layers (i.e., variables)</span>
+<span class="sd">            domainFunc (Callable[[int], List[int]]): domainFunc(j) returns the</span>
+<span class="sd">                domain of layer &#39;j&#39;</span>
+<span class="sd">            trFunc (Callable[[object, int, int], object]): trFunc(s,d,j)</span>
+<span class="sd">                returns the state transitioned to when domain value &#39;d&#39; is</span>
+<span class="sd">                selected at current state &#39;s&#39;, current layer &#39;j&#39;</span>
+<span class="sd">            costFunc (Callable[[object, int, int, object], float]):</span>
+<span class="sd">                costFunc(s,d,j,ns) returns the cost of selecting domain value</span>
+<span class="sd">                &#39;d&#39; at current state &#39;s&#39;, current layer &#39;j&#39;, resulting in next</span>
+<span class="sd">                state &#39;ns&#39; (i.e., the output of trFunc(s,d,j))</span>
+<span class="sd">            rootState (object): state of the root node</span>
+<span class="sd">            isFeas (Callable[[object, int], bool]): isFeas(s,j) returns True if</span>
+<span class="sd">                node state &#39;s&#39; in layer &#39;j&#39; is feasible and False otherwise</span>
+<span class="sd">            maxWidth (Callable[[int], int]): maxWidth(j) returns the maximum</span>
+<span class="sd">                allowable width for layer &#39;j&#39; of the MDD; if None (default),</span>
+<span class="sd">                the maximum width is set to 100 for all layers</span>
+<span class="sd">            nodeSelFunc (Callable[[List[MDDNode], int], List[MDDNode]]):</span>
+<span class="sd">                nodeSelFunc(vlist,j) returns a list of nodes selected from</span>
+<span class="sd">                &#39;vlist&#39; in layer &#39;j&#39; to be either merged (if mergeFunc and</span>
+<span class="sd">                adjFunc are defined) or removed (if mergeFunc and adjFunc</span>
+<span class="sd">                are None); if nodeSelFunc is None (default), the parameters</span>
+<span class="sd">                maxWidth, mergeFunc, and adjFunc are ignored and</span>
+<span class="sd">                compile_top_down(...) returns an exact MDD</span>
+<span class="sd">            mergeFunc (Callable[[List[object], int], object]):</span>
+<span class="sd">                mergeFunc(slist,j) returns the node state resulting from</span>
+<span class="sd">                merging node states in &#39;slist&#39; in layer &#39;j&#39; (default: None)</span>
+<span class="sd">            adjFunc (Callable[[float, object, object, int], float]):</span>
+<span class="sd">                adjFunc(w,os,ms,j) returns the adjusted weight of an arc with</span>
+<span class="sd">                weight &#39;w&#39;, old head node state &#39;os&#39;, and new head node (i.e.,</span>
+<span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39; (default: None)</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: mergeFunc and adjFunc must be defined together</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Basic parameter checks and default settings</span>
+        <span class="k">if</span> <span class="n">maxWidth</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">maxWidth</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">j</span><span class="p">:</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="n">nodeSelFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mergeFunc</span> <span class="ow">is</span> <span class="bp">None</span> <span class="o">!=</span> <span class="n">adjFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;mergeFunc and adjFunc must be defined together&#39;</span><span class="p">)</span>
+        <span class="c1"># First, clear the MDD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span>
+        <span class="c1"># Create first layer, containing only the root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">MDDNode</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rootState</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numLayers</span><span class="p">):</span>
+            <span class="c1"># Merge/Remove until current layer is under maxWidth</span>
+            <span class="k">if</span> <span class="n">nodeSelFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">currLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
+                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">currLayer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                    <span class="n">mnodes</span> <span class="o">=</span> <span class="n">nodeSelFunc</span><span class="p">(</span><span class="n">currLayer</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">mergeFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>   <span class="c1"># Remove</span>
+                        <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>                   <span class="c1"># Merge</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">slist</span><span class="p">:</span> <span class="n">mergeFunc</span><span class="p">(</span><span class="n">slist</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span>
+                    <span class="n">currLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
+
+            <span class="c1"># Create the next layer of nodes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
+            <span class="c1"># For each node in the current layer and each possible assignment...</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">domainFunc</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                    <span class="c1"># Apply transition function</span>
+                    <span class="n">vstate</span> <span class="o">=</span> <span class="n">trFunc</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                    <span class="c1"># Add if node is feasible</span>
+                    <span class="k">if</span> <span class="n">isFeas</span><span class="p">(</span><span class="n">vstate</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+                        <span class="n">v</span> <span class="o">=</span> <span class="n">MDDNode</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">vstate</span><span class="p">)</span>
+                        <span class="c1"># Check if equivalent node exists</span>
+                        <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                        <span class="c1"># Add appropriate arc</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">MDDArc</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">costFunc</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">vstate</span><span class="p">),</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MDD.compile_trivial"><a class="viewcode-back" href="../index.html#mdd.MDD.compile_trivial">[docs]</a>    <span class="k">def</span> <span class="nf">compile_trivial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numLayers</span><span class="p">,</span> <span class="n">domainFunc</span><span class="p">,</span> <span class="n">costFunc</span><span class="p">,</span> <span class="n">nodeStateFunc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compile a trivial MDD.</span>
+
+<span class="sd">        Compile a trivial MDD, i.e., one that represents all possible solutions</span>
+<span class="sd">        based on the given domains and costs.  This MDD contains one node in</span>
+<span class="sd">        each layer, and an arc for every possible domain value.  For domainFunc</span>
+<span class="sd">        costFunc, and nodeStateFunc, the layers should be numbered 0, 1, ...,</span>
+<span class="sd">        numLayers-1.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            numLayers (int): number of (arc) layers (i.e., variables)</span>
+<span class="sd">            domainFunc (Callable[[int], List[int]]): domainFunc(j) returns the</span>
+<span class="sd">                domain of layer &#39;j&#39;</span>
+<span class="sd">            costFunc (Callable[[int, int], float]): costFunc(d,j) returns the</span>
+<span class="sd">                cost of selecting domain value &#39;d&#39; at current layer &#39;j&#39;</span>
+<span class="sd">            nodeStateFunc (Callable[[int], object]): nodeStateFunc(j) returns</span>
+<span class="sd">                the node state of the node in layer &#39;j&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First, clear the MDD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span>
+        <span class="c1"># Create root node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">MDDNode</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nodeStateFunc</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
+        <span class="c1"># Create each layer</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numLayers</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">MDDNode</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nodeStateFunc</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">domainFunc</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">MDDArc</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">costFunc</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MDD.filter_and_refine_constraint"><a class="viewcode-back" href="../index.html#mdd.MDD.filter_and_refine_constraint">[docs]</a>    <span class="k">def</span> <span class="nf">filter_and_refine_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trFunc</span><span class="p">,</span> <span class="n">rootState</span><span class="p">,</span> <span class="n">isFeas</span><span class="p">,</span> <span class="n">nodeStateFunc</span><span class="p">,</span> <span class="n">maxWidth</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Filter and refine MDD for a constraint.</span>
+
+<span class="sd">        Perform incremental refinement of a particular constraint on the MDD.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            trFunc (Callable[[object, int, int], object]): trFunc(s,d,j) returns</span>
+<span class="sd">                the state transitioned to when domain value &#39;d&#39; is selected at</span>
+<span class="sd">                current state &#39;s&#39;, current layer &#39;j&#39;</span>
+<span class="sd">            rootState (object): state assigned to root node</span>
+<span class="sd">            isFeas (Callable[[object, int], bool]): isFeas(s,j) returns True if</span>
+<span class="sd">                node state &#39;s&#39; in layer &#39;j&#39; is feasible and False otherwise</span>
+<span class="sd">            nodeStateFunc (Callable[[object, int], object]): nodeStateFunc(s,j)</span>
+<span class="sd">                returns the node state resulting from transitioning to state</span>
+<span class="sd">                &#39;s&#39; in layer &#39;j&#39;</span>
+<span class="sd">            maxWidth (Callable[[int], int]): maxWidth(j) returns the maximum</span>
+<span class="sd">                allowable width for layer &#39;j&#39; of the MDD; if None (default),</span>
+<span class="sd">                the maximum width is set to 100 for all layers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">maxWidth</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">maxWidth</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">j</span><span class="p">:</span> <span class="mi">100</span>
+        <span class="c1"># Reset tmp attribute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_tmp</span><span class="p">()</span>
+        <span class="c1"># Set up root node</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="n">rootState</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">):</span>
+            <span class="c1"># Filtering</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">isFeas</span><span class="p">(</span><span class="n">trFunc</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">j</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_arc</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+            <span class="c1"># Prune nodes that are no longer reachable</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ui</span><span class="o">.</span><span class="n">incoming</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+            <span class="c1"># Refinement</span>
+            <span class="n">numNodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">):</span>
+                    <span class="n">ns</span> <span class="o">=</span> <span class="n">trFunc</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                    <span class="n">vi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">head</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">vi</span><span class="o">.</span><span class="n">_tmp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">vi</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="n">ns</span>
+                    <span class="k">elif</span> <span class="n">vi</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">!=</span> <span class="n">ns</span> <span class="ow">and</span> <span class="n">numNodes</span> <span class="o">&lt;</span> <span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="c1"># Redirect arc to a new node</span>
+                        <span class="n">w</span> <span class="o">=</span> <span class="n">MDDNode</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nodeStateFunc</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="n">ns</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">MDDArc</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">,</span><span class="n">a</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">w</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_arc</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                        <span class="c1"># Copy outgoing arcs from v, to w</span>
+                        <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">vi</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">MDDArc</span><span class="p">(</span><span class="n">aa</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">aa</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">aa</span><span class="o">.</span><span class="n">head</span><span class="p">))</span>
+                        <span class="n">numNodes</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Update</span>
+                        <span class="n">vi</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="n">ns</span>
+
+        <span class="c1"># Reset tmp attribute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_tmp</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MDD.reduce_bottom_up"><a class="viewcode-back" href="../index.html#mdd.MDD.reduce_bottom_up">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_bottom_up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="p">,</span> <span class="n">adjInFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adjOutFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reduce the MDD bottom-up by merging equivalent nodes.</span>
+<span class="sd">        </span>
+<span class="sd">        Merge all equivalent nodes in the MDD, i.e., nodes which have the same</span>
+<span class="sd">        suffix set.  The state of the new node is determined by mergeFunc, and</span>
+<span class="sd">        the weight of incoming and outgoing arcs of the new node is adjusted by</span>
+<span class="sd">        adjInFunc and adjOutFunc respectively.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mergeFunc (Callable[[List[object], int], object]):</span>
+<span class="sd">                mergeFunc(slist,j) returns the node state resulting from merging</span>
+<span class="sd">                node states in &#39;slist&#39; in layer &#39;j&#39;</span>
+<span class="sd">            adjInFunc (Callable[[float, object, object, int], float]):</span>
+<span class="sd">                adjInFunc(w,os,ms,j) returns the adjusted weight of an arc with</span>
+<span class="sd">                weight &#39;w&#39;, old head node state &#39;os&#39;, and new head node (i.e.,</span>
+<span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39; (default: None)</span>
+<span class="sd">            adjOutFunc (Callable[[float, object, object, int], float]):</span>
+<span class="sd">                adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with</span>
+<span class="sd">                weight &#39;w&#39;, old tail node state &#39;os&#39;, and new tail node (i.e.,</span>
+<span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39; (default: None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Merge from bottom up</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># Cluster nodes by their outNeighbors</span>
+            <span class="n">outDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">outNeighbors</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([(</span><span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">head</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">outNeighbors</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">outDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">outDict</span><span class="p">[</span><span class="n">outNeighbors</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">outDict</span><span class="p">[</span><span class="n">outNeighbors</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+            <span class="n">adjinfun</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjInFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span> <span class="k">if</span> <span class="n">adjInFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+            <span class="n">adjoutfun</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjOutFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span> <span class="k">if</span> <span class="n">adjOutFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+            <span class="c1"># Nodes that have the same outNeighbors can be merged together</span>
+            <span class="k">for</span> <span class="n">mnodes</span> <span class="ow">in</span> <span class="n">outDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mnodes</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">slist</span><span class="p">:</span> <span class="n">mergeFunc</span><span class="p">(</span><span class="n">slist</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">adjinfun</span><span class="p">,</span> <span class="n">adjoutfun</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_find_opt_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">longest</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find an &#39;optimal&#39; root-terminal path in the MDD.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            longest (bool): True/False if computing longest/shortest path resp</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, List[object]]: optimal weight and optimal path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">longest</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">limVal</span><span class="p">,</span> <span class="n">limCmp</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">limVal</span><span class="p">,</span> <span class="n">limCmp</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c1"># Initialize tmp attribute</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="p">(</span><span class="n">limVal</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="c1"># Compute the optimal path, layer by layer</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">limCmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="c1"># Identify the optimal path, layer by layer</span>
+        <span class="n">optVal</span> <span class="o">=</span> <span class="n">limVal</span>
+        <span class="n">optNode</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">limCmp</span><span class="p">(</span><span class="n">optVal</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">optVal</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">optNode</span> <span class="o">=</span> <span class="n">u</span>
+        <span class="n">lpath</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">optArc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">optNode</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">lpath</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">optArc</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">optNode</span> <span class="o">=</span> <span class="n">optArc</span><span class="o">.</span><span class="n">tail</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_tmp</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">optVal</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">lpath</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="MDD.find_longest_path"><a class="viewcode-back" href="../index.html#mdd.MDD.find_longest_path">[docs]</a>    <span class="k">def</span> <span class="nf">find_longest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find a longest root-terminal path in the MDD.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, List[object]]: maximum weight and longest path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_opt_path</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.find_shortest_path"><a class="viewcode-back" href="../index.html#mdd.MDD.find_shortest_path">[docs]</a>    <span class="k">def</span> <span class="nf">find_shortest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find a shortest root-terminal path in the MDD.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, List[object]]: minimum weight and shortest path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_opt_path</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.enumerate_all_paths"><a class="viewcode-back" href="../index.html#mdd.MDD.enumerate_all_paths">[docs]</a>    <span class="k">def</span> <span class="nf">enumerate_all_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Enumerate all root-terminal paths in the MDD.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple[float, List[object]]]: list of path weights/paths</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize tmp attribute</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Set up root node</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">a</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">]))</span>
+        <span class="c1"># Compute paths, layer by layer.</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="p">[(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">]</span> <span class="p">)</span>
+        <span class="c1"># Enumerate paths</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">):</span>
+            <span class="n">paths</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_tmp</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">paths</span></div>
+
+    <span class="c1"># Default functions/args for GraphViz output</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_default_nodedotfunc</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">lyr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;[label=&quot;&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&quot;];&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_default_arcdotfunc</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">lyr</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;[style=dotted,label=&quot;&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&quot;];&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;[label=&quot;&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>  <span class="o">+</span> <span class="s1">&#39;&quot;];&#39;</span>
+
+    <span class="n">_default_arcsortargs</span> <span class="o">=</span>  <span class="p">{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">}</span>
+    <span class="n">_default_nodesortargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+
+<div class="viewcode-block" id="MDD.output_to_dot"><a class="viewcode-back" href="../index.html#mdd.MDD.output_to_dot">[docs]</a>    <span class="k">def</span> <span class="nf">output_to_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodeDotFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">arcDotFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">arcSortArgs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nodeSortArgs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write the graphical structure of the MDD to a file.</span>
+
+<span class="sd">        Write the graphical structure of the MDD to a file (&lt;MDDName&gt;.gv) in</span>
+<span class="sd">        the DOT language.  The MDD can then be visualized with GraphViz.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nodeDotFunc (Callable[[object, int], str]): nodeDotFunc(s,j)</span>
+<span class="sd">                returns a string with the DOT options to use given node state</span>
+<span class="sd">                &#39;s&#39; in layer &#39;j&#39;; if None (default), a sensible default is used</span>
+<span class="sd">            arcDotFunc (Callable[[object, float, int], str]): arcDotFunc(l,w,j)</span>
+<span class="sd">                returns a string with the DOT options to use given arc label</span>
+<span class="sd">                &#39;l&#39;, arc weight &#39;w&#39;, and tail node layer &#39;j&#39;; if None (default),</span>
+<span class="sd">                a sensible default is used</span>
+<span class="sd">            arcSortArgs (dict): arguments specifying how to sort a list of arcs</span>
+<span class="sd">                via list.sort() (i.e., &#39;key&#39; and, optionally, &#39;reverse&#39;);</span>
+<span class="sd">                GraphViz then attempts to order the arcs accordingly in the</span>
+<span class="sd">                output graph; if arcSortArgs is None (default), no such order</span>
+<span class="sd">                is enforced</span>
+<span class="sd">            nodeSortArgs (dict): arguments specifying how to sort a list of</span>
+<span class="sd">                nodes via list.sort() (i.e., &#39;key&#39; and, optionally, &#39;reverse&#39;);</span>
+<span class="sd">                GraphViz then attempts to order the nodes accordingly in the</span>
+<span class="sd">                output graph; if nodeSortArgs is None (default), no such order</span>
+<span class="sd">                is enforced</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Use default output functions if unspecified</span>
+        <span class="k">if</span> <span class="n">nodeDotFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nodeDotFunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_nodedotfunc</span>
+        <span class="k">if</span> <span class="n">arcDotFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">arcDotFunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_arcdotfunc</span>
+
+        <span class="n">outf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.gv&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;digraph &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; {</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">arcSortArgs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ordering=out;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes</span><span class="p">():</span>
+            <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">+</span> <span class="n">nodeDotFunc</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">arcsinlayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">arcSortArgs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">arcsinlayer</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="o">**</span><span class="n">arcSortArgs</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">arcsinlayer</span><span class="p">:</span>
+                    <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="n">arc</span><span class="o">.</span><span class="n">tail</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="n">arc</span><span class="o">.</span><span class="n">head</span><span class="p">))</span> <span class="o">+</span> <span class="n">arcDotFunc</span><span class="p">(</span><span class="n">arc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">arc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">arc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nodeSortArgs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">):</span>
+                <span class="n">nodesinlayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesinlayer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">nodesinlayer</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="o">**</span><span class="n">nodeSortArgs</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodesinlayer</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="n">nodesinlayer</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="n">nodesinlayer</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39;[style=invis];&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;{rank=same&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nodesinlayer</span><span class="p">:</span>
+                        <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;;&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+                    <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">)</span>
+        <span class="n">outf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Ryo Kimura.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
