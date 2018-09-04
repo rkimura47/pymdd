@@ -214,3 +214,7 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+.PHONY: buildandcommithtml
+buildandcommithtml: html
+	cd $(BUILDDIR)/html; git add . ; git commit -m "rebuiltdocs"; git push origin gh-pages
