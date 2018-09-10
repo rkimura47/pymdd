@@ -28,7 +28,7 @@ mymdd.reduce_bottom_up(mergeFunc)
 print(mymdd)
 print(mymdd.find_longest_path())
 
-# Display MDD with GraphViz
+# Output and display MDD with GraphViz
 mymdd.output_to_dot()
 #mymdd.output_to_dot(arcSortArgs=MDD._default_arcsortargs, nodeSortArgs=MDD._default_nodesortargs)
 system('dot -Tps ' + name + '.gv -o ' + name + '.ps')

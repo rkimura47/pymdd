@@ -58,7 +58,7 @@ mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas, m
 print(mymdd)
 print(mymdd.find_longest_path())
 
-# Display MDD with GraphViz
+# Output and display MDD with GraphViz
 def adf(l,w,j):
     if l == 'S':
         return '[style=dotted,label="' + str(w) + '"];'

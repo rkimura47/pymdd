@@ -1,4 +1,5 @@
 from itertools import chain # used in various places
+from json import dump, load
 
 class MDDArc(object):
     """MDDArc represents a single arc in the MDD.
@@ -153,15 +154,19 @@ class MDD(object):
 
     Args:
         name (str): name of MDD (default: 'mdd')
+        nodes (List[Dict[MDDNode, MDDNodeInfo]]): nodes of MDD;
+            if None (default), set to empty list
     """
 
-    def __init__(self, name='mdd'):
+    def __init__(self, name='mdd', nodes=None):
         """Construct a new 'MDD' object."""
         # 'nodes' is a list of dicts (one for each node layer),
         # and each dict stores the nodes in that layer;
         # each node is represented as a (MDDNode, MDDNodeInfo) key-value pair
-        self.nodes = []
+        self.nodes = nodes
         self.name = name
+        if self.nodes is None:
+            self.nodes = []
 
     @property
     def numNodeLayers(self):
@@ -215,7 +220,7 @@ class MDD(object):
         return s
 
     def __repr__(self):
-        return repr(self.nodes) + '\nnumArcLayers = ' + repr(self.numArcLayers)
+        return 'MDD(' + repr(self.name) + ', ' + repr(self.nodes) + ')'
 
     def _add_arc(self, newarc):
         """Add an arc to the MDD, without sanity checks."""
@@ -887,3 +892,62 @@ class MDD(object):
                     outf.write('}\n')
         outf.write('}')
         outf.close()
+
+    def dumpJSON(self, stateDumpFunc=repr, labelDumpFunc=repr):
+        """Dump the MDD into a JSON file.
+
+        Dump the contents of the MDD into a JSON file for later retrieval.
+
+        Args:
+            stateDumpFunc (Callable[[object], str]): stateDumpFunc(s) returns
+                a string representation of the node state 's' (default: repr)
+            labelDumpFunc (Callable[[object], str]): labelDumpFunc(l) returns
+                a string representation of the arc label 'l' (default: repr)
+        """
+        dataList = []
+        dataList.append({'Type': 'name', 'name': self.name})
+        for v in self.allnodes():
+            dataList.append({'Type': 'node', 'layer': v.layer, 'state': stateDumpFunc(v.state), 'id': hash(v)})
+        for a in self.alloutgoingarcs():
+            dataList.append({'Type': 'arc', 'label': labelDumpFunc(a.label), 'weight': float(a.weight), 'tail': hash(a.tail), 'head': hash(a.head)})
+        outf = open(self.name + '.json', 'w')
+        dump(dataList, outf)
+        outf.close()
+
+    def loadJSON(self, fname, stateLoadFunc=eval, labelLoadFunc=eval):
+        """Load an MDD from a JSON file.
+
+        Load the contents of an MDD from a JSON file.
+        NOTE: Since node states and arc labels can be arbitrary python
+        objects, loadJSON uses eval() by default to construct these attributes.
+        THIS ALLOWS FOR ARBITRARY CODE EXECUTION! USE RESPONSIBLY!!!
+
+        Args:
+            fname (str): name of input file (e.g., mdd.json)
+            stateLoadFunc (Callable[[str], object]): stateLoadFunc(s) returns
+                the node state corresponding to string 's' (default: eval)
+            labelLoadFunc (Callable[[str], object]): labelLoadFunc(s) returns
+                the arc label corresponding to string 's' (default: eval)
+
+        Raises:
+            ValueError: unknown item type (e.g., incorrect input file format)
+        """
+        self._clear()
+        mddf = open(fname, 'r')
+        dataList = load(mddf)
+        mddf.close()
+        nodeDict = dict()
+        for item in dataList:
+            if item['Type'] == 'name':
+                self.name = item['name']
+            elif item['Type'] == 'node':
+                while int(item['layer']) >= self.numNodeLayers:
+                    self._append_new_layer()
+                newnode = MDDNode(int(item['layer']), stateLoadFunc(item['state']))
+                self.add_node(newnode)
+                nodeDict[item['id']] = newnode
+            elif item['Type'] == 'arc':
+                newarc = MDDArc(labelLoadFunc(item['label']), float(item['weight']), nodeDict[item['tail']], nodeDict[item['head']])
+                self.add_arc(newarc)
+            else:
+                raise ValueError('Unknown item type: check input file format')
