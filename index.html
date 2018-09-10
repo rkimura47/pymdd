@@ -45,14 +45,19 @@
 </div>
 <span class="target" id="module-mdd"></span><dl class="class">
 <dt id="mdd.MDD">
-<em class="property">class </em><code class="descclassname">mdd.</code><code class="descname">MDD</code><span class="sig-paren">(</span><em>name='mdd'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">mdd.</code><code class="descname">MDD</code><span class="sig-paren">(</span><em>name='mdd'</em>, <em>nodes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD" title="Permalink to this definition">¶</a></dt>
 <dd><p>MDD represents a multivalued decision diagram (MDD).</p>
 <p>MDD represents a multivalued decision diagram, or MDD.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of MDD (default: &#8216;mdd&#8217;)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of MDD (default: &#8216;mdd&#8217;)</li>
+<li><strong>nodes</strong> (<em>List[Dict[MDDNode, MDDNodeInfo]]</em>) &#8211; nodes of MDD;
+if None (default), set to empty list</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -213,6 +218,27 @@ the node state of the node in layer &#8216;j&#8217;</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="mdd.MDD.dumpJSON">
+<code class="descname">dumpJSON</code><span class="sig-paren">(</span><em>stateDumpFunc=&lt;built-in function repr&gt;</em>, <em>labelDumpFunc=&lt;built-in function repr&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.dumpJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.dumpJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump the MDD into a JSON file.</p>
+<p>Dump the contents of the MDD into a JSON file for later retrieval.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>stateDumpFunc</strong> (<em>Callable[[object], str]</em>) &#8211; stateDumpFunc(s) returns
+a string representation of the node state &#8216;s&#8217; (default: repr)</li>
+<li><strong>labelDumpFunc</strong> (<em>Callable[[object], str]</em>) &#8211; labelDumpFunc(l) returns
+a string representation of the arc label &#8216;l&#8217; (default: repr)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="mdd.MDD.enumerate_all_paths">
 <code class="descname">enumerate_all_paths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.enumerate_all_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.enumerate_all_paths" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enumerate all root-terminal paths in the MDD.</p>
@@ -284,6 +310,35 @@ the maximum width is set to 100 for all layers</li>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">minimum weight and shortest path</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Tuple[float, List[object]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdd.MDD.loadJSON">
+<code class="descname">loadJSON</code><span class="sig-paren">(</span><em>fname</em>, <em>stateLoadFunc=&lt;built-in function eval&gt;</em>, <em>labelLoadFunc=&lt;built-in function eval&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.loadJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.loadJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an MDD from a JSON file.</p>
+<p>Load the contents of an MDD from a JSON file.
+NOTE: Since node states and arc labels can be arbitrary python
+objects, loadJSON uses eval() by default to construct these attributes.
+THIS ALLOWS FOR ARBITRARY CODE EXECUTION! USE RESPONSIBLY!!!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of input file (e.g., mdd.json)</li>
+<li><strong>stateLoadFunc</strong> (<em>Callable[[str], object]</em>) &#8211; stateLoadFunc(s) returns
+the node state corresponding to string &#8216;s&#8217; (default: eval)</li>
+<li><strong>labelLoadFunc</strong> (<em>Callable[[str], object]</em>) &#8211; labelLoadFunc(s) returns
+the arc label corresponding to string &#8216;s&#8217; (default: eval)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> &#8211;
+unknown item type (e.g., incorrect input file format)</p>
+</td>
 </tr>
 </tbody>
 </table>

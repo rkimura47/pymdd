@@ -39,6 +39,7 @@
             
   <h1>Source code for mdd</h1><div class="highlight"><pre>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span> <span class="c1"># used in various places</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dump</span><span class="p">,</span> <span class="n">load</span>
 
 <div class="viewcode-block" id="MDDArc"><a class="viewcode-back" href="../index.html#mdd.MDDArc">[docs]</a><span class="k">class</span> <span class="nc">MDDArc</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;MDDArc represents a single arc in the MDD.</span>
@@ -193,15 +194,19 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        name (str): name of MDD (default: &#39;mdd&#39;)</span>
+<span class="sd">        nodes (List[Dict[MDDNode, MDDNodeInfo]]): nodes of MDD;</span>
+<span class="sd">            if None (default), set to empty list</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mdd&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mdd&#39;</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct a new &#39;MDD&#39; object.&quot;&quot;&quot;</span>
         <span class="c1"># &#39;nodes&#39; is a list of dicts (one for each node layer),</span>
         <span class="c1"># and each dict stores the nodes in that layer;</span>
         <span class="c1"># each node is represented as a (MDDNode, MDDNodeInfo) key-value pair</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">numNodeLayers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -255,7 +260,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">numArcLayers = &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;MDD(&#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
 
     <span class="k">def</span> <span class="nf">_add_arc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newarc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add an arc to the MDD, without sanity checks.&quot;&quot;&quot;</span>
@@ -926,7 +931,66 @@
                         <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;;&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
                     <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">)</span>
-        <span class="n">outf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+        <span class="n">outf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MDD.dumpJSON"><a class="viewcode-back" href="../index.html#mdd.MDD.dumpJSON">[docs]</a>    <span class="k">def</span> <span class="nf">dumpJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stateDumpFunc</span><span class="o">=</span><span class="nb">repr</span><span class="p">,</span> <span class="n">labelDumpFunc</span><span class="o">=</span><span class="nb">repr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dump the MDD into a JSON file.</span>
+
+<span class="sd">        Dump the contents of the MDD into a JSON file for later retrieval.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            stateDumpFunc (Callable[[object], str]): stateDumpFunc(s) returns</span>
+<span class="sd">                a string representation of the node state &#39;s&#39; (default: repr)</span>
+<span class="sd">            labelDumpFunc (Callable[[object], str]): labelDumpFunc(l) returns</span>
+<span class="sd">                a string representation of the arc label &#39;l&#39; (default: repr)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dataList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dataList</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes</span><span class="p">():</span>
+            <span class="n">dataList</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="s1">&#39;layer&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="n">stateDumpFunc</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="nb">hash</span><span class="p">(</span><span class="n">v</span><span class="p">)})</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alloutgoingarcs</span><span class="p">():</span>
+            <span class="n">dataList</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;arc&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">labelDumpFunc</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">),</span> <span class="s1">&#39;weight&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">weight</span><span class="p">),</span> <span class="s1">&#39;tail&#39;</span><span class="p">:</span> <span class="nb">hash</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">tail</span><span class="p">),</span> <span class="s1">&#39;head&#39;</span><span class="p">:</span> <span class="nb">hash</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">head</span><span class="p">)})</span>
+        <span class="n">outf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">dump</span><span class="p">(</span><span class="n">dataList</span><span class="p">,</span> <span class="n">outf</span><span class="p">)</span>
+        <span class="n">outf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MDD.loadJSON"><a class="viewcode-back" href="../index.html#mdd.MDD.loadJSON">[docs]</a>    <span class="k">def</span> <span class="nf">loadJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">stateLoadFunc</span><span class="o">=</span><span class="nb">eval</span><span class="p">,</span> <span class="n">labelLoadFunc</span><span class="o">=</span><span class="nb">eval</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load an MDD from a JSON file.</span>
+
+<span class="sd">        Load the contents of an MDD from a JSON file.</span>
+<span class="sd">        NOTE: Since node states and arc labels can be arbitrary python</span>
+<span class="sd">        objects, loadJSON uses eval() by default to construct these attributes.</span>
+<span class="sd">        THIS ALLOWS FOR ARBITRARY CODE EXECUTION! USE RESPONSIBLY!!!</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fname (str): name of input file (e.g., mdd.json)</span>
+<span class="sd">            stateLoadFunc (Callable[[str], object]): stateLoadFunc(s) returns</span>
+<span class="sd">                the node state corresponding to string &#39;s&#39; (default: eval)</span>
+<span class="sd">            labelLoadFunc (Callable[[str], object]): labelLoadFunc(s) returns</span>
+<span class="sd">                the arc label corresponding to string &#39;s&#39; (default: eval)</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: unknown item type (e.g., incorrect input file format)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span>
+        <span class="n">mddf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">dataList</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">mddf</span><span class="p">)</span>
+        <span class="n">mddf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">nodeDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dataList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+                <span class="k">while</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
+                <span class="n">newnode</span> <span class="o">=</span> <span class="n">MDDNode</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">]),</span> <span class="n">stateLoadFunc</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">newnode</span><span class="p">)</span>
+                <span class="n">nodeDict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">newnode</span>
+            <span class="k">elif</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;arc&#39;</span><span class="p">:</span>
+                <span class="n">newarc</span> <span class="o">=</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">labelLoadFunc</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]),</span> <span class="n">nodeDict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;tail&#39;</span><span class="p">]],</span> <span class="n">nodeDict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;head&#39;</span><span class="p">]])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_arc</span><span class="p">(</span><span class="n">newarc</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown item type: check input file format&#39;</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
