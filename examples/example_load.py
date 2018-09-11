@@ -1,19 +1,20 @@
 #!/usr/bin/python3
+from argparse import ArgumentParser
 from pymdd.mdd import *
 from os import system
 
+# Parser
+parser = ArgumentParser(description='Loads and displays MDD from JSON file')
+parser.add_argument('json_file', help='json file with MDD data')
+args = parser.parse_args()
+
 # Load MDD from file
-jsondir = './pymdd/examples/json/'
-jsonfiles = ['knapsack.json', 'mcp.json', 'misp.json', 'smisp.json']
-selectfile = jsonfiles[2]
-
+json_file = args.json_file
 mymdd = MDD()
-
-if selectfile == 'smisp.json':
-    from uuid import UUID
-    mymdd.loadJSON(jsondir + selectfile, stateLoadFunc=lambda s: eval(s, globals()))
-else:
-    mymdd.loadJSON(jsondir + selectfile)
+mymdd.loadJSON(json_file)
+# NOTE: for smisp.json, use the following instead
+#from uuid import UUID
+#mymdd.loadJSON(json_file, stateLoadFunc=lambda s: eval(s, globals()))
 
 # Print the contents
 print(mymdd)
