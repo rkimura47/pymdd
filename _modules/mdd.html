@@ -579,7 +579,7 @@
 <span class="sd">        prune_all() may be more efficient.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            origNodeList(List[MDDNodes]): nodes to be pruned</span>
+<span class="sd">            origNodeList (List[MDDNode]): nodes to be potentially pruned</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Recursively delete nodes that cannot reach the first or last layer</span>
         <span class="k">def</span> <span class="nf">prunable</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
