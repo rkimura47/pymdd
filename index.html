@@ -426,10 +426,35 @@ is enforced</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="mdd.MDD.prune_dead_nodes">
-<code class="descname">prune_dead_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.prune_dead_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.prune_dead_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prune nodes from the MDD that cannot reach the last layer.</p>
-<p>Prune nodes from the MDD that do not have a path to the last layer.</p>
+<dt id="mdd.MDD.prune_all">
+<code class="descname">prune_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.prune_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.prune_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune all dead nodes with no root/terminal path.</p>
+<p>Prune all nodes from the MDD that do not have a path to the first or
+last layer.  This procedure employs two passes to prune all dead nodes
+in the MDD.  To prune more selectively (e.g., after removing a small
+number of nodes/arcs), use prune_recusive(...).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdd.MDD.prune_recursive">
+<code class="descname">prune_recursive</code><span class="sig-paren">(</span><em>origNodeList</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.prune_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.prune_recursive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively prune dead nodes with no root/terminal path.</p>
+<p>Recursively prune nodes from the MDD that do not have a path to the
+first or last layer.  Specifically, this procedure first initializes a
+FIFO queue of nodes to be pruned from &#8216;origNodeList&#8217;.  Then, it pops a
+node &#8216;u&#8217; from the queue, removes it from the MDD, then adds any nodes
+&#8216;v&#8217; neighboring &#8216;u&#8217; to the queue if the removal of &#8216;u&#8217; results in &#8216;v&#8217;
+having no incoming or outgoing arcs.  The process is repeated until
+the queue is empty.  Note that if one wishes to prune all dead nodes,
+prune_all() may be more efficient.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>origNodeList</strong> (<em>List[MDDNodes]</em>) &#8211; nodes to be pruned</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">

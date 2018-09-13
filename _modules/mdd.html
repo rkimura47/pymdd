@@ -39,6 +39,7 @@
             
   <h1>Source code for mdd</h1><div class="highlight"><pre>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span> <span class="c1"># used in various places</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
 <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dump</span><span class="p">,</span> <span class="n">load</span>
 
 <div class="viewcode-block" id="MDDArc"><a class="viewcode-back" href="../index.html#mdd.MDDArc">[docs]</a><span class="k">class</span> <span class="nc">MDDArc</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -486,7 +487,7 @@
 <span class="sd">            IndexError: the MDD does not contain the specified node layer</span>
 <span class="sd">            ValueError: a duplicate node already exists in the MDD</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span> <span class="ow">or</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span> <span class="ow">or</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;node layer </span><span class="si">%d</span><span class="s1"> does not exist&#39;</span> <span class="o">%</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">newnode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">newnode</span><span class="o">.</span><span class="n">layer</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot add proposed node; duplicate node already exists&#39;</span><span class="p">)</span>
@@ -504,7 +505,7 @@
 <span class="sd">            IndexError: the MDD does not contain the specified node layer</span>
 <span class="sd">            KeyError: no such node exists in the MDD</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span> <span class="ow">or</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span> <span class="ow">or</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;node layer </span><span class="si">%d</span><span class="s1"> does not exist&#39;</span> <span class="o">%</span> <span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">rmvnode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">rmvnode</span><span class="o">.</span><span class="n">layer</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;cannot remove non-existent node&#39;</span><span class="p">)</span>
@@ -541,18 +542,63 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot merge nodes in different layers&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nsfun</span><span class="p">,</span> <span class="n">awinfun</span><span class="p">,</span> <span class="n">awoutfun</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MDD.prune_dead_nodes"><a class="viewcode-back" href="../index.html#mdd.MDD.prune_dead_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">prune_dead_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Prune nodes from the MDD that cannot reach the last layer.</span>
+<div class="viewcode-block" id="MDD.prune_all"><a class="viewcode-back" href="../index.html#mdd.MDD.prune_all">[docs]</a>    <span class="k">def</span> <span class="nf">prune_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prune all dead nodes with no root/terminal path.</span>
 
-<span class="sd">        Prune nodes from the MDD that do not have a path to the last layer.</span>
+<span class="sd">        Prune all nodes from the MDD that do not have a path to the first or</span>
+<span class="sd">        last layer.  This procedure employs two passes to prune all dead nodes</span>
+<span class="sd">        in the MDD.  To prune more selectively (e.g., after removing a small</span>
+<span class="sd">        number of nodes/arcs), use prune_recusive(...).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Go up the MDD, from second to last layer to top</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Note last node layer is numNodeLayers-1</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="c1"># Delete nodes without any outgoing arcs</span>
             <span class="c1"># bool(set()) = False, so if x is a set, &#39;x is empty&#39; == not x</span>
             <span class="n">prnnodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">prnnodes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="c1"># Go down the MDD, from second layer to bottom</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">):</span>
+            <span class="c1"># Delete nodes without any incoming arcs</span>
+            <span class="n">prnnodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ui</span><span class="o">.</span><span class="n">incoming</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">prnnodes</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MDD.prune_recursive"><a class="viewcode-back" href="../index.html#mdd.MDD.prune_recursive">[docs]</a>    <span class="k">def</span> <span class="nf">prune_recursive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origNodeList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively prune dead nodes with no root/terminal path.</span>
+
+<span class="sd">        Recursively prune nodes from the MDD that do not have a path to the</span>
+<span class="sd">        first or last layer.  Specifically, this procedure first initializes a</span>
+<span class="sd">        FIFO queue of nodes to be pruned from &#39;origNodeList&#39;.  Then, it pops a</span>
+<span class="sd">        node &#39;u&#39; from the queue, removes it from the MDD, then adds any nodes</span>
+<span class="sd">        &#39;v&#39; neighboring &#39;u&#39; to the queue if the removal of &#39;u&#39; results in &#39;v&#39;</span>
+<span class="sd">        having no incoming or outgoing arcs.  The process is repeated until</span>
+<span class="sd">        the queue is empty.  Note that if one wishes to prune all dead nodes,</span>
+<span class="sd">        prune_all() may be more efficient.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            origNodeList(List[MDDNodes]): nodes to be pruned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Recursively delete nodes that cannot reach the first or last layer</span>
+        <span class="k">def</span> <span class="nf">prunable</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">u</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span> <span class="ow">and</span> <span class="n">u</span><span class="o">.</span><span class="n">layer</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">u</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span> <span class="ow">and</span> <span class="n">u</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="n">prnnodes</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">origNodeList</span> <span class="k">if</span> <span class="n">prunable</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">prnnodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">prnnodes</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">u</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">arc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">arc</span><span class="o">.</span><span class="n">tail</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">prnnodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arc</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">u</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">arc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">arc</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">prnnodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arc</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MDD.compile_top_down"><a class="viewcode-back" href="../index.html#mdd.MDD.compile_top_down">[docs]</a>    <span class="k">def</span> <span class="nf">compile_top_down</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numLayers</span><span class="p">,</span> <span class="n">domainFunc</span><span class="p">,</span> <span class="n">trFunc</span><span class="p">,</span> <span class="n">costFunc</span><span class="p">,</span> <span class="n">rootState</span><span class="p">,</span> <span class="n">isFeas</span><span class="p">,</span> <span class="n">maxWidth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nodeSelFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adjFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Compile the MDD top-down according to a DP formulation.</span>
