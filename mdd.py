@@ -1,4 +1,5 @@
 from itertools import chain # used in various places
+from collections import deque
 from json import dump, load
 
 class MDDArc(object):
@@ -446,7 +447,7 @@ class MDD(object):
             IndexError: the MDD does not contain the specified node layer
             ValueError: a duplicate node already exists in the MDD
         """
-        if newnode.layer > self.numArcLayers or newnode.layer < 0:
+        if newnode.layer >= self.numNodeLayers or newnode.layer < 0:
             raise IndexError('node layer %d does not exist' % newnode.layer)
         if newnode in self.allnodes_in_layer(newnode.layer):
             raise ValueError('cannot add proposed node; duplicate node already exists')
@@ -464,7 +465,7 @@ class MDD(object):
             IndexError: the MDD does not contain the specified node layer
             KeyError: no such node exists in the MDD
         """
-        if rmvnode.layer > self.numArcLayers or rmvnode.layer < 0:
+        if rmvnode.layer >= self.numNodeLayers or rmvnode.layer < 0:
             raise IndexError('node layer %d does not exist' % rmvnode.layer)
         if not rmvnode in self.allnodes_in_layer(rmvnode.layer):
             raise KeyError('cannot remove non-existent node')
@@ -501,18 +502,63 @@ class MDD(object):
             raise ValueError('cannot merge nodes in different layers')
         self._merge_nodes(mnodes, mlayer[0], nsfun, awinfun, awoutfun)
 
-    def prune_dead_nodes(self):
-        """Prune nodes from the MDD that cannot reach the last layer.
+    def prune_all(self):
+        """Prune all dead nodes with no root/terminal path.
 
-        Prune nodes from the MDD that do not have a path to the last layer.
+        Prune all nodes from the MDD that do not have a path to the first or
+        last layer.  This procedure employs two passes to prune all dead nodes
+        in the MDD.  To prune more selectively (e.g., after removing a small
+        number of nodes/arcs), use prune_recusive(...).
         """
         # Go up the MDD, from second to last layer to top
-        for j in range(self.numArcLayers-1, 0, -1):
+        # Note last node layer is numNodeLayers-1
+        for j in range(self.numNodeLayers-2, -1, -1):
             # Delete nodes without any outgoing arcs
             # bool(set()) = False, so if x is a set, 'x is empty' == not x
             prnnodes = [u for (u, ui) in self.allnodeitems_in_layer(j) if not ui.outgoing]
             for u in prnnodes:
                 self._remove_node(u)
+
+        # Go down the MDD, from second layer to bottom
+        for j in range(1, self.numNodeLayers):
+            # Delete nodes without any incoming arcs
+            prnnodes = [u for (u, ui) in self.allnodeitems_in_layer(j) if not ui.incoming]
+            for u in prnnodes:
+                self._remove_node(u)
+
+    def prune_recursive(self, origNodeList):
+        """Recursively prune dead nodes with no root/terminal path.
+
+        Recursively prune nodes from the MDD that do not have a path to the
+        first or last layer.  Specifically, this procedure first initializes a
+        FIFO queue of nodes to be pruned from 'origNodeList'.  Then, it pops a
+        node 'u' from the queue, removes it from the MDD, then adds any nodes
+        'v' neighboring 'u' to the queue if the removal of 'u' results in 'v'
+        having no incoming or outgoing arcs.  The process is repeated until
+        the queue is empty.  Note that if one wishes to prune all dead nodes,
+        prune_all() may be more efficient.
+
+        Args:
+            origNodeList(List[MDDNodes]): nodes to be pruned
+        """
+        # Recursively delete nodes that cannot reach the first or last layer
+        def prunable(u):
+            if not self.nodes[u.layer][u].incoming and u.layer > 0:
+                return True
+            elif not self.nodes[u.layer][u].outgoing and u.layer < self.numNodeLayers-1:
+                return True
+            else:
+                return False
+        prnnodes = deque(u for u in origNodeList if prunable(u))
+        while len(prnnodes) > 0:
+            u = prnnodes.popleft()
+            for arc in self.nodes[u.layer][u].incoming:
+                if len(self.nodes[arc.tail.layer][arc.tail].outgoing) <= 1:
+                    prnnodes.append(arc.tail)
+            for arc in self.nodes[u.layer][u].outgoing:
+                if len(self.nodes[arc.head.layer][arc.head].incoming) <= 1:
+                    prnnodes.append(arc.head)
+            self._remove_node(u)
 
     def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas, maxWidth=None, nodeSelFunc=None, mergeFunc=None, adjFunc=None):
         """Compile the MDD top-down according to a DP formulation.
