@@ -5,7 +5,8 @@ A simple Python implementation of a multivalued decision diagram (MDD), for use 
 * Compile a relaxed or reduced MDD given a DP formulation of the problem and node selection/merging rules.
 * Filter and refine an existing MDD for a constraint given as a DP model.
 * Perform a shortest/longest path computation over the MDD.
-* Write the resulting MDD to a [GraphViz](https://www.graphviz.org) file for visualization.
+* Write the MDD to a [GraphViz](https://www.graphviz.org) file for visualization.
+* Save/load the MDD to a JSON file for archiving/reconstruction.
 
 # Installation
 1. Create a new directory named `pymdd/` in your working directory.
