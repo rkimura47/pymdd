@@ -539,7 +539,7 @@ class MDD(object):
         prune_all() may be more efficient.
 
         Args:
-            origNodeList(List[MDDNodes]): nodes to be pruned
+            origNodeList (List[MDDNode]): nodes to be potentially pruned
         """
         # Recursively delete nodes that cannot reach the first or last layer
         def prunable(u):
