@@ -742,7 +742,7 @@ class MDD(object):
         # Reset tmp attribute
         self._reset_tmp()
 
-    def reduce_bottom_up(self, mergeFunc, adjInFunc=None, adjOutFunc=None):
+    def reduce_bottom_up(self, mergeFunc, adjInFunc=None, adjOutFunc=None, ignoreLastLayer=False):
         """Reduce the MDD bottom-up by merging equivalent nodes.
         
         Merge all equivalent nodes in the MDD, i.e., nodes which have the same
@@ -762,9 +762,11 @@ class MDD(object):
                 adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with
                 weight 'w', old tail node state 'os', and new tail node (i.e.,
                 merged supernode in layer 'j') state 'ms' (default: None)
+            ignoreLastLayer (bool): whether to merge last layer (i.e., merge
+                all terminal nodes into one) or not (default: False)
         """
         # Merge from bottom up
-        for j in range(self.numArcLayers, 0, -1):
+        for j in range(self.numArcLayers - int(ignoreLastLayer), 0, -1):
             # Cluster nodes by their outNeighbors
             outDict = dict()
             for v in self.allnodes_in_layer(j):
