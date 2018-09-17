@@ -459,7 +459,7 @@ prune_all() may be more efficient.</p>
 
 <dl class="method">
 <dt id="mdd.MDD.reduce_bottom_up">
-<code class="descname">reduce_bottom_up</code><span class="sig-paren">(</span><em>mergeFunc</em>, <em>adjInFunc=None</em>, <em>adjOutFunc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.reduce_bottom_up"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.reduce_bottom_up" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reduce_bottom_up</code><span class="sig-paren">(</span><em>mergeFunc</em>, <em>adjInFunc=None</em>, <em>adjOutFunc=None</em>, <em>ignoreLastLayer=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.reduce_bottom_up"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.reduce_bottom_up" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reduce the MDD bottom-up by merging equivalent nodes.</p>
 <p>Merge all equivalent nodes in the MDD, i.e., nodes which have the same
 suffix set.  The state of the new node is determined by mergeFunc, and
@@ -478,6 +478,8 @@ merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217; (default: None
 <li><strong>adjOutFunc</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with
 weight &#8216;w&#8217;, old tail node state &#8216;os&#8217;, and new tail node (i.e.,
 merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217; (default: None)</li>
+<li><strong>ignoreLastLayer</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; whether to merge last layer (i.e., merge
+all terminal nodes into one) or not (default: False)</li>
 </ul>
 </td>
 </tr>

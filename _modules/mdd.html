@@ -782,7 +782,7 @@
         <span class="c1"># Reset tmp attribute</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_tmp</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="MDD.reduce_bottom_up"><a class="viewcode-back" href="../index.html#mdd.MDD.reduce_bottom_up">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_bottom_up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="p">,</span> <span class="n">adjInFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adjOutFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MDD.reduce_bottom_up"><a class="viewcode-back" href="../index.html#mdd.MDD.reduce_bottom_up">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_bottom_up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="p">,</span> <span class="n">adjInFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adjOutFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ignoreLastLayer</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reduce the MDD bottom-up by merging equivalent nodes.</span>
 <span class="sd">        </span>
 <span class="sd">        Merge all equivalent nodes in the MDD, i.e., nodes which have the same</span>
@@ -802,9 +802,11 @@
 <span class="sd">                adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with</span>
 <span class="sd">                weight &#39;w&#39;, old tail node state &#39;os&#39;, and new tail node (i.e.,</span>
 <span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39; (default: None)</span>
+<span class="sd">            ignoreLastLayer (bool): whether to merge last layer (i.e., merge</span>
+<span class="sd">                all terminal nodes into one) or not (default: False)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Merge from bottom up</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">ignoreLastLayer</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="c1"># Cluster nodes by their outNeighbors</span>
             <span class="n">outDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
