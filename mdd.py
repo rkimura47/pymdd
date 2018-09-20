@@ -1,6 +1,7 @@
 from itertools import chain # used in various places
-from collections import deque
-from json import dump, load
+from collections import deque # used in prune_recursive
+from json import dump, load # used in dumpJSON and loadJSON
+from random import sample # used in compile_top_down
 
 class MDDArc(object):
     """MDDArc represents a single arc in the MDD.
@@ -560,7 +561,7 @@ class MDD(object):
                     prnnodes.append(arc.head)
             self._remove_node(u)
 
-    def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas, maxWidth=None, nodeSelFunc=None, mergeFunc=None, adjFunc=None):
+    def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas, maxWidth=None, mergeFunc=None, adjFunc=None, nodeSelFunc=None):
         """Compile the MDD top-down according to a DP formulation.
 
         Perform a top-down compilation of the MDD according to a dynamic
@@ -584,14 +585,8 @@ class MDD(object):
                 node state 's' in layer 'j' is feasible and False otherwise
             maxWidth (Callable[[int], int]): maxWidth(j) returns the maximum
                 allowable width for layer 'j' of the MDD; if None (default),
-                the maximum width is set to 100 for all layers
-            nodeSelFunc (Callable[[List[MDDNode], int], List[MDDNode]]):
-                nodeSelFunc(vlist,j) returns a list of nodes selected from
-                'vlist' in layer 'j' to be either merged (if mergeFunc and
-                adjFunc are defined) or removed (if mergeFunc and adjFunc
-                are None); if nodeSelFunc is None (default), the parameters
-                maxWidth, mergeFunc, and adjFunc are ignored and
-                compile_top_down(...) returns an exact MDD
+                the maximum width is set to +inf and compile_top_down(...)
+                returns an exact MDD
             mergeFunc (Callable[[List[object], int], object]):
                 mergeFunc(slist,j) returns the node state resulting from
                 merging node states in 'slist' in layer 'j' (default: None)
@@ -599,16 +594,24 @@ class MDD(object):
                 adjFunc(w,os,ms,j) returns the adjusted weight of an arc with
                 weight 'w', old head node state 'os', and new head node (i.e.,
                 merged supernode in layer 'j') state 'ms' (default: None)
+            nodeSelFunc (Callable[[List[MDDNode], int], List[MDDNode]]):
+                nodeSelFunc(vlist,j) returns a list of nodes selected from
+                'vlist' in layer 'j' to be either merged (if mergeFunc and
+                adjFunc are defined) or removed (if mergeFunc and adjFunc
+                are None); if nodeSelFunc is None (default), it picks either
+                two (if merging) or one (if removing) node(s) at random
 
         Raises:
             RuntimeError: mergeFunc and adjFunc must be defined together
         """
         # Basic parameter checks and default settings
         if maxWidth is None:
-            maxWidth = lambda j: 100
-        if nodeSelFunc is not None:
+            maxWidth = lambda j: float('inf')
+        else:
             if mergeFunc is None != adjFunc is None:
                 raise RuntimeError('mergeFunc and adjFunc must be defined together')
+            if nodeSelFunc is None:
+                nodeSelFunc = lambda vlist,j: sample(vlist, 1 + int(mergeFunc is not None))
         # First, clear the MDD
         self._clear()
         # Create first layer, containing only the root
@@ -616,16 +619,15 @@ class MDD(object):
         self._add_node(MDDNode(0, rootState))
         for j in range(numLayers):
             # Merge/Remove until current layer is under maxWidth
-            if nodeSelFunc is not None:
+            currLayer = [u for u in self.allnodes_in_layer(j)]
+            while len(currLayer) > maxWidth(j):
+                mnodes = nodeSelFunc(currLayer,j)
+                if mergeFunc is None:   # Remove
+                    for u in mnodes:
+                        self._remove_node(u)
+                else:                   # Merge
+                    self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), lambda w,os,ms: adjFunc(w,os,ms,j))
                 currLayer = [u for u in self.allnodes_in_layer(j)]
-                while len(currLayer) > maxWidth(j):
-                    mnodes = nodeSelFunc(currLayer,j)
-                    if mergeFunc is None:   # Remove
-                        for u in mnodes:
-                            self._remove_node(u)
-                    else:                   # Merge
-                        self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), lambda w,os,ms: adjFunc(w,os,ms,j))
-                    currLayer = [u for u in self.allnodes_in_layer(j)]
 
             # Create the next layer of nodes
             self._append_new_layer()

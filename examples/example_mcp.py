@@ -27,9 +27,6 @@ def costFunc(s,d,k,ns):
             return pos(s[k]) + sum(min(abs(s[l]), abs(wght[k][l])) for l in range(k+1,numVrt) if s[l]*wght[k][l] >= 0)
 isFeas = lambda s,k: True
 maxWidth = lambda k: 1 if k == 2 else 100
-def nodeSelFunc(vlist, k):
-    maxWidth = 5
-    return vlist
 def mergeFunc(slist,k):
     newstate = []
     for l in range(numVrt):
@@ -52,7 +49,7 @@ mymdd = MDD(name)
 # Perform DP-based top-down exact compilation
 #mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas)
 # Perform DP-based top-down relaxed compilation
-mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas, maxWidth, nodeSelFunc, mergeFunc, adjFunc)
+mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas, maxWidth, mergeFunc, adjFunc)
 
 # Print the contents
 print(mymdd)

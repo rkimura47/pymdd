@@ -35,7 +35,7 @@ mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas)
 #mymdd.merge_nodes([MDDNode(2,frozenset([5])), MDDNode(2,frozenset([3,4,5]))], lambda l: mergeFunc(l,2))
 
 # Perform DP-based top-down relaxed compilation
-#mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas, maxWidth, nodeSelFunc, mergeFunc, adjFunc)
+#mymdd.compile_top_down(numLayers, domain, trFunc, costFunc, rootState, isFeas, maxWidth, mergeFunc, adjFunc, nodeSelFunc)
 
 # Print the contents
 print(mymdd)
