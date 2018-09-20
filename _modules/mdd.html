@@ -39,8 +39,9 @@
             
   <h1>Source code for mdd</h1><div class="highlight"><pre>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span> <span class="c1"># used in various places</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
-<span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dump</span><span class="p">,</span> <span class="n">load</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span> <span class="c1"># used in prune_recursive</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dump</span><span class="p">,</span> <span class="n">load</span> <span class="c1"># used in dumpJSON and loadJSON</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">sample</span> <span class="c1"># used in compile_top_down</span>
 
 <div class="viewcode-block" id="MDDArc"><a class="viewcode-back" href="../index.html#mdd.MDDArc">[docs]</a><span class="k">class</span> <span class="nc">MDDArc</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;MDDArc represents a single arc in the MDD.</span>
@@ -600,7 +601,7 @@
                     <span class="n">prnnodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arc</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MDD.compile_top_down"><a class="viewcode-back" href="../index.html#mdd.MDD.compile_top_down">[docs]</a>    <span class="k">def</span> <span class="nf">compile_top_down</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numLayers</span><span class="p">,</span> <span class="n">domainFunc</span><span class="p">,</span> <span class="n">trFunc</span><span class="p">,</span> <span class="n">costFunc</span><span class="p">,</span> <span class="n">rootState</span><span class="p">,</span> <span class="n">isFeas</span><span class="p">,</span> <span class="n">maxWidth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nodeSelFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adjFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MDD.compile_top_down"><a class="viewcode-back" href="../index.html#mdd.MDD.compile_top_down">[docs]</a>    <span class="k">def</span> <span class="nf">compile_top_down</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numLayers</span><span class="p">,</span> <span class="n">domainFunc</span><span class="p">,</span> <span class="n">trFunc</span><span class="p">,</span> <span class="n">costFunc</span><span class="p">,</span> <span class="n">rootState</span><span class="p">,</span> <span class="n">isFeas</span><span class="p">,</span> <span class="n">maxWidth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adjFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nodeSelFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Compile the MDD top-down according to a DP formulation.</span>
 
 <span class="sd">        Perform a top-down compilation of the MDD according to a dynamic</span>
@@ -624,14 +625,8 @@
 <span class="sd">                node state &#39;s&#39; in layer &#39;j&#39; is feasible and False otherwise</span>
 <span class="sd">            maxWidth (Callable[[int], int]): maxWidth(j) returns the maximum</span>
 <span class="sd">                allowable width for layer &#39;j&#39; of the MDD; if None (default),</span>
-<span class="sd">                the maximum width is set to 100 for all layers</span>
-<span class="sd">            nodeSelFunc (Callable[[List[MDDNode], int], List[MDDNode]]):</span>
-<span class="sd">                nodeSelFunc(vlist,j) returns a list of nodes selected from</span>
-<span class="sd">                &#39;vlist&#39; in layer &#39;j&#39; to be either merged (if mergeFunc and</span>
-<span class="sd">                adjFunc are defined) or removed (if mergeFunc and adjFunc</span>
-<span class="sd">                are None); if nodeSelFunc is None (default), the parameters</span>
-<span class="sd">                maxWidth, mergeFunc, and adjFunc are ignored and</span>
-<span class="sd">                compile_top_down(...) returns an exact MDD</span>
+<span class="sd">                the maximum width is set to +inf and compile_top_down(...)</span>
+<span class="sd">                returns an exact MDD</span>
 <span class="sd">            mergeFunc (Callable[[List[object], int], object]):</span>
 <span class="sd">                mergeFunc(slist,j) returns the node state resulting from</span>
 <span class="sd">                merging node states in &#39;slist&#39; in layer &#39;j&#39; (default: None)</span>
@@ -639,16 +634,24 @@
 <span class="sd">                adjFunc(w,os,ms,j) returns the adjusted weight of an arc with</span>
 <span class="sd">                weight &#39;w&#39;, old head node state &#39;os&#39;, and new head node (i.e.,</span>
 <span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39; (default: None)</span>
+<span class="sd">            nodeSelFunc (Callable[[List[MDDNode], int], List[MDDNode]]):</span>
+<span class="sd">                nodeSelFunc(vlist,j) returns a list of nodes selected from</span>
+<span class="sd">                &#39;vlist&#39; in layer &#39;j&#39; to be either merged (if mergeFunc and</span>
+<span class="sd">                adjFunc are defined) or removed (if mergeFunc and adjFunc</span>
+<span class="sd">                are None); if nodeSelFunc is None (default), it picks either</span>
+<span class="sd">                two (if merging) or one (if removing) node(s) at random</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: mergeFunc and adjFunc must be defined together</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Basic parameter checks and default settings</span>
         <span class="k">if</span> <span class="n">maxWidth</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">maxWidth</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">j</span><span class="p">:</span> <span class="mi">100</span>
-        <span class="k">if</span> <span class="n">nodeSelFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">maxWidth</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">j</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">mergeFunc</span> <span class="ow">is</span> <span class="bp">None</span> <span class="o">!=</span> <span class="n">adjFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;mergeFunc and adjFunc must be defined together&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nodeSelFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">nodeSelFunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">vlist</span><span class="p">,</span><span class="n">j</span><span class="p">:</span> <span class="n">sample</span><span class="p">(</span><span class="n">vlist</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">mergeFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">))</span>
         <span class="c1"># First, clear the MDD</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span>
         <span class="c1"># Create first layer, containing only the root</span>
@@ -656,16 +659,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">MDDNode</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rootState</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numLayers</span><span class="p">):</span>
             <span class="c1"># Merge/Remove until current layer is under maxWidth</span>
-            <span class="k">if</span> <span class="n">nodeSelFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">currLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
+            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">currLayer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">mnodes</span> <span class="o">=</span> <span class="n">nodeSelFunc</span><span class="p">(</span><span class="n">currLayer</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">mergeFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>   <span class="c1"># Remove</span>
+                    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>                   <span class="c1"># Merge</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">slist</span><span class="p">:</span> <span class="n">mergeFunc</span><span class="p">(</span><span class="n">slist</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span>
                 <span class="n">currLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
-                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">currLayer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
-                    <span class="n">mnodes</span> <span class="o">=</span> <span class="n">nodeSelFunc</span><span class="p">(</span><span class="n">currLayer</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">mergeFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>   <span class="c1"># Remove</span>
-                        <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>                   <span class="c1"># Merge</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">slist</span><span class="p">:</span> <span class="n">mergeFunc</span><span class="p">(</span><span class="n">slist</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span>
-                    <span class="n">currLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
 
             <span class="c1"># Create the next layer of nodes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>

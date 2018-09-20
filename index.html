@@ -141,7 +141,7 @@ a duplicate node already exists in the MDD</li>
 
 <dl class="method">
 <dt id="mdd.MDD.compile_top_down">
-<code class="descname">compile_top_down</code><span class="sig-paren">(</span><em>numLayers</em>, <em>domainFunc</em>, <em>trFunc</em>, <em>costFunc</em>, <em>rootState</em>, <em>isFeas</em>, <em>maxWidth=None</em>, <em>nodeSelFunc=None</em>, <em>mergeFunc=None</em>, <em>adjFunc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.compile_top_down"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.compile_top_down" title="Permalink to this definition">¶</a></dt>
+<code class="descname">compile_top_down</code><span class="sig-paren">(</span><em>numLayers</em>, <em>domainFunc</em>, <em>trFunc</em>, <em>costFunc</em>, <em>rootState</em>, <em>isFeas</em>, <em>maxWidth=None</em>, <em>mergeFunc=None</em>, <em>adjFunc=None</em>, <em>nodeSelFunc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.compile_top_down"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.compile_top_down" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compile the MDD top-down according to a DP formulation.</p>
 <p>Perform a top-down compilation of the MDD according to a dynamic
 programming (DP) formulation.  For the DP-specifying functions
@@ -166,18 +166,18 @@ state &#8216;ns&#8217; (i.e., the output of trFunc(s,d,j))</li>
 node state &#8216;s&#8217; in layer &#8216;j&#8217; is feasible and False otherwise</li>
 <li><strong>maxWidth</strong> (<em>Callable[[int], int]</em>) &#8211; maxWidth(j) returns the maximum
 allowable width for layer &#8216;j&#8217; of the MDD; if None (default),
-the maximum width is set to 100 for all layers</li>
-<li><strong>nodeSelFunc</strong> (<em>Callable[[List[MDDNode], int], List[MDDNode]]</em>) &#8211; nodeSelFunc(vlist,j) returns a list of nodes selected from
-&#8216;vlist&#8217; in layer &#8216;j&#8217; to be either merged (if mergeFunc and
-adjFunc are defined) or removed (if mergeFunc and adjFunc
-are None); if nodeSelFunc is None (default), the parameters
-maxWidth, mergeFunc, and adjFunc are ignored and
-compile_top_down(...) returns an exact MDD</li>
+the maximum width is set to +inf and compile_top_down(...)
+returns an exact MDD</li>
 <li><strong>mergeFunc</strong> (<em>Callable[[List[object], int], object]</em>) &#8211; mergeFunc(slist,j) returns the node state resulting from
 merging node states in &#8216;slist&#8217; in layer &#8216;j&#8217; (default: None)</li>
 <li><strong>adjFunc</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; adjFunc(w,os,ms,j) returns the adjusted weight of an arc with
 weight &#8216;w&#8217;, old head node state &#8216;os&#8217;, and new head node (i.e.,
 merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217; (default: None)</li>
+<li><strong>nodeSelFunc</strong> (<em>Callable[[List[MDDNode], int], List[MDDNode]]</em>) &#8211; nodeSelFunc(vlist,j) returns a list of nodes selected from
+&#8216;vlist&#8217; in layer &#8216;j&#8217; to be either merged (if mergeFunc and
+adjFunc are defined) or removed (if mergeFunc and adjFunc
+are None); if nodeSelFunc is None (default), it picks either
+two (if merging) or one (if removing) node(s) at random</li>
 </ul>
 </td>
 </tr>
