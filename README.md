@@ -1,5 +1,7 @@
 # pymdd
-A simple Python implementation of a multivalued decision diagram (MDD), for use in optimization. At present, it can do the following:
+A simple Python implementation of a multivalued decision diagram (MDD), for use in optimization. The code prioritizes transparency over speed so that the user can clearly see the effects of various operations performed by the MDD.
+
+At present, it can do the following:
 
 * Compile an exact MDD given a dynamic programming (DP) formulation of the problem.
 * Compile a relaxed or reduced MDD given a DP formulation of the problem and node selection/merging rules.
