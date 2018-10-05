@@ -643,6 +643,7 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: mergeFunc and adjFunc must be defined together</span>
+<span class="sd">            RuntimeError: no more nodes to remove/merge but currWidth &gt; maxWidth</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Basic parameter checks and default settings</span>
         <span class="k">if</span> <span class="n">maxWidth</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -660,7 +661,8 @@
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numLayers</span><span class="p">):</span>
             <span class="c1"># Merge/Remove until current layer is under maxWidth</span>
             <span class="n">currLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
-            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">currLayer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+            <span class="n">currWidth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">currLayer</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">currWidth</span> <span class="o">&gt;</span> <span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
                 <span class="n">mnodes</span> <span class="o">=</span> <span class="n">nodeSelFunc</span><span class="p">(</span><span class="n">currLayer</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">mergeFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>   <span class="c1"># Remove</span>
                     <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">:</span>
@@ -668,6 +670,9 @@
                 <span class="k">else</span><span class="p">:</span>                   <span class="c1"># Merge</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">slist</span><span class="p">:</span> <span class="n">mergeFunc</span><span class="p">(</span><span class="n">slist</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span>
                 <span class="n">currLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">currLayer</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">currWidth</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;no more nodes to remove/merge but width of layer </span><span class="si">%d</span><span class="s1"> &gt; </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="p">)))</span>
+                <span class="n">currWidth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">currLayer</span><span class="p">)</span>
 
             <span class="c1"># Create the next layer of nodes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
