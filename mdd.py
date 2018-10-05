@@ -603,7 +603,7 @@ class MDD(object):
 
         Raises:
             RuntimeError: mergeFunc and adjFunc must be defined together
-            RuntimeError: no more nodes to remove/merge
+            RuntimeError: no more nodes to remove/merge but currWidth > maxWidth
         """
         # Basic parameter checks and default settings
         if maxWidth is None:
@@ -621,18 +621,18 @@ class MDD(object):
         for j in range(numLayers):
             # Merge/Remove until current layer is under maxWidth
             currLayer = [u for u in self.allnodes_in_layer(j)]
-            while len(currLayer) > maxWidth(j):
+            currWidth = len(currLayer)
+            while currWidth > maxWidth(j):
                 mnodes = nodeSelFunc(currLayer,j)
                 if mergeFunc is None:   # Remove
-                    if len(mnodes) < 1:
-                        raise RuntimeError('no more nodes to remove but width > maxWidth')
                     for u in mnodes:
                         self._remove_node(u)
                 else:                   # Merge
-                    if len(mnodes) < 2:
-                        raise RuntimeError('no more nodes to merge but width > maxWidth')
                     self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), lambda w,os,ms: adjFunc(w,os,ms,j))
                 currLayer = [u for u in self.allnodes_in_layer(j)]
+                if len(currLayer) >= currWidth:
+                    raise RuntimeError('no more nodes to remove/merge but width of layer %d > %d' % (j,maxWidth(j)))
+                currWidth = len(currLayer)
 
             # Create the next layer of nodes
             self._append_new_layer()
