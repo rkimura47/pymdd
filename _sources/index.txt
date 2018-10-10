@@ -1,7 +1,7 @@
 User Documentation for pymdd
 ============================
 
-Contents:
+`pymdd Github repository <https://github.com/rkimura47/pymdd>`_
 
 .. toctree::
    :maxdepth: 2
