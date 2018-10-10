@@ -249,6 +249,11 @@ class MDD(object):
             self.nodes[rmvlayer+1][arc.head].incoming.remove(arc)
         del self.nodes[rmvlayer][rmvnode]
 
+    def _remove_nodes(self, rmvnodes):
+        """Remove a list of nodes from the MDD, without sanity checks."""
+        for v in rmvnodes:
+            self._remove_node(v)
+
     # Default inarcfun, outarcfun methods
     @staticmethod
     def _default_inarcfun(mgnode, inarc):
@@ -306,8 +311,7 @@ class MDD(object):
         newIncoming = [inarcfun(mNode, arc) for arc in mIncoming]
         newOutgoing = [outarcfun(mNode, arc) for arc in mOutgoing]
         # Delete merged nodes
-        for v in mnodes:
-            self._remove_node(v)
+        self._remove_nodes(mnodes)
         # Add supernode and its arcs to MDD
         self._add_node(mNode)
         for arc in newIncoming:
@@ -625,8 +629,7 @@ class MDD(object):
             while currWidth > maxWidth(j):
                 mnodes = nodeSelFunc(currLayer,j)
                 if mergeFunc is None:   # Remove
-                    for u in mnodes:
-                        self._remove_node(u)
+                    self._remove_nodes(mnodes)
                 else:                   # Merge
                     self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), lambda w,os,ms: adjFunc(w,os,ms,j))
                 currLayer = [u for u in self.allnodes_in_layer(j)]
