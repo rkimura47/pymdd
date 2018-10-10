@@ -361,16 +361,16 @@ and/or outgoing arcs are specified by awinfun/awoutfun.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>mnodes</strong> (<em>List[MDDNode]</em>) &#8211; nodes to be merged together</li>
-<li><strong>nsfun</strong> (<em>Callable[[List[object]], object]</em>) &#8211; nsfun(slist) returns the
-node state resulting from merging node states in &#8216;slist&#8217;</li>
-<li><strong>awinfun</strong> (<em>Callable[[float, object, object], float]</em>) &#8211; awinfun(w,os,ms) returns the adjusted weight of an arc with
+<li><strong>nsfun</strong> (<em>Callable[[List[object], int], object]</em>) &#8211; nsfun(slist, j) returns the node state resulting from merging
+node states in &#8216;slist&#8217; in layer &#8216;j&#8217;</li>
+<li><strong>awinfun</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; awinfun(w,os,ms,j) returns the adjusted weight of an arc with
 weight &#8216;w&#8217;, old head node state &#8216;os&#8217;, and new head node (i.e.,
-merged supernode) state &#8216;ms&#8217;; if awinfun is None (default), the
-original weight is used</li>
-<li><strong>awoutfun</strong> (<em>Callable[[float, object, object], float]</em>) &#8211; awoutfun(w,os,ms) returns the adjusted weight of an arc with
+merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217;;
+if awinfun is None (default), the original weight is used</li>
+<li><strong>awoutfun</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; awoutfun(w,os,ms,j) returns the adjusted weight of an arc with
 weight &#8216;w&#8217;, old tail node state &#8216;os&#8217;, and new tail node (i.e.,
-merged supernode) state &#8216;ms&#8217;; if awoutfun is None (default), the
-original weight is used</li>
+merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217;;
+if awoutfun is None (default), the original weight is used</li>
 </ul>
 </td>
 </tr>

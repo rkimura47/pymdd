@@ -289,12 +289,17 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvlayer</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">arc</span><span class="o">.</span><span class="n">head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">rmvlayer</span><span class="p">][</span><span class="n">rmvnode</span><span class="p">]</span>
 
+    <span class="k">def</span> <span class="nf">_remove_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmvnodes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove a list of nodes from the MDD, without sanity checks.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rmvnodes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
     <span class="c1"># Default inarcfun, outarcfun methods</span>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_default_inarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">inarc</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_default_inarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">inarc</span><span class="p">,</span> <span class="n">lyr</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">inarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">inarc</span><span class="o">.</span><span class="n">tail</span><span class="p">,</span> <span class="n">mgnode</span><span class="p">)</span>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_default_outarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_default_outarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="p">,</span> <span class="n">lyr</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
 
     <span class="c1">#</span>
@@ -310,17 +315,19 @@
 <span class="sd">            mnodes (List[MDDNode]): nodes to be merged together</span>
 <span class="sd">            mlayer (int): layer containing merged nodes</span>
 <span class="sd">                NOTE: all nodes in mnodes must be in layer mlayer</span>
-<span class="sd">            nodefun (Callable[[List[MDDNode]], MDDNode]): nodefun(vlist) returns</span>
-<span class="sd">                the node resulting from merging nodes in &#39;vlist&#39;</span>
-<span class="sd">            inarcfun (Callable[[MDDNode, MDDArc], MDDArc]):</span>
-<span class="sd">                inarcfun(mgnode, inarc) returns the arc (corresponding to</span>
-<span class="sd">                &#39;inarc&#39;) incoming to the new merged node &#39;mgnode&#39;;</span>
+<span class="sd">            nodefun (Callable[[List[MDDNode], int], MDDNode]):</span>
+<span class="sd">                nodefun(vlist, j) returns the node resulting from merging nodes</span>
+<span class="sd">                in &#39;vlist&#39; in layer &#39;j&#39;</span>
+<span class="sd">            inarcfun (Callable[[MDDNode, MDDArc, int], MDDArc]):</span>
+<span class="sd">                inarcfun(mgnode, inarc, j) returns the arc (corresponding to</span>
+<span class="sd">                &#39;inarc&#39;) incoming to the new merged node &#39;mgnode&#39; in layer &#39;j&#39;;</span>
 <span class="sd">                if inarcfun is None (default), the original &#39;inarc&#39; data is</span>
 <span class="sd">                used unchanged</span>
 <span class="sd">                NOTE: head of returned arc must be &#39;mgnode&#39;</span>
-<span class="sd">            outarcfun (Callable[[MDDNode, MDDArc], MDDArc]):</span>
-<span class="sd">                outarcfun(mgnode, outarc) returns the arc (corresponding to</span>
-<span class="sd">                &#39;outarc&#39;) outgoing from the new merged node &#39;mgnode&#39;;</span>
+<span class="sd">            outarcfun (Callable[[MDDNode, MDDArc, int], MDDArc]):</span>
+<span class="sd">                outarcfun(mgnode, outarc, j) returns the arc (corresponding to</span>
+<span class="sd">                &#39;outarc&#39;) outgoing from the new merged node &#39;mgnode&#39;</span>
+<span class="sd">                in layer &#39;j&#39;;</span>
 <span class="sd">                if outarcfun is None (default), the original &#39;outarc&#39; data is</span>
 <span class="sd">                used unchanged</span>
 <span class="sd">                NOTE: tail of returned arc must be &#39;mgnode&#39;</span>
@@ -342,12 +349,11 @@
         <span class="n">mOutgoing</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">mlayer</span><span class="p">][</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">outgoing</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">))</span>
 
         <span class="c1"># Create new supernode, and new incoming/outgoing arcs</span>
-        <span class="n">mNode</span> <span class="o">=</span> <span class="n">nodefun</span><span class="p">(</span><span class="n">mnodes</span><span class="p">)</span>
-        <span class="n">newIncoming</span> <span class="o">=</span> <span class="p">[</span><span class="n">inarcfun</span><span class="p">(</span><span class="n">mNode</span><span class="p">,</span> <span class="n">arc</span><span class="p">)</span> <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">mIncoming</span><span class="p">]</span>
-        <span class="n">newOutgoing</span> <span class="o">=</span> <span class="p">[</span><span class="n">outarcfun</span><span class="p">(</span><span class="n">mNode</span><span class="p">,</span> <span class="n">arc</span><span class="p">)</span> <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">mOutgoing</span><span class="p">]</span>
+        <span class="n">mNode</span> <span class="o">=</span> <span class="n">nodefun</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">)</span>
+        <span class="n">newIncoming</span> <span class="o">=</span> <span class="p">[</span><span class="n">inarcfun</span><span class="p">(</span><span class="n">mNode</span><span class="p">,</span> <span class="n">arc</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">)</span> <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">mIncoming</span><span class="p">]</span>
+        <span class="n">newOutgoing</span> <span class="o">=</span> <span class="p">[</span><span class="n">outarcfun</span><span class="p">(</span><span class="n">mNode</span><span class="p">,</span> <span class="n">arc</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">)</span> <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">mOutgoing</span><span class="p">]</span>
         <span class="c1"># Delete merged nodes</span>
-        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">)</span>
         <span class="c1"># Add supernode and its arcs to MDD</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">mNode</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">newIncoming</span><span class="p">:</span>
@@ -357,7 +363,7 @@
 
     <span class="c1"># Default awfun method</span>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_default_awfun</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">nt</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_default_awfun</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">nt</span><span class="p">,</span><span class="n">j</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">w</span>
 
     <span class="k">def</span> <span class="nf">_merge_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">,</span> <span class="n">nsfun</span><span class="p">,</span> <span class="n">awinfun</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">awoutfun</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -372,18 +378,19 @@
 <span class="sd">        Args:</span>
 <span class="sd">            mnodes (List[MDDNode]): nodes to be merged together</span>
 <span class="sd">            mlayer (int): layer containing merged nodes</span>
-<span class="sd">            nsfun (Callable[[List[object]], object]): nsfun(slist) returns the</span>
+<span class="sd">            nsfun (Callable[[List[object], int], object]): nsfun(slist,j) returns the</span>
 <span class="sd">                node state resulting from merging node states in &#39;slist&#39;</span>
-<span class="sd">            awinfun (Callable[[float, object, object], float]):</span>
-<span class="sd">                awinfun(w,os,ms) returns the adjusted weight of an arc with</span>
+<span class="sd">                in layer &#39;j&#39;</span>
+<span class="sd">            awinfun (Callable[[float, object, object, int], float]):</span>
+<span class="sd">                awinfun(w,os,ms,j) returns the adjusted weight of an arc with</span>
 <span class="sd">                weight &#39;w&#39;, old head node state &#39;os&#39;, and new head node (i.e.,</span>
-<span class="sd">                merged supernode) state &#39;ms&#39;; if awinfun is None (default),</span>
-<span class="sd">                the original weight is used</span>
-<span class="sd">            awoutfun (Callable[[float, object, object], float]):</span>
-<span class="sd">                awoutfun(w,os,ms) returns the adjusted weight of an arc with</span>
+<span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39;;</span>
+<span class="sd">                if awinfun is None (default), the original weight is used</span>
+<span class="sd">            awoutfun (Callable[[float, object, object, int], float]):</span>
+<span class="sd">                awoutfun(w,os,ms,j) returns the adjusted weight of an arc with</span>
 <span class="sd">                weight &#39;w&#39;, old tail node state &#39;os&#39;, and new tail node (i.e.,</span>
-<span class="sd">                merged supernode) state &#39;ms&#39;; if awoutfun is None (default),</span>
-<span class="sd">                the original weight is used</span>
+<span class="sd">                merged supernode in layer&#39;j&#39;) state &#39;ms&#39;;</span>
+<span class="sd">                if awoutfun is None (default), the original weight is used</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Use default awfun if unspecified</span>
         <span class="k">if</span> <span class="n">awinfun</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -391,12 +398,12 @@
         <span class="k">if</span> <span class="n">awoutfun</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">awoutfun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_awfun</span>
 
-        <span class="k">def</span> <span class="nf">nodefun</span><span class="p">(</span><span class="n">vlist</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">MDDNode</span><span class="p">(</span><span class="n">mlayer</span><span class="p">,</span> <span class="n">nsfun</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">state</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vlist</span><span class="p">]))</span>
-        <span class="k">def</span> <span class="nf">inarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">inarc</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">awinfun</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">inarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">mgnode</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">inarc</span><span class="o">.</span><span class="n">tail</span><span class="p">,</span> <span class="n">mgnode</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">outarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">awoutfun</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">mgnode</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">nodefun</span><span class="p">(</span><span class="n">vlist</span><span class="p">,</span> <span class="n">lyr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">MDDNode</span><span class="p">(</span><span class="n">mlayer</span><span class="p">,</span> <span class="n">nsfun</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">state</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vlist</span><span class="p">],</span> <span class="n">lyr</span><span class="p">))</span>
+        <span class="k">def</span> <span class="nf">inarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">inarc</span><span class="p">,</span> <span class="n">lyr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">awinfun</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">inarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">mgnode</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">lyr</span><span class="p">),</span> <span class="n">inarc</span><span class="o">.</span><span class="n">tail</span><span class="p">,</span> <span class="n">mgnode</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">outarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="p">,</span> <span class="n">lyr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">awoutfun</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">mgnode</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">lyr</span><span class="p">),</span> <span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes_internal</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">,</span> <span class="n">nodefun</span><span class="p">,</span> <span class="n">inarcfun</span><span class="p">,</span> <span class="n">outarcfun</span><span class="p">)</span>
 
 
@@ -521,18 +528,19 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            mnodes (List[MDDNode]): nodes to be merged together</span>
-<span class="sd">            nsfun (Callable[[List[object]], object]): nsfun(slist) returns the</span>
-<span class="sd">                node state resulting from merging node states in &#39;slist&#39;</span>
-<span class="sd">            awinfun (Callable[[float, object, object], float]):</span>
-<span class="sd">                awinfun(w,os,ms) returns the adjusted weight of an arc with</span>
+<span class="sd">            nsfun (Callable[[List[object], int], object]):</span>
+<span class="sd">                nsfun(slist, j) returns the node state resulting from merging</span>
+<span class="sd">                node states in &#39;slist&#39; in layer &#39;j&#39;</span>
+<span class="sd">            awinfun (Callable[[float, object, object, int], float]):</span>
+<span class="sd">                awinfun(w,os,ms,j) returns the adjusted weight of an arc with</span>
 <span class="sd">                weight &#39;w&#39;, old head node state &#39;os&#39;, and new head node (i.e.,</span>
-<span class="sd">                merged supernode) state &#39;ms&#39;; if awinfun is None (default), the</span>
-<span class="sd">                original weight is used</span>
-<span class="sd">            awoutfun (Callable[[float, object, object], float]):</span>
-<span class="sd">                awoutfun(w,os,ms) returns the adjusted weight of an arc with</span>
+<span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39;;</span>
+<span class="sd">                if awinfun is None (default), the original weight is used</span>
+<span class="sd">            awoutfun (Callable[[float, object, object, int], float]):</span>
+<span class="sd">                awoutfun(w,os,ms,j) returns the adjusted weight of an arc with</span>
 <span class="sd">                weight &#39;w&#39;, old tail node state &#39;os&#39;, and new tail node (i.e.,</span>
-<span class="sd">                merged supernode) state &#39;ms&#39;; if awoutfun is None (default), the</span>
-<span class="sd">                original weight is used</span>
+<span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39;;</span>
+<span class="sd">                if awoutfun is None (default), the original weight is used</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: cannot merge nodes in different layers</span>
@@ -665,10 +673,9 @@
             <span class="k">while</span> <span class="n">currWidth</span> <span class="o">&gt;</span> <span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
                 <span class="n">mnodes</span> <span class="o">=</span> <span class="n">nodeSelFunc</span><span class="p">(</span><span class="n">currLayer</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">mergeFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>   <span class="c1"># Remove</span>
-                    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_remove_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>                   <span class="c1"># Merge</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">slist</span><span class="p">:</span> <span class="n">mergeFunc</span><span class="p">(</span><span class="n">slist</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="p">,</span> <span class="n">adjFunc</span><span class="p">)</span>
                 <span class="n">currLayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">)]</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">currLayer</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">currWidth</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;no more nodes to remove/merge but width of layer </span><span class="si">%d</span><span class="s1"> &gt; </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">maxWidth</span><span class="p">(</span><span class="n">j</span><span class="p">)))</span>
@@ -822,12 +829,10 @@
                     <span class="n">outDict</span><span class="p">[</span><span class="n">outNeighbors</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">outDict</span><span class="p">[</span><span class="n">outNeighbors</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 
-            <span class="n">adjinfun</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjInFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span> <span class="k">if</span> <span class="n">adjInFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
-            <span class="n">adjoutfun</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">:</span> <span class="n">adjOutFunc</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">j</span><span class="p">))</span> <span class="k">if</span> <span class="n">adjOutFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
             <span class="c1"># Nodes that have the same outNeighbors can be merged together</span>
             <span class="k">for</span> <span class="n">mnodes</span> <span class="ow">in</span> <span class="n">outDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mnodes</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">slist</span><span class="p">:</span> <span class="n">mergeFunc</span><span class="p">(</span><span class="n">slist</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">adjinfun</span><span class="p">,</span> <span class="n">adjoutfun</span><span class="p">)</span></div>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="p">,</span> <span class="n">adjInFunc</span><span class="p">,</span> <span class="n">adjOutFunc</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_find_opt_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">longest</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Find an &#39;optimal&#39; root-terminal path in the MDD.</span>
