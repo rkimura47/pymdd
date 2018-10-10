@@ -256,10 +256,10 @@ class MDD(object):
 
     # Default inarcfun, outarcfun methods
     @staticmethod
-    def _default_inarcfun(mgnode, inarc):
+    def _default_inarcfun(mgnode, inarc, lyr):
         return MDDArc(inarc.label, inarc.weight, inarc.tail, mgnode)
     @staticmethod
-    def _default_outarcfun(mgnode, outarc):
+    def _default_outarcfun(mgnode, outarc, lyr):
         return MDDArc(outarc.label, outarc.weight, mgnode, outarc.head)
 
     #
@@ -275,17 +275,19 @@ class MDD(object):
             mnodes (List[MDDNode]): nodes to be merged together
             mlayer (int): layer containing merged nodes
                 NOTE: all nodes in mnodes must be in layer mlayer
-            nodefun (Callable[[List[MDDNode]], MDDNode]): nodefun(vlist) returns
-                the node resulting from merging nodes in 'vlist'
-            inarcfun (Callable[[MDDNode, MDDArc], MDDArc]):
-                inarcfun(mgnode, inarc) returns the arc (corresponding to
-                'inarc') incoming to the new merged node 'mgnode';
+            nodefun (Callable[[List[MDDNode], int], MDDNode]):
+                nodefun(vlist, j) returns the node resulting from merging nodes
+                in 'vlist' in layer 'j'
+            inarcfun (Callable[[MDDNode, MDDArc, int], MDDArc]):
+                inarcfun(mgnode, inarc, j) returns the arc (corresponding to
+                'inarc') incoming to the new merged node 'mgnode' in layer 'j';
                 if inarcfun is None (default), the original 'inarc' data is
                 used unchanged
                 NOTE: head of returned arc must be 'mgnode'
-            outarcfun (Callable[[MDDNode, MDDArc], MDDArc]):
-                outarcfun(mgnode, outarc) returns the arc (corresponding to
-                'outarc') outgoing from the new merged node 'mgnode';
+            outarcfun (Callable[[MDDNode, MDDArc, int], MDDArc]):
+                outarcfun(mgnode, outarc, j) returns the arc (corresponding to
+                'outarc') outgoing from the new merged node 'mgnode'
+                in layer 'j';
                 if outarcfun is None (default), the original 'outarc' data is
                 used unchanged
                 NOTE: tail of returned arc must be 'mgnode'
@@ -307,9 +309,9 @@ class MDD(object):
         mOutgoing = set(chain.from_iterable(self.nodes[mlayer][v].outgoing for v in mnodes))
 
         # Create new supernode, and new incoming/outgoing arcs
-        mNode = nodefun(mnodes)
-        newIncoming = [inarcfun(mNode, arc) for arc in mIncoming]
-        newOutgoing = [outarcfun(mNode, arc) for arc in mOutgoing]
+        mNode = nodefun(mnodes, mlayer)
+        newIncoming = [inarcfun(mNode, arc, mlayer) for arc in mIncoming]
+        newOutgoing = [outarcfun(mNode, arc, mlayer) for arc in mOutgoing]
         # Delete merged nodes
         self._remove_nodes(mnodes)
         # Add supernode and its arcs to MDD
@@ -321,7 +323,7 @@ class MDD(object):
 
     # Default awfun method
     @staticmethod
-    def _default_awfun(w,ns,nt):
+    def _default_awfun(w,ns,nt,j):
         return w
 
     def _merge_nodes(self, mnodes, mlayer, nsfun, awinfun=None, awoutfun=None):
@@ -336,18 +338,19 @@ class MDD(object):
         Args:
             mnodes (List[MDDNode]): nodes to be merged together
             mlayer (int): layer containing merged nodes
-            nsfun (Callable[[List[object]], object]): nsfun(slist) returns the
+            nsfun (Callable[[List[object], int], object]): nsfun(slist,j) returns the
                 node state resulting from merging node states in 'slist'
-            awinfun (Callable[[float, object, object], float]):
-                awinfun(w,os,ms) returns the adjusted weight of an arc with
+                in layer 'j'
+            awinfun (Callable[[float, object, object, int], float]):
+                awinfun(w,os,ms,j) returns the adjusted weight of an arc with
                 weight 'w', old head node state 'os', and new head node (i.e.,
-                merged supernode) state 'ms'; if awinfun is None (default),
-                the original weight is used
-            awoutfun (Callable[[float, object, object], float]):
-                awoutfun(w,os,ms) returns the adjusted weight of an arc with
+                merged supernode in layer 'j') state 'ms';
+                if awinfun is None (default), the original weight is used
+            awoutfun (Callable[[float, object, object, int], float]):
+                awoutfun(w,os,ms,j) returns the adjusted weight of an arc with
                 weight 'w', old tail node state 'os', and new tail node (i.e.,
-                merged supernode) state 'ms'; if awoutfun is None (default),
-                the original weight is used
+                merged supernode in layer'j') state 'ms';
+                if awoutfun is None (default), the original weight is used
         """
         # Use default awfun if unspecified
         if awinfun is None:
@@ -355,12 +358,12 @@ class MDD(object):
         if awoutfun is None:
             awoutfun = self._default_awfun
 
-        def nodefun(vlist):
-            return MDDNode(mlayer, nsfun([v.state for v in vlist]))
-        def inarcfun(mgnode, inarc):
-            return MDDArc(inarc.label, awinfun(inarc.weight, inarc.head.state, mgnode.state), inarc.tail, mgnode)
-        def outarcfun(mgnode, outarc):
-            return MDDArc(outarc.label, awoutfun(outarc.weight, outarc.tail.state, mgnode.state), mgnode, outarc.head)
+        def nodefun(vlist, lyr):
+            return MDDNode(mlayer, nsfun([v.state for v in vlist], lyr))
+        def inarcfun(mgnode, inarc, lyr):
+            return MDDArc(inarc.label, awinfun(inarc.weight, inarc.head.state, mgnode.state, lyr), inarc.tail, mgnode)
+        def outarcfun(mgnode, outarc, lyr):
+            return MDDArc(outarc.label, awoutfun(outarc.weight, outarc.tail.state, mgnode.state, lyr), mgnode, outarc.head)
         self._merge_nodes_internal(mnodes, mlayer, nodefun, inarcfun, outarcfun)
 
 
@@ -485,18 +488,19 @@ class MDD(object):
 
         Args:
             mnodes (List[MDDNode]): nodes to be merged together
-            nsfun (Callable[[List[object]], object]): nsfun(slist) returns the
-                node state resulting from merging node states in 'slist'
-            awinfun (Callable[[float, object, object], float]):
-                awinfun(w,os,ms) returns the adjusted weight of an arc with
+            nsfun (Callable[[List[object], int], object]):
+                nsfun(slist, j) returns the node state resulting from merging
+                node states in 'slist' in layer 'j'
+            awinfun (Callable[[float, object, object, int], float]):
+                awinfun(w,os,ms,j) returns the adjusted weight of an arc with
                 weight 'w', old head node state 'os', and new head node (i.e.,
-                merged supernode) state 'ms'; if awinfun is None (default), the
-                original weight is used
-            awoutfun (Callable[[float, object, object], float]):
-                awoutfun(w,os,ms) returns the adjusted weight of an arc with
+                merged supernode in layer 'j') state 'ms';
+                if awinfun is None (default), the original weight is used
+            awoutfun (Callable[[float, object, object, int], float]):
+                awoutfun(w,os,ms,j) returns the adjusted weight of an arc with
                 weight 'w', old tail node state 'os', and new tail node (i.e.,
-                merged supernode) state 'ms'; if awoutfun is None (default), the
-                original weight is used
+                merged supernode in layer 'j') state 'ms';
+                if awoutfun is None (default), the original weight is used
 
         Raises:
             ValueError: cannot merge nodes in different layers
@@ -631,7 +635,7 @@ class MDD(object):
                 if mergeFunc is None:   # Remove
                     self._remove_nodes(mnodes)
                 else:                   # Merge
-                    self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), lambda w,os,ms: adjFunc(w,os,ms,j))
+                    self._merge_nodes(mnodes, j, mergeFunc, adjFunc)
                 currLayer = [u for u in self.allnodes_in_layer(j)]
                 if len(currLayer) >= currWidth:
                     raise RuntimeError('no more nodes to remove/merge but width of layer %d > %d' % (j,maxWidth(j)))
@@ -785,12 +789,10 @@ class MDD(object):
                     outDict[outNeighbors] = []
                 outDict[outNeighbors].append(v)
 
-            adjinfun = (lambda w,os,ms: adjInFunc(w,os,ms,j)) if adjInFunc is not None else None
-            adjoutfun = (lambda w,os,ms: adjOutFunc(w,os,ms,j)) if adjOutFunc is not None else None
             # Nodes that have the same outNeighbors can be merged together
             for mnodes in outDict.values():
                 if len(mnodes) >= 2:
-                    self._merge_nodes(mnodes, j, lambda slist: mergeFunc(slist,j), adjinfun, adjoutfun)
+                    self._merge_nodes(mnodes, j, mergeFunc, adjInFunc, adjOutFunc)
 
     def _find_opt_path(self, longest):
         """Find an 'optimal' root-terminal path in the MDD.
