@@ -292,6 +292,9 @@ class MDD(object):
                 used unchanged
                 NOTE: tail of returned arc must be 'mgnode'
 
+        Returns:
+            MDDNode: new merged supernode
+
         Raises:
             ValueError: cannot merge < 2 nodes
         """
@@ -320,6 +323,9 @@ class MDD(object):
             self._add_arc(arc)
         for arc in newOutgoing:
             self._add_arc(arc)
+
+        # Return new merged supernode
+        return mNode
 
     # Default awfun method
     @staticmethod
@@ -351,6 +357,9 @@ class MDD(object):
                 weight 'w', old tail node state 'os', and new tail node (i.e.,
                 merged supernode in layer'j') state 'ms';
                 if awoutfun is None (default), the original weight is used
+
+        Returns:
+            MDDNode: new merged supernode
         """
         # Use default awfun if unspecified
         if awinfun is None:
@@ -364,7 +373,7 @@ class MDD(object):
             return MDDArc(inarc.label, awinfun(inarc.weight, inarc.head.state, mgnode.state, lyr), inarc.tail, mgnode)
         def outarcfun(mgnode, outarc, lyr):
             return MDDArc(outarc.label, awoutfun(outarc.weight, outarc.tail.state, mgnode.state, lyr), mgnode, outarc.head)
-        self._merge_nodes_internal(mnodes, mlayer, nodefun, inarcfun, outarcfun)
+        return self._merge_nodes_internal(mnodes, mlayer, nodefun, inarcfun, outarcfun)
 
 
     def _append_new_layer(self):
@@ -502,6 +511,9 @@ class MDD(object):
                 merged supernode in layer 'j') state 'ms';
                 if awoutfun is None (default), the original weight is used
 
+        Returns:
+            MDDNode: new merged supernode
+
         Raises:
             ValueError: cannot merge nodes in different layers
         """
@@ -509,7 +521,7 @@ class MDD(object):
         mlayer = [v.layer for v in mnodes]
         if len(set(mlayer)) > 1:
             raise ValueError('cannot merge nodes in different layers')
-        self._merge_nodes(mnodes, mlayer[0], nsfun, awinfun, awoutfun)
+        return self._merge_nodes(mnodes, mlayer[0], nsfun, awinfun, awoutfun)
 
     def prune_all(self):
         """Prune all dead nodes with no root/terminal path.
