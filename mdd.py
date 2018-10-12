@@ -639,6 +639,20 @@ class MDD(object):
         self._append_new_layer()
         self._add_node(MDDNode(0, rootState))
         for j in range(numLayers):
+            # Merge/Remove until current layer is under maxWidth
+            currLayer = [u for u in self.allnodes_in_layer(j)]
+            currWidth = len(currLayer)
+            while currWidth > maxWidth(j):
+                mnodes = nodeSelFunc(currLayer,j)
+                if mergeFunc is None:   # Remove
+                    self._remove_nodes(mnodes)
+                else:                   # Merge
+                    self._merge_nodes(mnodes, j, mergeFunc, adjFunc)
+                currLayer = [u for u in self.allnodes_in_layer(j)]
+                if len(currLayer) >= currWidth:
+                    raise RuntimeError('no more nodes to remove/merge but width of layer %d > %d' % (j,maxWidth(j)))
+                currWidth = len(currLayer)
+
             # Create the next layer of nodes
             self._append_new_layer()
             # For each node in the current layer and each possible assignment...
@@ -654,20 +668,6 @@ class MDD(object):
                             self._add_node(v)
                         # Add appropriate arc
                         self._add_arc(MDDArc(d, costFunc(u.state, d, j, vstate), u, v))
-
-            # Merge/Remove until next layer is under maxWidth
-            nextLayer = [u for u in self.allnodes_in_layer(j+1)]
-            nextWidth = len(nextLayer)
-            while nextWidth > maxWidth(j+1):
-                mnodes = nodeSelFunc(nextLayer,j+1)
-                if mergeFunc is None:   # Remove
-                    self._remove_nodes(mnodes)
-                else:                   # Merge
-                    self._merge_nodes(mnodes, j+1, mergeFunc, adjFunc)
-                nextLayer = [u for u in self.allnodes_in_layer(j+1)]
-                if len(nextLayer) >= nextWidth:
-                    raise RuntimeError('no more nodes to remove/merge but width of layer %d > %d' % (j+1,maxWidth(j+1)))
-                nextWidth = len(nextLayer)
 
     def compile_trivial(self, numLayers, domainFunc, costFunc, nodeStateFunc):
         """Compile a trivial MDD.
