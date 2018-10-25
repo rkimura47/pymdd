@@ -661,7 +661,7 @@ class MDD(object):
                     # Apply transition function
                     vstate = trFunc(u.state, d, j)
                     # Add if node is feasible
-                    if isFeas(vstate, j):
+                    if isFeas(vstate, j+1):
                         v = MDDNode(j+1, vstate)
                         # Check if equivalent node exists
                         if v not in self.allnodes_in_layer(j+1):
