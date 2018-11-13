@@ -375,6 +375,28 @@ class MDD(object):
             return MDDArc(outarc.label, awoutfun(outarc.weight, outarc.tail.state, mgnode.state, lyr), mgnode, outarc.head)
         return self._merge_nodes_internal(mnodes, mlayer, nodefun, inarcfun, outarcfun)
 
+    def _redirect_incoming_arcs(self, old_head, new_head):
+        """Redirect all incoming arcs of one node to another node.
+
+        Redirect all incoming arcs of node 'old_head' to another node
+        'new_head'.  The 'old_head' node is then pruned from the MDD (in
+        particular, its outgoing arcs are removed).
+
+        Args:
+            old_head (MDDNode): node whose incoming arcs are redirected
+            new_head (MDDNode): new head node of redirected arcs
+        """
+        # Redirect incoming arcs
+        for arc in self.nodes[old_head.layer][old_head].incoming:
+            arc.head = new_head
+            self.nodes[new_head.layer][new_head].incoming.add(arc)
+            # Note: because we are operating on arcs in the MDD, this also
+            # updates the corresponding arcs in the outgoing arc sets,
+            # i.e., we do not need to manually update them!
+
+        # Prune old_head node
+        self.nodes[old_head.layer][old_head].incoming = set()
+        self.prune_recursive([old_head])
 
     def _append_new_layer(self):
         """Append a new layer to the MDD."""
