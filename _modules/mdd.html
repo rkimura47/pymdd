@@ -332,6 +332,9 @@
 <span class="sd">                used unchanged</span>
 <span class="sd">                NOTE: tail of returned arc must be &#39;mgnode&#39;</span>
 
+<span class="sd">        Returns:</span>
+<span class="sd">            MDDNode: new merged supernode</span>
+
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: cannot merge &lt; 2 nodes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -360,6 +363,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">newOutgoing</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
+
+        <span class="c1"># Return new merged supernode</span>
+        <span class="k">return</span> <span class="n">mNode</span>
 
     <span class="c1"># Default awfun method</span>
     <span class="nd">@staticmethod</span>
@@ -391,6 +397,9 @@
 <span class="sd">                weight &#39;w&#39;, old tail node state &#39;os&#39;, and new tail node (i.e.,</span>
 <span class="sd">                merged supernode in layer&#39;j&#39;) state &#39;ms&#39;;</span>
 <span class="sd">                if awoutfun is None (default), the original weight is used</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            MDDNode: new merged supernode</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Use default awfun if unspecified</span>
         <span class="k">if</span> <span class="n">awinfun</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -404,8 +413,30 @@
             <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">awinfun</span><span class="p">(</span><span class="n">inarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">inarc</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">mgnode</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">lyr</span><span class="p">),</span> <span class="n">inarc</span><span class="o">.</span><span class="n">tail</span><span class="p">,</span> <span class="n">mgnode</span><span class="p">)</span>
         <span class="k">def</span> <span class="nf">outarcfun</span><span class="p">(</span><span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="p">,</span> <span class="n">lyr</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">MDDArc</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">awoutfun</span><span class="p">(</span><span class="n">outarc</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">mgnode</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">lyr</span><span class="p">),</span> <span class="n">mgnode</span><span class="p">,</span> <span class="n">outarc</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes_internal</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">,</span> <span class="n">nodefun</span><span class="p">,</span> <span class="n">inarcfun</span><span class="p">,</span> <span class="n">outarcfun</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes_internal</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">,</span> <span class="n">nodefun</span><span class="p">,</span> <span class="n">inarcfun</span><span class="p">,</span> <span class="n">outarcfun</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_redirect_incoming_arcs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_head</span><span class="p">,</span> <span class="n">new_head</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Redirect all incoming arcs of one node to another node.</span>
+
+<span class="sd">        Redirect all incoming arcs of node &#39;old_head&#39; to another node</span>
+<span class="sd">        &#39;new_head&#39;.  The &#39;old_head&#39; node is then pruned from the MDD (in</span>
+<span class="sd">        particular, its outgoing arcs are removed).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            old_head (MDDNode): node whose incoming arcs are redirected</span>
+<span class="sd">            new_head (MDDNode): new head node of redirected arcs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Redirect incoming arcs</span>
+        <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">old_head</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">old_head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="p">:</span>
+            <span class="n">arc</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">new_head</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">new_head</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">new_head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
+            <span class="c1"># Note: because we are operating on arcs in the MDD, this also</span>
+            <span class="c1"># updates the corresponding arcs in the outgoing arc sets,</span>
+            <span class="c1"># i.e., we do not need to manually update them!</span>
+
+        <span class="c1"># Prune old_head node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">old_head</span><span class="o">.</span><span class="n">layer</span><span class="p">][</span><span class="n">old_head</span><span class="p">]</span><span class="o">.</span><span class="n">incoming</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prune_recursive</span><span class="p">([</span><span class="n">old_head</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_append_new_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Append a new layer to the MDD.&quot;&quot;&quot;</span>
@@ -542,6 +573,9 @@
 <span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39;;</span>
 <span class="sd">                if awoutfun is None (default), the original weight is used</span>
 
+<span class="sd">        Returns:</span>
+<span class="sd">            MDDNode: new merged supernode</span>
+
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: cannot merge nodes in different layers</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -549,7 +583,7 @@
         <span class="n">mlayer</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">layer</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mnodes</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">mlayer</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot merge nodes in different layers&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nsfun</span><span class="p">,</span> <span class="n">awinfun</span><span class="p">,</span> <span class="n">awoutfun</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_nodes</span><span class="p">(</span><span class="n">mnodes</span><span class="p">,</span> <span class="n">mlayer</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nsfun</span><span class="p">,</span> <span class="n">awinfun</span><span class="p">,</span> <span class="n">awoutfun</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MDD.prune_all"><a class="viewcode-back" href="../index.html#mdd.MDD.prune_all">[docs]</a>    <span class="k">def</span> <span class="nf">prune_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Prune all dead nodes with no root/terminal path.</span>
@@ -689,7 +723,7 @@
                     <span class="c1"># Apply transition function</span>
                     <span class="n">vstate</span> <span class="o">=</span> <span class="n">trFunc</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
                     <span class="c1"># Add if node is feasible</span>
-                    <span class="k">if</span> <span class="n">isFeas</span><span class="p">(</span><span class="n">vstate</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">isFeas</span><span class="p">(</span><span class="n">vstate</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
                         <span class="n">v</span> <span class="o">=</span> <span class="n">MDDNode</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">vstate</span><span class="p">)</span>
                         <span class="c1"># Check if equivalent node exists</span>
                         <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
