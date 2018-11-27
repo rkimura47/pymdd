@@ -219,6 +219,10 @@
         <span class="sd">&quot;&quot;&quot;Number of arc layers; equal to number of &#39;variables&#39;.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">maxWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Maximum number of nodes in a single node layer.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lyr</span><span class="p">)</span> <span class="k">for</span> <span class="n">lyr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showLong</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">showIncoming</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return str(self).</span>
