@@ -179,6 +179,10 @@ class MDD(object):
         """Number of arc layers; equal to number of 'variables'."""
         return len(self.nodes)-1
 
+    @property
+    def maxWidth(self):
+        """Maximum number of nodes in a single node layer."""
+        return max(len(lyr) for lyr in self.nodes)
 
     def __str__(self, showLong=False, showIncoming=False):
         """Return str(self).
