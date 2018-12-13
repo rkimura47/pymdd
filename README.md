@@ -5,6 +5,7 @@ At present, it can do the following:
 
 * Compile an exact MDD given a dynamic programming (DP) formulation of the problem.
 * Compile a relaxed or reduced MDD given a DP formulation of the problem and node selection/merging rules.
+* Compile an exact MDD representation (with canonical arc costs) given a list of paths and their corresponding weights.
 * Filter and refine an existing MDD for a constraint given as a DP model.
 * Perform a shortest/longest path computation over the MDD.
 * Write the MDD to a [GraphViz](https://www.graphviz.org) file for visualization.
