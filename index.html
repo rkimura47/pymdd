@@ -140,6 +140,40 @@ a duplicate node already exists in the MDD</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="mdd.MDD.compile_pathlist">
+<code class="descname">compile_pathlist</code><span class="sig-paren">(</span><em>pathList</em>, <em>minArcCostFunc=None</em>, <em>nodeStateFunc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.compile_pathlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.compile_pathlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile an MDD from a list of paths.</p>
+<p>Compile an MDD based on a list of paths (and their associated weights).
+The weight of each arc is determined according to the canonical arc
+cost construction. Note that setting &#8216;minArcCost&#8217; to &#8216;L&#8217; guarantees
+that, in the constructed MDD, the weight of every arc EXCEPT those in
+the first layer will be at least &#8216;L&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pathList</strong> (<em>List[Tuple[float, List[object]]]</em>) &#8211; list of tuples of
+path weights and paths</li>
+<li><strong>minArcCostFunc</strong> (<em>Callable[[int], float]</em>) &#8211; minArcCostFunc(j) returns
+the desired minimum arc weight in layer &#8216;j&#8217; of the constructed
+MDD (note layer 0 is not considere); if None (default), returns
+0.0 for every layer</li>
+<li><strong>nodeStateFunc</strong> (<em>Callable[[int,int], object]</em>) &#8211; nodeStateFunc(j,k)
+returns the node state of the &#8216;k&#8217;th node in layer &#8216;j&#8217;; if
+None (default), returns the tuple &#8216;(j,k)&#8217;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/exceptions.html#RuntimeError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code></a> &#8211;
+numLayers is not consistent with pathList</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="mdd.MDD.compile_top_down">
 <code class="descname">compile_top_down</code><span class="sig-paren">(</span><em>numLayers</em>, <em>domainFunc</em>, <em>trFunc</em>, <em>costFunc</em>, <em>rootState</em>, <em>isFeas</em>, <em>maxWidth=None</em>, <em>mergeFunc=None</em>, <em>adjFunc=None</em>, <em>nodeSelFunc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.compile_top_down"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.compile_top_down" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compile the MDD top-down according to a DP formulation.</p>
@@ -494,8 +528,8 @@ merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217; (default: None
 <li><strong>adjOutFunc</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with
 weight &#8216;w&#8217;, old tail node state &#8216;os&#8217;, and new tail node (i.e.,
 merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217; (default: None)</li>
-<li><strong>ignoreLastLayer</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; whether to merge last layer (i.e., merge
-all terminal nodes into one) or not (default: False)</li>
+<li><strong>ignoreLastLayer</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; whether to avoid merging last layer (i.e.,
+merge all terminal nodes into one) or not (default: False)</li>
 </ul>
 </td>
 </tr>

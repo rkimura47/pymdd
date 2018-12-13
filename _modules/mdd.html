@@ -834,6 +834,69 @@
         <span class="c1"># Reset tmp attribute</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_tmp</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="MDD.compile_pathlist"><a class="viewcode-back" href="../index.html#mdd.MDD.compile_pathlist">[docs]</a>    <span class="k">def</span> <span class="nf">compile_pathlist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathList</span><span class="p">,</span> <span class="n">minArcCostFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nodeStateFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compile an MDD from a list of paths.</span>
+
+<span class="sd">        Compile an MDD based on a list of paths (and their associated weights).</span>
+<span class="sd">        The weight of each arc is determined according to the canonical arc</span>
+<span class="sd">        cost construction. Note that setting &#39;minArcCost&#39; to &#39;L&#39; guarantees</span>
+<span class="sd">        that, in the constructed MDD, the weight of every arc EXCEPT those in</span>
+<span class="sd">        the first layer will be at least &#39;L&#39;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pathList (List[Tuple[float, List[object]]]): list of tuples of</span>
+<span class="sd">                path weights and paths</span>
+<span class="sd">            minArcCostFunc (Callable[[int], float]): minArcCostFunc(j) returns</span>
+<span class="sd">                the desired minimum arc weight in layer &#39;j&#39; of the constructed</span>
+<span class="sd">                MDD (note layer 0 is not considere); if None (default), returns</span>
+<span class="sd">                0.0 for every layer</span>
+<span class="sd">            nodeStateFunc (Callable[[int,int], object]): nodeStateFunc(j,k)</span>
+<span class="sd">                returns the node state of the &#39;k&#39;th node in layer &#39;j&#39;; if</span>
+<span class="sd">                None (default), returns the tuple &#39;(j,k)&#39;</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: numLayers is not consistent with pathList</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Sanity check and count number of layers needed</span>
+        <span class="n">numLayers</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pathList</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">numLayers</span> <span class="o">!=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pathList</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;number of layers in pathList is not consistent&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nodeStateFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nodeStateFunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">:</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">minArcCostFunc</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">minArcCostFunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">j</span><span class="p">:</span> <span class="mf">0.0</span>
+
+        <span class="c1"># First, clear the MDD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span>
+        <span class="c1"># Create root node and associate it with full pathList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
+        <span class="n">rootNode</span> <span class="o">=</span> <span class="n">MDDNode</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nodeStateFunc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">rootNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">rootNode</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="n">pathList</span>
+        <span class="c1"># Create initial tree</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numLayers</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
+            <span class="n">nodeIndex</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">currDomain</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">currDomain</span><span class="p">:</span>
+                    <span class="n">v</span> <span class="o">=</span> <span class="n">MDDNode</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nodeStateFunc</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nodeIndex</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">_tmp</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">d</span><span class="p">]</span>
+                    <span class="n">arcWeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span> <span class="o">==</span> <span class="n">numLayers</span> <span class="k">else</span> <span class="mf">0.0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">MDDArc</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">arcWeight</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+                    <span class="n">nodeIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_tmp</span><span class="p">()</span>
+
+        <span class="c1"># Define canonical arc costs, bottom up</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numLayers</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">minArcWeight</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">outgoing</span><span class="p">:</span>
+                    <span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="o">-</span> <span class="p">(</span><span class="n">minArcWeight</span> <span class="o">-</span> <span class="n">minArcCostFunc</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ui</span><span class="o">.</span><span class="n">incoming</span><span class="p">:</span>
+                    <span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="n">minArcWeight</span> <span class="o">+</span> <span class="n">minArcCostFunc</span><span class="p">(</span><span class="n">j</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="MDD.reduce_bottom_up"><a class="viewcode-back" href="../index.html#mdd.MDD.reduce_bottom_up">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_bottom_up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mergeFunc</span><span class="p">,</span> <span class="n">adjInFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">adjOutFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ignoreLastLayer</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reduce the MDD bottom-up by merging equivalent nodes.</span>
 <span class="sd">        </span>
@@ -854,8 +917,8 @@
 <span class="sd">                adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with</span>
 <span class="sd">                weight &#39;w&#39;, old tail node state &#39;os&#39;, and new tail node (i.e.,</span>
 <span class="sd">                merged supernode in layer &#39;j&#39;) state &#39;ms&#39; (default: None)</span>
-<span class="sd">            ignoreLastLayer (bool): whether to merge last layer (i.e., merge</span>
-<span class="sd">                all terminal nodes into one) or not (default: False)</span>
+<span class="sd">            ignoreLastLayer (bool): whether to avoid merging last layer (i.e.,</span>
+<span class="sd">                merge all terminal nodes into one) or not (default: False)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Merge from bottom up</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">ignoreLastLayer</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
