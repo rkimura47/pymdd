@@ -228,15 +228,30 @@ class MDD(object):
     def __repr__(self):
         return 'MDD(' + repr(self.name) + ', ' + repr(self.nodes) + ')'
 
+    def _get_node_info(self, node):
+        """Get 'MDDNodeInfo' corresponding to 'node'.
+
+        Get the 'MDDNodeInfo' object corresponding to the 'MDDNode'
+        object 'node'. Note this function can *not* be used to populate
+        the underlying dictionary; it can only be used to reference
+        the object.
+
+        NOTE: In general, you should use allnodeitems_in_layer(...) if you
+        want to update node info in a systematic manner. The author
+        recommends only using this function if allnodeitems_in_layer(...)
+        cannot be used.
+        """
+        return self.nodes[node.layer][node]
+
     def _add_arc(self, newarc):
         """Add an arc to the MDD, without sanity checks."""
-        self.nodes[newarc.tail.layer][newarc.tail].outgoing.add(newarc)
-        self.nodes[newarc.head.layer][newarc.head].incoming.add(newarc)
+        self._get_node_info(newarc.tail).outgoing.add(newarc)
+        self._get_node_info(newarc.head).incoming.add(newarc)
 
     def _remove_arc(self, rmvarc):
         """Remove an arc from the MDD, without sanity checks."""
-        self.nodes[rmvarc.tail.layer][rmvarc.tail].outgoing.remove(rmvarc)
-        self.nodes[rmvarc.head.layer][rmvarc.head].incoming.remove(rmvarc)
+        self._get_node_info(rmvarc.tail).outgoing.remove(rmvarc)
+        self._get_node_info(rmvarc.head).incoming.remove(rmvarc)
 
     def _add_node(self, newnode):
         """Add a node to the MDD, without sanity checks."""
@@ -246,12 +261,11 @@ class MDD(object):
 
     def _remove_node(self, rmvnode):
         """Remove a node from the MDD, without sanity checks."""
-        rmvlayer = rmvnode.layer
-        for arc in self.nodes[rmvlayer][rmvnode].incoming:
-            self.nodes[rmvlayer-1][arc.tail].outgoing.remove(arc)
-        for arc in self.nodes[rmvlayer][rmvnode].outgoing:
-            self.nodes[rmvlayer+1][arc.head].incoming.remove(arc)
-        del self.nodes[rmvlayer][rmvnode]
+        for arc in self._get_node_info(rmvnode).incoming:
+            self._get_node_info(arc.tail).outgoing.remove(arc)
+        for arc in self._get_node_info(rmvnode).outgoing:
+            self._get_node_info(arc.head).incoming.remove(arc)
+        del self.nodes[rmvnode.layer][rmvnode]
 
     def _remove_nodes(self, rmvnodes):
         """Remove a list of nodes from the MDD, without sanity checks."""
@@ -391,9 +405,9 @@ class MDD(object):
             new_head (MDDNode): new head node of redirected arcs
         """
         # Redirect incoming arcs
-        for arc in self.nodes[old_head.layer][old_head].incoming:
+        for arc in self._get_node_info(old_head).incoming:
             arc.head = new_head
-            self.nodes[new_head.layer][new_head].incoming.add(arc)
+            self._get_node_info(new_head).incoming.add(arc)
             # Note: because we are operating on arcs in the MDD, this also
             # updates the corresponding arcs in the outgoing arc sets,
             # i.e., we do not need to manually update them!
@@ -472,9 +486,9 @@ class MDD(object):
             raise RuntimeError('tail node of arc does not exist')
         if not rmvarc.head in self.allnodes_in_layer(rmvarc.head.layer):
             raise RuntimeError('head node of arc does not exist')
-        if not rmvarc in self.nodes[rmvarc.tail.layer][rmvarc.tail].outgoing:
+        if not rmvarc in self._get_node_info(rmvarc.tail).outgoing:
             raise KeyError('cannot remove non-existent outgoing arc')
-        if not rmvarc in self.nodes[rmvarc.head.layer][rmvarc.head].incoming:
+        if not rmvarc in self._get_node_info(rmvarc.head).incoming:
             raise KeyError('cannot remove non-existent incoming arc')
         self._remove_arc(rmvarc)
     
@@ -599,11 +613,11 @@ class MDD(object):
         prnnodes = deque(u for u in origNodeList if prunable(u))
         while len(prnnodes) > 0:
             u = prnnodes.popleft()
-            for arc in self.nodes[u.layer][u].incoming:
-                if len(self.nodes[arc.tail.layer][arc.tail].outgoing) <= 1:
+            for arc in self._get_node_info(u).incoming:
+                if len(self._get_node_info(arc.tail).outgoing) <= 1:
                     prnnodes.append(arc.tail)
-            for arc in self.nodes[u.layer][u].outgoing:
-                if len(self.nodes[arc.head.layer][arc.head].incoming) <= 1:
+            for arc in self._get_node_info(u).outgoing:
+                if len(self._get_node_info(arc.head).incoming) <= 1:
                     prnnodes.append(arc.head)
             self._remove_node(u)
 
