@@ -794,6 +794,69 @@ class MDD(object):
         # Reset tmp attribute
         self._reset_tmp()
 
+    def compile_pathlist(self, pathList, minArcCostFunc=None, nodeStateFunc=None):
+        """Compile an MDD from a list of paths.
+
+        Compile an MDD based on a list of paths (and their associated weights).
+        The weight of each arc is determined according to the canonical arc
+        cost construction. Note that setting 'minArcCost' to 'L' guarantees
+        that, in the constructed MDD, the weight of every arc EXCEPT those in
+        the first layer will be at least 'L'.
+
+        Args:
+            pathList (List[Tuple[float, List[object]]]): list of tuples of
+                path weights and paths
+            minArcCostFunc (Callable[[int], float]): minArcCostFunc(j) returns
+                the desired minimum arc weight in layer 'j' of the constructed
+                MDD (note layer 0 is not considere); if None (default), returns
+                0.0 for every layer
+            nodeStateFunc (Callable[[int,int], object]): nodeStateFunc(j,k)
+                returns the node state of the 'k'th node in layer 'j'; if
+                None (default), returns the tuple '(j,k)'
+
+        Raises:
+            RuntimeError: numLayers is not consistent with pathList
+        """
+        # Sanity check and count number of layers needed
+        numLayers = max(len(p[1]) for p in pathList)
+        if numLayers != min(len(p[1]) for p in pathList):
+            raise RuntimeError('number of layers in pathList is not consistent')
+        if nodeStateFunc is None:
+            nodeStateFunc = lambda j,k: (j,k)
+        if minArcCostFunc is None:
+            minArcCostFunc = lambda j: 0.0
+
+        # First, clear the MDD
+        self._clear()
+        # Create root node and associate it with full pathList
+        self._append_new_layer()
+        rootNode = MDDNode(0, nodeStateFunc(0,0))
+        self._add_node(rootNode)
+        self.nodes[0][rootNode]._tmp = pathList
+        # Create initial tree
+        for j in range(numLayers):
+            self._append_new_layer()
+            nodeIndex = 0
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                currDomain = frozenset(p[1][j] for p in ui._tmp)
+                for d in currDomain:
+                    v = MDDNode(j+1, nodeStateFunc(j+1,nodeIndex))
+                    self._add_node(v)
+                    self.nodes[j+1][v]._tmp = [p for p in ui._tmp if p[1][j] == d]
+                    arcWeight = self.nodes[j+1][v]._tmp[0][0] if j+1 == numLayers else 0.0
+                    self._add_arc(MDDArc(d, arcWeight, u, v))
+                    nodeIndex += 1
+        self._reset_tmp()
+
+        # Define canonical arc costs, bottom up
+        for j in range(numLayers-1, 0, -1):
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                minArcWeight = min(a.weight for a in ui.outgoing)
+                for a in ui.outgoing:
+                    a.weight = a.weight - (minArcWeight - minArcCostFunc(j))
+                for a in ui.incoming:
+                    a.weight = a.weight + minArcWeight + minArcCostFunc(j)
+
     def reduce_bottom_up(self, mergeFunc, adjInFunc=None, adjOutFunc=None, ignoreLastLayer=False):
         """Reduce the MDD bottom-up by merging equivalent nodes.
         
@@ -814,8 +877,8 @@ class MDD(object):
                 adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with
                 weight 'w', old tail node state 'os', and new tail node (i.e.,
                 merged supernode in layer 'j') state 'ms' (default: None)
-            ignoreLastLayer (bool): whether to merge last layer (i.e., merge
-                all terminal nodes into one) or not (default: False)
+            ignoreLastLayer (bool): whether to avoid merging last layer (i.e.,
+                merge all terminal nodes into one) or not (default: False)
         """
         # Merge from bottom up
         for j in range(self.numArcLayers - int(ignoreLastLayer), 0, -1):
