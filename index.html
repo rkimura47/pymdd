@@ -293,6 +293,42 @@ a string representation of the arc label &#8216;l&#8217; (default: repr)</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="mdd.MDD.enumerate_all_prefixes">
+<code class="descname">enumerate_all_prefixes</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.enumerate_all_prefixes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.enumerate_all_prefixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumerate all prefixes of a node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<a class="reference internal" href="#mdd.MDDNode" title="mdd.MDDNode"><em>MDDNode</em></a>) &#8211; node to examine</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of prefix weights/prefixes</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[Tuple[float, List[object]]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdd.MDD.enumerate_all_suffixes">
+<code class="descname">enumerate_all_suffixes</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.enumerate_all_suffixes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.enumerate_all_suffixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumerate all suffixes of a node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<a class="reference internal" href="#mdd.MDDNode" title="mdd.MDDNode"><em>MDDNode</em></a>) &#8211; node to examine</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of suffix weights/suffixes</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[Tuple[float, List[object]]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="mdd.MDD.filter_and_refine_constraint">
 <code class="descname">filter_and_refine_constraint</code><span class="sig-paren">(</span><em>trFunc</em>, <em>rootState</em>, <em>isFeas</em>, <em>nodeStateFunc</em>, <em>maxWidth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.filter_and_refine_constraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.filter_and_refine_constraint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filter and refine MDD for a constraint.</p>
