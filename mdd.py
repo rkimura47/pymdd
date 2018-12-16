@@ -980,12 +980,13 @@ class MDD(object):
         # Set up root node
         for (u, ui) in self.allnodeitems_in_layer(0):
             for a in ui.outgoing:
-                self.nodes[1][a.head]._tmp.append((a.weight, [a.label]))
+                self._get_node_info(a.head)._tmp.append((a.weight, [a.label]))
         # Compute paths, layer by layer.
         for j in range(1, self.numArcLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in ui.outgoing:
-                    self.nodes[j+1][a.head]._tmp.extend( [(x[0] + a.weight, x[1] + [a.label]) for x in ui._tmp] )
+                    for x in ui._tmp:
+                        self._get_node_info(a.head)._tmp.append((x[0] + a.weight, x[1] + [a.label]))
         # Enumerate paths
         paths = []
         for (u, ui) in self.allnodeitems_in_layer(self.numArcLayers):
@@ -1017,6 +1018,9 @@ class MDD(object):
             iterRange = range(node.layer-1, -1, -1)
             nextArcs = 'incoming'
             otherEnd = 'tail'
+        # Corner case
+        if node.layer == lastNodeLayer:
+            return []
 
         # Initialize tmp attribute
         for j in iterRange:
