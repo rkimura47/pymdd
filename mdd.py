@@ -1023,14 +1023,17 @@ class MDD(object):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 ui._tmp = []
         # Set up first arc of path
-        for a in self._get_node_info(node).__getattribute__(nextArcs):
-            self._get_node_info(a.__getattribute__(otherEnd))._tmp.append((a.weight, [a.label]))
+        for a in getattr(self._get_node_info(node), nextArcs):
+            self._get_node_info(getattr(a, otherEnd))._tmp.append((a.weight, [a.label]))
         # Compute paths, layer by layer.
         # (NOTE: Technically the last iteration isn't needed, but it makes the code cleaner.)
         for j in iterRange:
             for (u, ui) in self.allnodeitems_in_layer(j):
-                for a in ui.__getattribute__(nextArcs):
-                    self._get_node_info(a.__getattribute__(otherEnd))._tmp.extend( [(x[0] + a.weight, x[1] + [a.label] if suffixes else [a.label] + x[1]) for x in ui._tmp] )
+                for a in getattr(ui, nextArcs):
+                    for x in ui._tmp:
+                        newWeight = x[0] + a.weight
+                        newPath = x[1] + [a.label] if suffixes else [a.label] + x[1]
+                        self._get_node_info(getattr(a, otherEnd))._tmp.append((newWeight, newPath))
         # Enumerate paths
         ixes = []
         for (u, ui) in self.allnodeitems_in_layer(lastNodeLayer):
