@@ -994,6 +994,76 @@ class MDD(object):
         self._reset_tmp()
         return paths
 
+    def _enumerate_fromnode(self, node, suffixes):
+        """Enumerate all prefixes/suffixes from a node.
+
+        Args:
+            node (MDDNode): node to examine
+            suffixes (bool): if True, enumerate all suffixes of 'node';
+                otherwise, enumerate all prefixes of 'node'
+
+        Returns:
+            List[Tuple[float, List[object]]]: list of -ix weights/-ixes
+        """
+        if suffixes:
+            # Computing suffixes
+            lastNodeLayer = self.numNodeLayers-1
+            iterRange = range(node.layer+1, self.numNodeLayers)
+            nextArcs = 'outgoing'
+            otherEnd = 'head'
+        else:
+            # Computing prefixes
+            lastNodeLayer = 0
+            iterRange = range(node.layer-1, -1, -1)
+            nextArcs = 'incoming'
+            otherEnd = 'tail'
+
+        # Initialize tmp attribute
+        for j in iterRange:
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                ui._tmp = []
+        # Set up first arc of path
+        for a in self._get_node_info(node).__getattribute__(nextArcs):
+            self._get_node_info(a.__getattribute__(otherEnd))._tmp.append((a.weight, [a.label]))
+        # Compute paths, layer by layer.
+        # (NOTE: Technically the last iteration isn't needed, but it makes the code cleaner.)
+        for j in iterRange:
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                for a in ui.__getattribute__(nextArcs):
+                    self._get_node_info(a.__getattribute__(otherEnd))._tmp.extend( [(x[0] + a.weight, x[1] + [a.label] if suffixes else [a.label] + x[1]) for x in ui._tmp] )
+        # Enumerate paths
+        ixes = []
+        for (u, ui) in self.allnodeitems_in_layer(lastNodeLayer):
+            ixes.extend(ui._tmp)
+        # Clear tmp
+        for j in iterRange:
+            for (u, ui) in self.allnodeitems_in_layer(j):
+                ui._tmp = None
+
+        return ixes
+
+    def enumerate_all_prefixes(self, node):
+        """Enumerate all prefixes of a node.
+
+        Args:
+            node (MDDNode): node to examine
+
+        Returns:
+            List[Tuple[float, List[object]]]: list of prefix weights/prefixes
+        """
+        return self._enumerate_fromnode(node, False)
+
+    def enumerate_all_suffixes(self, node):
+        """Enumerate all suffixes of a node.
+
+        Args:
+            node (MDDNode): node to examine
+
+        Returns:
+            List[Tuple[float, List[object]]]: list of suffix weights/suffixes
+        """
+        return self._enumerate_fromnode(node, True)
+
     # Default functions/args for GraphViz output
     @staticmethod
     def _default_nodedotfunc(state, lyr):
