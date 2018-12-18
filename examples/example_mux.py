@@ -61,8 +61,8 @@ print(mymdd.maxWidth)
 
 # Output and display MDD with GraphViz
 if mymdd.maxWidth <= 50:
-    ndf = lambda s,j: '[label=""];'
-    adf = lambda l,w,j: '[%slabel="%d"];' % ('style=dotted,' if l == 0 else '',l)
-    mymdd.output_to_dot(ndf, adf, MDD._default_arcsortargs)
+    ndf = lambda s,j: 'label=""'
+    adf = lambda l,w,j: '{}label="{}"'.format('style=dotted,' if l == 0 else '', l)
+    mymdd.output_to_dot(ndf, adf, MDD._default_asa)
     system('dot -Tps ' + name + '.gv -o ' + name + '.ps')
     system('gv ' + name + '.ps')

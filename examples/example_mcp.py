@@ -57,10 +57,7 @@ print(mymdd.find_longest_path())
 
 # Output and display MDD with GraphViz
 def adf(l,w,j):
-    if l == 'S':
-        return '[style=dotted,label="' + str(w) + '"];'
-    else:
-        return '[label="' + str(w) + '"];'
+    return '{}label="{}"'.format('style=dotted,' if l == 'S' else '', w)
 mymdd.output_to_dot(arcDotFunc=adf)
 system('dot -Tps ' + name + '.gv -o ' + name + '.ps')
 system('gv ' + name + '.ps')

@@ -30,6 +30,6 @@ print(mymdd.find_longest_path())
 
 # Output and display MDD with GraphViz
 mymdd.output_to_dot()
-#mymdd.output_to_dot(arcSortArgs=MDD._default_arcsortargs, nodeSortArgs=MDD._default_nodesortargs)
+#mymdd.output_to_dot(arcSortArgs=MDD._default_asa, nodeSortArgs=MDD._default_nsa)
 system('dot -Tps ' + name + '.gv -o ' + name + '.ps')
 system('gv ' + name + '.ps')

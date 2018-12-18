@@ -629,6 +629,10 @@ class MDD(object):
         domainFunc, trFunc, and costFunc, layers should be numbered
         0, 1, ..., numLayers-1.
 
+        Note that 'mergeFunc', 'adjFunc', and 'nodeSelFunc' are only used
+        when compiling restricted/relaxed MDDs, so if 'maxWidth' is None,
+        (i.e., compiling an exact MDD), they do not need to be set.
+
         Args:
             numLayers (int): number of (arc) layers (i.e., variables)
             domainFunc (Callable[[int], List[int]]): domainFunc(j) returns the
@@ -1073,20 +1077,20 @@ class MDD(object):
 
     # Default functions/args for GraphViz output
     @staticmethod
-    def _default_nodedotfunc(state, lyr):
-        return '[label="' + str(state) + '"];'
+    def _default_ndf(state, lyr):
+        return 'label="{}"'.format(state)
 
     @staticmethod
-    def _default_arcdotfunc(label, weight, lyr):
+    def _default_adf(label, weight, lyr):
         if label == 0:
-            return '[style=dotted,label="' + str(weight) + '"];'
+            return 'style=dotted,label="{}"'.format(weight)
         else:
-            return '[label="' + str(weight)  + '"];'
+            return 'label="{}"'.format(weight)
 
-    _default_arcsortargs =  {'key': lambda a: a.label}
-    _default_nodesortargs = {'key': lambda v: v.state, 'reverse': True}
+    _default_asa =  {'key': lambda a: a.label}
+    _default_nsa = {'key': lambda v: v.state, 'reverse': True}
 
-    def output_to_dot(self, nodeDotFunc=None, arcDotFunc=None, arcSortArgs=None, nodeSortArgs=None):
+    def output_to_dot(self, nodeDotFunc=None, arcDotFunc=None, arcSortArgs=None, nodeSortArgs=None, reverseDir=False):
         """Write the graphical structure of the MDD to a file.
 
         Write the graphical structure of the MDD to a file (<MDDName>.gv) in
@@ -1110,37 +1114,48 @@ class MDD(object):
                 GraphViz then attempts to order the nodes accordingly in the
                 output graph; if nodeSortArgs is None (default), no such order
                 is enforced
+            reverseDir (bool): if True, show the MDD with arcs oriented in the
+                opposite direction, so the terminal node appears at the top and
+                the root node at the bottom (default: False)
         """
 
         # Use default output functions if unspecified
         if nodeDotFunc is None:
-            nodeDotFunc = self._default_nodedotfunc
+            nodeDotFunc = self._default_ndf
         if arcDotFunc is None:
-            arcDotFunc = self._default_arcdotfunc
+            arcDotFunc = self._default_adf
+        if reverseDir:
+            iterRange = range(self.numArcLayers, 0, -1)
+            (nextArcAttr, srcAttr, destAttr) = ('incoming', 'head', 'tail')
+        else:
+            iterRange = range(self.numArcLayers)
+            (nextArcAttr, srcAttr, destAttr) = ('outgoing', 'tail', 'head')
 
-        outf = open(self.name + '.gv', 'w')
-        outf.write('digraph ' + self.name + ' {\n')
+        outf = open('{}.gv'.format(self.name), 'w')
+        outf.write('digraph {} {{\n'.format(self.name))
+        if reverseDir:
+            outf.write('edge [dir=back];\n')
         if arcSortArgs is not None:
             outf.write('ordering=out;\n')
         for v in self.allnodes():
-            outf.write(str(hash(v)) + nodeDotFunc(v.state, v.layer) + '\n')
-        for j in range(self.numArcLayers):
+            outf.write('{}[{}];\n'.format(hash(v), nodeDotFunc(v.state, v.layer)))
+        for j in iterRange:
             for (u, ui) in self.allnodeitems_in_layer(j):
-                arcsinlayer = [a for a in ui.outgoing]
+                arcsinlayer = [a for a in getattr(ui, nextArcAttr)]
                 if arcSortArgs is not None:
                     arcsinlayer.sort(**arcSortArgs)
                 for arc in arcsinlayer:
-                    outf.write(str(hash(arc.tail)) + ' -> ' + str(hash(arc.head)) + arcDotFunc(arc.label, arc.weight, arc.tail.layer) + '\n')
+                    outf.write('{} -> {}[{}];\n'.format(hash(getattr(arc, srcAttr)), hash(getattr(arc, destAttr)), arcDotFunc(arc.label, arc.weight, arc.tail.layer)))
         if nodeSortArgs is not None:
             for j in range(self.numNodeLayers):
                 nodesinlayer = [v for v in self.allnodes_in_layer(j)]
                 if len(nodesinlayer) > 1:
                     nodesinlayer.sort(**nodeSortArgs)
                     for i in range(len(nodesinlayer) - 1):
-                        outf.write(str(hash(nodesinlayer[i])) + ' -> ' + str(hash(nodesinlayer[i+1])) + '[style=invis];' + '\n')
+                        outf.write('{} -> {}[style=invis];\n'.format(hash(nodesinlayer[i]), hash(nodesinlayer[i+1])))
                     outf.write('{rank=same')
                     for v in nodesinlayer:
-                        outf.write(';' + str(hash(v)))
+                        outf.write(';{}'.format(hash(v)))
                     outf.write('}\n')
         outf.write('}')
         outf.close()
