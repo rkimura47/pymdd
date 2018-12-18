@@ -181,6 +181,9 @@ numLayers is not consistent with pathList</p>
 programming (DP) formulation.  For the DP-specifying functions
 domainFunc, trFunc, and costFunc, layers should be numbered
 0, 1, ..., numLayers-1.</p>
+<p>Note that &#8216;mergeFunc&#8217;, &#8216;adjFunc&#8217;, and &#8216;nodeSelFunc&#8217; are only used
+when compiling restricted/relaxed MDDs, so if &#8216;maxWidth&#8217; is None,
+(i.e., compiling an exact MDD), they do not need to be set.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -478,7 +481,7 @@ cannot merge nodes in different layers</p>
 
 <dl class="method">
 <dt id="mdd.MDD.output_to_dot">
-<code class="descname">output_to_dot</code><span class="sig-paren">(</span><em>nodeDotFunc=None</em>, <em>arcDotFunc=None</em>, <em>arcSortArgs=None</em>, <em>nodeSortArgs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.output_to_dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.output_to_dot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">output_to_dot</code><span class="sig-paren">(</span><em>nodeDotFunc=None</em>, <em>arcDotFunc=None</em>, <em>arcSortArgs=None</em>, <em>nodeSortArgs=None</em>, <em>reverseDir=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.output_to_dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.output_to_dot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the graphical structure of the MDD to a file.</p>
 <p>Write the graphical structure of the MDD to a file (&lt;MDDName&gt;.gv) in
 the DOT language.  The MDD can then be visualized with GraphViz.</p>
@@ -504,6 +507,9 @@ nodes via list.sort() (i.e., &#8216;key&#8217; and, optionally, &#8216;reverse&#
 GraphViz then attempts to order the nodes accordingly in the
 output graph; if nodeSortArgs is None (default), no such order
 is enforced</li>
+<li><strong>reverseDir</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; if True, show the MDD with arcs oriented in the
+opposite direction, so the terminal node appears at the top and
+the root node at the bottom (default: False)</li>
 </ul>
 </td>
 </tr>
