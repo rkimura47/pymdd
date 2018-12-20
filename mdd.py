@@ -180,6 +180,10 @@ class MDD(object):
         return len(self.nodes)-1
 
     @property
+    def widthList(self):
+        """Number of nodes in each layer"""
+        return list(len(lyr) for lyr in self.nodes)
+    @property
     def maxWidth(self):
         """Maximum number of nodes in a single node layer."""
         return max(len(lyr) for lyr in self.nodes)
