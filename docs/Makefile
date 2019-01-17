@@ -217,4 +217,4 @@ pseudoxml:
 
 .PHONY: buildandcommithtml
 buildandcommithtml: html
-	cd $(BUILDDIR)/html; git add . ; git commit -m "rebuiltdocs"; git push origin gh-pages
+	cd $(BUILDDIR)/html; git add . ; git commit -e -m "rebuiltdocs"; git push origin gh-pages
