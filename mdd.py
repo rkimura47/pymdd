@@ -917,7 +917,155 @@ class MDD(object):
                 if len(mnodes) >= 2:
                     self._merge_nodes(mnodes, j, mergeFunc, adjInFunc, adjOutFunc)
 
-    def _find_opt_path(self, longest):
+    def _find_optimal_path(self, srcNds, destNds, longest):
+        """Find an 'optimal' src-dest path.
+
+        Find an 'optimal' path between a set of source nodes and a set of
+        destination nodes using bidirectional search.  Note 'srcNds'/'destNds'
+        must only contain nodes from the same layer.  Note that if srcNds is
+        on a later layer than destNodes, then the path returned is traversed
+        in *reverse*, i.e., from bottom to top.
+
+        Also, the MDD cannot contain any long arcs.
+
+        Args:
+            srcNds (List[MDDNode]): list of source nodes
+            destNds (List[MDDNode]): list of destination nodes
+            longest (bool): True/False if computing longest/shortest path resp
+
+        Returns:
+            Tuple[float, List[object]]: optimal weight and optimal path
+        """
+        # Check that all nodes in srcNds/destNds are on the same layer
+        if len(set(v.layer for v in srcNds)) > 1:
+            raise ValueError('srcNds cannot contain nodes from different layers')
+        if len(set(v.layer for v in destNds)) > 1:
+            raise ValueError('destNds cannot contain nodes from different layers')
+        # Determine iteration parameters
+        srcLayer = srcNds[0].layer
+        destLayer = destNds[0].layer
+        if srcLayer == destLayer:
+            return []
+        if srcLayer < destLayer:
+            # Computing suffixes
+            iterDir = 1
+            (nextArcs, otherEnd, oppEnd) = ('outgoing', 'head', 'tail')
+        else:
+            # Computing prefixes
+            iterDir = -1
+            (nextArcs, otherEnd, oppEnd) = ('incoming', 'tail', 'head')
+        if longest:
+            (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
+        else:
+            (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
+        # Initialize tmp attribute of src
+        for src in srcNds:
+            self._get_node_info(src)._tmp = (0, None)
+        toBeProcessed = set(srcNds)
+        touched = set(srcNds)
+        # Compute the optimal path, layer by layer
+        for j in range(srcLayer, destLayer, iterDir):
+            nextToProcess = set()
+            for u in toBeProcessed:
+                ui = self._get_node_info(u)
+                for arc in getattr(ui, nextArcs):
+                    aot = getattr(arc, otherEnd)
+                    aoti = self._get_node_info(aot)
+                    if aoti._tmp is None or limCmp(aoti._tmp[0], ui._tmp[0] + arc.weight):
+                        aoti._tmp = (ui._tmp[0] + arc.weight, arc)
+                        nextToProcess.add(aot)
+                        touched.add(aot)
+            toBeProcessed = nextToProcess
+        # Identify the optimal path, layer by layer in reverse
+        optVal = limVal
+        optNode = None
+        for u in destNds:
+            ui = self._get_node_info(u)
+            if limCmp(optVal, ui._tmp[0]):
+                optVal = ui._tmp[0]
+                optNode = u
+        lpath = []
+        for j in range(destLayer, srcLayer, -iterDir):
+            optArc = self._get_node_info(optNode)._tmp[1]
+            lpath.append(optArc.label)
+            optNode = getattr(optArc, oppEnd)
+
+        # Reset tmp attribute
+        for u in touched:
+            self._get_node_info(u)._tmp = None
+
+        return (optVal, list(reversed(lpath)))
+
+    def _find_optimal_ix(self, node, suffixes, longest):
+        """Find an 'optimal' prefix/suffix from a node.
+
+        Find an 'optimal' prefix/suffix from a node.
+
+        Also, the MDD cannot contain any long arcs.
+
+        Args:
+            node (MDDNode): source node
+            suffixes (bool): True/False if optimizing over suffixes/prefixes
+                of 'src' node resp
+            longest (bool): True/False if computing longest/shortest path resp
+
+        Returns:
+            Tuple[float, List[object]]: optimal weight and optimal path
+        """
+        if suffixes:
+            # Computing suffixes
+            (lastNodeLayer, iterDir) = (self.numNodeLayers-1, 1)
+            (nextArcs, otherEnd, oppEnd) = ('outgoing', 'head', 'tail')
+        else:
+            # Computing prefixes
+            (lastNodeLayer, iterDir) = (0, -1)
+            (nextArcs, otherEnd, oppEnd) = ('incoming', 'tail', 'head')
+        if longest:
+            (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
+        else:
+            (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
+        # Corner case
+        if node.layer == lastNodeLayer:
+            return []
+        # Initialize tmp attribute of source node
+        self._get_node_info(node)._tmp = (0, None)
+        toBeProcessed = set([node])
+        touched = set([node])
+        # Compute the optimal ix, layer by layer
+        for j in range(node.layer, lastNodeLayer, iterDir):
+            nextToProcess = set()
+            for u in toBeProcessed:
+                ui = self._get_node_info(u)
+                for arc in getattr(ui, nextArcs):
+                    aot = getattr(arc, otherEnd)
+                    aoti = self._get_node_info(aot)
+                    if aoti._tmp is None or limCmp(aoti._tmp[0], ui._tmp[0] + arc.weight):
+                        aoti._tmp = (ui._tmp[0] + arc.weight, arc)
+                        nextToProcess.add(aot)
+                        touched.add(aot)
+            toBeProcessed = nextToProcess
+        # Identify the optimal ix, layer by layer in 'reverse'
+        optVal = limVal
+        optNode = None
+        for (u, ui) in self.allnodeitems_in_layer(lastNodeLayer):
+            if limCmp(optVal, ui._tmp[0]):
+                optVal = ui._tmp[0]
+                optNode = u
+        lpath = []
+        for j in range(lastNodeLayer, node.layer, -iterDir):
+            optArc = self._get_node_info(optNode)._tmp[1]
+            lpath.append(optArc.label)
+            optNode = getattr(optArc, oppEnd)
+        # Ensure path is always traversed top to bottom
+        if suffixes:
+            lpath = list(reversed(lpath))
+
+        # Reset tmp attribute
+        for u in touched:
+            self._get_node_info(u)._tmp = None
+        return (optVal, lpath)
+
+    def _find_opt_rtpath(self, longest):
         """Find an 'optimal' root-terminal path in the MDD.
 
         Args:
@@ -965,7 +1113,7 @@ class MDD(object):
         Returns:
             Tuple[float, List[object]]: maximum weight and longest path
         """
-        return self._find_opt_path(True)
+        return self._find_opt_rtpath(True)
 
     def find_shortest_path(self):
         """Find a shortest root-terminal path in the MDD.
@@ -973,7 +1121,7 @@ class MDD(object):
         Returns:
             Tuple[float, List[object]]: minimum weight and shortest path
         """
-        return self._find_opt_path(False)
+        return self._find_opt_rtpath(False)
 
     def enumerate_all_paths(self):
         """Enumerate all root-terminal paths in the MDD.
