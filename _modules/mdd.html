@@ -861,16 +861,15 @@
 
 <span class="sd">        Compile an MDD based on a list of paths (and their associated weights).</span>
 <span class="sd">        The weight of each arc is determined according to the canonical arc</span>
-<span class="sd">        cost construction. Note that setting &#39;minArcCost&#39; to &#39;L&#39; guarantees</span>
-<span class="sd">        that, in the constructed MDD, the weight of every arc EXCEPT those in</span>
-<span class="sd">        the first layer will be at least &#39;L&#39;.</span>
+<span class="sd">        cost construction. If &#39;minArcCost(k)&#39; is &#39;L&#39;, then in the constructed</span>
+<span class="sd">        MDD the weight of every arc in layer &#39;k&#39; will be at least &#39;L&#39;.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            pathList (List[Tuple[float, List[object]]]): list of tuples of</span>
 <span class="sd">                path weights and paths</span>
 <span class="sd">            minArcCostFunc (Callable[[int], float]): minArcCostFunc(j) returns</span>
 <span class="sd">                the desired minimum arc weight in layer &#39;j&#39; of the constructed</span>
-<span class="sd">                MDD (note layer 0 is not considere); if None (default), returns</span>
+<span class="sd">                MDD (layer 0 is not considered); if None (default), returns</span>
 <span class="sd">                0.0 for every layer</span>
 <span class="sd">            nodeStateFunc (Callable[[int,int], object]): nodeStateFunc(j,k)</span>
 <span class="sd">                returns the node state of the &#39;k&#39;th node in layer &#39;j&#39;; if</span>

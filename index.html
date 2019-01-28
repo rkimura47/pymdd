@@ -145,9 +145,8 @@ a duplicate node already exists in the MDD</li>
 <dd><p>Compile an MDD from a list of paths.</p>
 <p>Compile an MDD based on a list of paths (and their associated weights).
 The weight of each arc is determined according to the canonical arc
-cost construction. Note that setting &#8216;minArcCost&#8217; to &#8216;L&#8217; guarantees
-that, in the constructed MDD, the weight of every arc EXCEPT those in
-the first layer will be at least &#8216;L&#8217;.</p>
+cost construction. If &#8216;minArcCost(k)&#8217; is &#8216;L&#8217;, then in the constructed
+MDD the weight of every arc in layer &#8216;k&#8217; will be at least &#8216;L&#8217;.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -157,7 +156,7 @@ the first layer will be at least &#8216;L&#8217;.</p>
 path weights and paths</li>
 <li><strong>minArcCostFunc</strong> (<em>Callable[[int], float]</em>) &#8211; minArcCostFunc(j) returns
 the desired minimum arc weight in layer &#8216;j&#8217; of the constructed
-MDD (note layer 0 is not considere); if None (default), returns
+MDD (layer 0 is not considered); if None (default), returns
 0.0 for every layer</li>
 <li><strong>nodeStateFunc</strong> (<em>Callable[[int,int], object]</em>) &#8211; nodeStateFunc(j,k)
 returns the node state of the &#8216;k&#8217;th node in layer &#8216;j&#8217;; if
