@@ -941,10 +941,17 @@ class MDD(object):
         if len(set(v.layer for v in destNds)) > 1:
             raise ValueError('destNds cannot contain nodes from different layers')
         # Determine iteration parameters
+        if longest:
+            (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
+        else:
+            (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
         srcLayer = srcNds[0].layer
         destLayer = destNds[0].layer
         if srcLayer == destLayer:
-            return []
+            if len(set(srcNds) & set(destNds)) > 0:
+                return (0, [])
+            else:
+                return (limVal, [])
         if srcLayer < destLayer:
             # Computing suffixes
             iterDir = 1
@@ -953,10 +960,6 @@ class MDD(object):
             # Computing prefixes
             iterDir = -1
             (nextArcs, otherEnd, oppEnd) = ('incoming', 'tail', 'head')
-        if longest:
-            (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
-        else:
-            (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
         # Initialize tmp attribute of src
         for src in srcNds:
             self._get_node_info(src)._tmp = (0, None)
@@ -1011,6 +1014,10 @@ class MDD(object):
         Returns:
             Tuple[float, List[object]]: optimal weight and optimal path
         """
+        if longest:
+            (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
+        else:
+            (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
         if suffixes:
             # Computing suffixes
             (lastNodeLayer, iterDir) = (self.numNodeLayers-1, 1)
@@ -1019,13 +1026,9 @@ class MDD(object):
             # Computing prefixes
             (lastNodeLayer, iterDir) = (0, -1)
             (nextArcs, otherEnd, oppEnd) = ('incoming', 'tail', 'head')
-        if longest:
-            (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
-        else:
-            (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
         # Corner case
         if node.layer == lastNodeLayer:
-            return []
+            return (0, [])
         # Initialize tmp attribute of source node
         self._get_node_info(node)._tmp = (0, None)
         toBeProcessed = set([node])
