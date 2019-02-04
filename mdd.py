@@ -1039,6 +1039,8 @@ class MDD(object):
                         tmpdict[aot] = (tmpdict[u][0] + arc.weight, arc)
                         nextToProcess.add(aot)
             toBeProcessed = nextToProcess
+            if len(toBeProcessed) == 0:
+                return (limVal, [])
         # Identify the optimal ix, layer by layer in 'reverse'
         optVal = limVal
         optNode = None
@@ -1093,8 +1095,12 @@ class MDD(object):
             if limCmp(optVal, tmpdict[u][0]):
                 optVal = tmpdict[u][0]
                 optNode = u
+        if optNode is None:
+            return (limVal, [])
         lpath = []
         for j in range(self.numArcLayers, 0, -1):
+            if tmpdict[optNode][1] is None:
+                return (limVal, [])
             optArc = tmpdict[optNode][1]
             lpath.append(optArc.label)
             optNode = optArc.tail
