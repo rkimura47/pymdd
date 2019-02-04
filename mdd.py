@@ -770,16 +770,16 @@ class MDD(object):
         """
         if maxWidth is None:
             maxWidth = lambda j: 100
-        # Reset tmp attribute
-        self._reset_tmp()
+        # Initialize tmpdict
+        tmpdict = dict()
         # Set up root node
-        for (u, ui) in self.allnodeitems_in_layer(0):
-            ui._tmp = rootState
+        for u in self.allnodes_in_layer(0):
+            tmpdict[u] = rootState
         for j in range(self.numArcLayers):
             # Filtering
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in list(ui.outgoing):
-                    if not isFeas(trFunc(ui._tmp, a.label, j), j):
+                    if not isFeas(trFunc(tmpdict[u], a.label, j), j):
                         self._remove_arc(a)
 
             # Prune nodes that are no longer reachable
@@ -794,27 +794,27 @@ class MDD(object):
             numNodes = len(self.allnodes_in_layer(j+1))
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in list(ui.outgoing):
-                    ns = trFunc(ui._tmp, a.label, j)
-                    vi = self.nodes[j+1][a.head]
-                    if vi._tmp is None:
-                        vi._tmp = ns
-                    elif vi._tmp != ns and numNodes < maxWidth(j+1):
+                    ns = trFunc(tmpdict[u], a.label, j)
+                    v = a.head
+                    if v not in tmpdict:
+                        tmpdict[v] = ns
+                    elif tmpdict[v] != ns and numNodes < maxWidth(j+1):
                         # Redirect arc to a new node
                         w = MDDNode(j+1, nodeStateFunc(ns, j+1))
                         self._add_node(w)
-                        self.nodes[j+1][w]._tmp = ns
-                        self._add_arc(MDDArc(a.label,a.weight,u,w))
+                        tmpdict[w] = ns
+                        self._add_arc(MDDArc(a.label, a.weight, u, w))
                         self._remove_arc(a)
                         # Copy outgoing arcs from v, to w
-                        for aa in vi.outgoing:
+                        for aa in self._get_node_info(v).outgoing:
                             self._add_arc(MDDArc(aa.label, aa.weight, w, aa.head))
                         numNodes += 1
                     else:
                         # Update
-                        vi._tmp = ns
+                        tmpdict[v] = ns
 
         # Reset tmp attribute
-        self._reset_tmp()
+        tmpdict.clear()
 
     def compile_pathlist(self, pathList, minArcCostFunc=None, nodeStateFunc=None):
         """Compile an MDD from a list of paths.
@@ -853,21 +853,21 @@ class MDD(object):
         self._append_new_layer()
         rootNode = MDDNode(0, nodeStateFunc(0,0))
         self._add_node(rootNode)
-        self.nodes[0][rootNode]._tmp = pathList
+        tmpdict = {rootNode: pathList}
         # Create initial tree
         for j in range(numLayers):
             self._append_new_layer()
             nodeIndex = 0
             for (u, ui) in self.allnodeitems_in_layer(j):
-                currDomain = frozenset(p[1][j] for p in ui._tmp)
+                currDomain = frozenset(p[1][j] for p in tmpdict[u])
                 for d in currDomain:
                     v = MDDNode(j+1, nodeStateFunc(j+1,nodeIndex))
                     self._add_node(v)
-                    self.nodes[j+1][v]._tmp = [p for p in ui._tmp if p[1][j] == d]
-                    arcWeight = self.nodes[j+1][v]._tmp[0][0] if j+1 == numLayers else 0.0
+                    tmpdict[v] = [p for p in tmpdict[u] if p[1][j] == d]
+                    arcWeight = tmpdict[v][0][0] if j+1 == numLayers else 0.0
                     self._add_arc(MDDArc(d, arcWeight, u, v))
                     nodeIndex += 1
-        self._reset_tmp()
+        tmpdict.clear()
 
         # Define canonical arc costs, bottom up
         for j in range(numLayers-1, 0, -1):
@@ -960,11 +960,11 @@ class MDD(object):
             # Computing prefixes
             iterDir = -1
             (nextArcs, otherEnd, oppEnd) = ('incoming', 'tail', 'head')
-        # Initialize tmp attribute of src
+        # Initialize tmpdict
+        tmpdict = dict()
         for src in srcNds:
-            self._get_node_info(src)._tmp = (0, None)
+            tmpdict[src] = (0, None)
         toBeProcessed = set(srcNds)
-        touched = set(srcNds)
         # Compute the optimal path, layer by layer
         for j in range(srcLayer, destLayer, iterDir):
             nextToProcess = set()
@@ -972,29 +972,25 @@ class MDD(object):
                 ui = self._get_node_info(u)
                 for arc in getattr(ui, nextArcs):
                     aot = getattr(arc, otherEnd)
-                    aoti = self._get_node_info(aot)
-                    if aoti._tmp is None or limCmp(aoti._tmp[0], ui._tmp[0] + arc.weight):
-                        aoti._tmp = (ui._tmp[0] + arc.weight, arc)
+                    if aot not in tmpdict or limCmp(tmpdict[aot][0], tmpdict[u][0] + arc.weight):
+                        tmpdict[aot] = (tmpdict[u][0] + arc.weight, arc)
                         nextToProcess.add(aot)
-                        touched.add(aot)
             toBeProcessed = nextToProcess
         # Identify the optimal path, layer by layer in reverse
         optVal = limVal
         optNode = None
         for u in destNds:
-            ui = self._get_node_info(u)
-            if limCmp(optVal, ui._tmp[0]):
-                optVal = ui._tmp[0]
+            if limCmp(optVal, tmpdict[u][0]):
+                optVal = tmpdict[u][0]
                 optNode = u
         lpath = []
         for j in range(destLayer, srcLayer, -iterDir):
-            optArc = self._get_node_info(optNode)._tmp[1]
+            optArc = tmpdict[optNode][1]
             lpath.append(optArc.label)
             optNode = getattr(optArc, oppEnd)
 
-        # Reset tmp attribute
-        for u in touched:
-            self._get_node_info(u)._tmp = None
+        # Clear tmpdict
+        tmpdict.clear()
 
         return (optVal, list(reversed(lpath)))
 
@@ -1029,10 +1025,9 @@ class MDD(object):
         # Corner case
         if node.layer == lastNodeLayer:
             return (0, [])
-        # Initialize tmp attribute of source node
-        self._get_node_info(node)._tmp = (0, None)
+        # Initialize tmpdict with source node
+        tmpdict = {node: (0, None)}
         toBeProcessed = set([node])
-        touched = set([node])
         # Compute the optimal ix, layer by layer
         for j in range(node.layer, lastNodeLayer, iterDir):
             nextToProcess = set()
@@ -1040,31 +1035,28 @@ class MDD(object):
                 ui = self._get_node_info(u)
                 for arc in getattr(ui, nextArcs):
                     aot = getattr(arc, otherEnd)
-                    aoti = self._get_node_info(aot)
-                    if aoti._tmp is None or limCmp(aoti._tmp[0], ui._tmp[0] + arc.weight):
-                        aoti._tmp = (ui._tmp[0] + arc.weight, arc)
+                    if aot not in tmpdict or limCmp(tmpdict[aot][0], tmpdict[u][0] + arc.weight):
+                        tmpdict[aot] = (tmpdict[u][0] + arc.weight, arc)
                         nextToProcess.add(aot)
-                        touched.add(aot)
             toBeProcessed = nextToProcess
         # Identify the optimal ix, layer by layer in 'reverse'
         optVal = limVal
         optNode = None
-        for (u, ui) in self.allnodeitems_in_layer(lastNodeLayer):
-            if limCmp(optVal, ui._tmp[0]):
-                optVal = ui._tmp[0]
+        for u in self.allnodes_in_layer(lastNodeLayer):
+            if limCmp(optVal, tmpdict[u][0]):
+                optVal = tmpdict[u][0]
                 optNode = u
         lpath = []
         for j in range(lastNodeLayer, node.layer, -iterDir):
-            optArc = self._get_node_info(optNode)._tmp[1]
+            optArc = tmpdict[optNode][1]
             lpath.append(optArc.label)
             optNode = getattr(optArc, oppEnd)
         # Ensure path is always traversed top to bottom
         if suffixes:
             lpath = list(reversed(lpath))
 
-        # Reset tmp attribute
-        for u in touched:
-            self._get_node_info(u)._tmp = None
+        # Clear tmpdict
+        tmpdict.clear()
         return (optVal, lpath)
 
     def _find_opt_rtpath(self, longest):
@@ -1080,33 +1072,34 @@ class MDD(object):
             (limVal, limCmp) = (float('-inf'), lambda x,y: x < y)
         else:
             (limVal, limCmp) = (float('inf'), lambda x,y: x > y)
-        # Initialize tmp attribute
+        # Initialize tmpdict
+        tmpdict = dict()
         for j in range(self.numNodeLayers):
-            for (u, ui) in self.allnodeitems_in_layer(j):
+            for u in self.allnodes_in_layer(j):
                 if j == 0:
-                    ui._tmp = (0, None)
+                    tmpdict[u] = (0, None)
                 else:
-                    ui._tmp = (limVal, None)
+                    tmpdict[u] = (limVal, None)
         # Compute the optimal path, layer by layer
         for j in range(self.numArcLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in ui.outgoing:
-                    if limCmp(self.nodes[j+1][a.head]._tmp[0], ui._tmp[0] + a.weight):
-                        self.nodes[j+1][a.head]._tmp = (ui._tmp[0] + a.weight, a)
+                    if limCmp(tmpdict[a.head][0], tmpdict[u][0] + a.weight):
+                        tmpdict[a.head] = (tmpdict[u][0] + a.weight, a)
         # Identify the optimal path, layer by layer
         optVal = limVal
         optNode = None
-        for (u, ui) in self.allnodeitems_in_layer(self.numArcLayers):
-            if limCmp(optVal, ui._tmp[0]):
-                optVal = ui._tmp[0]
+        for u in self.allnodes_in_layer(self.numArcLayers):
+            if limCmp(optVal, tmpdict[u][0]):
+                optVal = tmpdict[u][0]
                 optNode = u
         lpath = []
         for j in range(self.numArcLayers, 0, -1):
-            optArc = self.nodes[j][optNode]._tmp[1]
+            optArc = tmpdict[optNode][1]
             lpath.append(optArc.label)
             optNode = optArc.tail
 
-        self._reset_tmp()
+        tmpdict.clear()
         return (optVal, list(reversed(lpath)))
 
     def find_longest_path(self):
@@ -1131,26 +1124,27 @@ class MDD(object):
         Returns:
             List[Tuple[float, List[object]]]: list of path weights/paths
         """
-        # Initialize tmp attribute
+        # Initialize tmpdict
+        tmpdict = dict()
         for j in range(self.numNodeLayers):
-            for (u, ui) in self.allnodeitems_in_layer(j):
-                ui._tmp = []
+            for u in self.allnodes_in_layer(j):
+                tmpdict[u] = []
         # Set up root node
         for (u, ui) in self.allnodeitems_in_layer(0):
             for a in ui.outgoing:
-                self._get_node_info(a.head)._tmp.append((a.weight, [a.label]))
+                tmpdict[a.head].append((a.weight, [a.label]))
         # Compute paths, layer by layer.
         for j in range(1, self.numArcLayers):
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in ui.outgoing:
-                    for x in ui._tmp:
-                        self._get_node_info(a.head)._tmp.append((x[0] + a.weight, x[1] + [a.label]))
+                    for x in tmpdict[u]:
+                        tmpdict[a.head].append((x[0] + a.weight, x[1] + [a.label]))
         # Enumerate paths
         paths = []
-        for (u, ui) in self.allnodeitems_in_layer(self.numArcLayers):
-            paths.extend(ui._tmp)
+        for u in self.allnodes_in_layer(self.numArcLayers):
+            paths.extend(tmpdict[u])
 
-        self._reset_tmp()
+        tmpdict.clear()
         return paths
 
     def _enumerate_fromnode(self, node, suffixes):
@@ -1180,30 +1174,29 @@ class MDD(object):
         if node.layer == lastNodeLayer:
             return []
 
-        # Initialize tmp attribute
+        # Initialize tmpdict
+        tmpdict = dict()
         for j in iterRange:
-            for (u, ui) in self.allnodeitems_in_layer(j):
-                ui._tmp = []
+            for u in self.allnodes_in_layer(j):
+                tmpdict[u] = []
         # Set up first arc of path
         for a in getattr(self._get_node_info(node), nextArcs):
-            self._get_node_info(getattr(a, otherEnd))._tmp.append((a.weight, [a.label]))
+            tmpdict[getattr(a, otherEnd)].append((a.weight, [a.label]))
         # Compute paths, layer by layer.
         # (NOTE: Technically the last iteration isn't needed, but it makes the code cleaner.)
         for j in iterRange:
             for (u, ui) in self.allnodeitems_in_layer(j):
                 for a in getattr(ui, nextArcs):
-                    for x in ui._tmp:
+                    for x in tmpdict[u]:
                         newWeight = x[0] + a.weight
                         newPath = x[1] + [a.label] if suffixes else [a.label] + x[1]
-                        self._get_node_info(getattr(a, otherEnd))._tmp.append((newWeight, newPath))
+                        tmpdict[getattr(a, otherEnd)].append((newWeight, newPath))
         # Enumerate paths
         ixes = []
-        for (u, ui) in self.allnodeitems_in_layer(lastNodeLayer):
-            ixes.extend(ui._tmp)
-        # Clear tmp
-        for j in iterRange:
-            for (u, ui) in self.allnodeitems_in_layer(j):
-                ui._tmp = None
+        for u in self.allnodes_in_layer(lastNodeLayer):
+            ixes.extend(tmpdict[u])
+        # Clear tmpdict
+        tmpdict.clear()
 
         return ixes
 
