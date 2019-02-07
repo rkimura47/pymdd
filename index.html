@@ -259,7 +259,7 @@ the node state of the node in layer &#8216;j&#8217;</li>
 
 <dl class="method">
 <dt id="mdd.MDD.dumpJSON">
-<code class="descname">dumpJSON</code><span class="sig-paren">(</span><em>stateDumpFunc=&lt;built-in function repr&gt;</em>, <em>labelDumpFunc=&lt;built-in function repr&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.dumpJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.dumpJSON" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dumpJSON</code><span class="sig-paren">(</span><em>fname=None</em>, <em>stateDumpFunc=&lt;built-in function repr&gt;</em>, <em>labelDumpFunc=&lt;built-in function repr&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.dumpJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.dumpJSON" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dump the MDD into a JSON file.</p>
 <p>Dump the contents of the MDD into a JSON file for later retrieval.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -267,6 +267,7 @@ the node state of the node in layer &#8216;j&#8217;</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of json file (default: self.name + &#8216;.json&#8217;)</li>
 <li><strong>stateDumpFunc</strong> (<em>Callable[[object], str]</em>) &#8211; stateDumpFunc(s) returns
 a string representation of the node state &#8216;s&#8217; (default: repr)</li>
 <li><strong>labelDumpFunc</strong> (<em>Callable[[object], str]</em>) &#8211; labelDumpFunc(l) returns
