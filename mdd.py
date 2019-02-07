@@ -1313,24 +1313,27 @@ class MDD(object):
         outf.write('}')
         outf.close()
 
-    def dumpJSON(self, stateDumpFunc=repr, labelDumpFunc=repr):
+    def dumpJSON(self, fname=None, stateDumpFunc=repr, labelDumpFunc=repr):
         """Dump the MDD into a JSON file.
 
         Dump the contents of the MDD into a JSON file for later retrieval.
 
         Args:
+            fname (str): name of json file (default: self.name + '.json')
             stateDumpFunc (Callable[[object], str]): stateDumpFunc(s) returns
                 a string representation of the node state 's' (default: repr)
             labelDumpFunc (Callable[[object], str]): labelDumpFunc(l) returns
                 a string representation of the arc label 'l' (default: repr)
         """
+        if fname is None:
+            fname = self.name + '.json'
         dataList = []
         dataList.append({'Type': 'name', 'name': self.name})
         for v in self.allnodes():
             dataList.append({'Type': 'node', 'layer': v.layer, 'state': stateDumpFunc(v.state), 'id': hash(v)})
         for a in self.alloutgoingarcs():
             dataList.append({'Type': 'arc', 'label': labelDumpFunc(a.label), 'weight': float(a.weight), 'tail': hash(a.tail), 'head': hash(a.head)})
-        outf = open(self.name + '.json', 'w')
+        outf = open(fname, 'w')
         dump(dataList, outf)
         outf.close()
 
