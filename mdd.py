@@ -1285,7 +1285,7 @@ class MDD(object):
             (nextArcAttr, srcAttr, destAttr) = ('outgoing', 'tail', 'head')
 
         outf = open('{}.gv'.format(self.name), 'w')
-        outf.write('digraph {} {{\n'.format(self.name))
+        outf.write('digraph "{}" {{\n'.format(self.name))
         if reverseDir:
             outf.write('edge [dir=back];\n')
         if arcSortArgs is not None:
