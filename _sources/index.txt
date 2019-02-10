@@ -9,6 +9,9 @@ User Documentation for pymdd
 .. automodule:: mdd
    :members:
 
+.. automodule:: ixmdd
+   :members:
+
 
 
 Indices and tables
