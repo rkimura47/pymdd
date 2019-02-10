@@ -12,7 +12,7 @@ args = parser.parse_args()
 json_file = args.json_file
 mymdd = MDD()
 mymdd.loadJSON(json_file)
-# NOTE: for smisp.json, use the following instead
+# NOTE: for smisp.json, you may have to use the following to read UUID states
 #from uuid import UUID
 #mymdd.loadJSON(json_file, stateLoadFunc=lambda s: eval(s, globals()))
 
