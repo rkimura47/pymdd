@@ -6,8 +6,14 @@ User Documentation for pymdd
 .. toctree::
    :maxdepth: 2
 
+pymdd.mdd
+=========
+
 .. automodule:: mdd
    :members:
+
+pymdd.ixmdd
+===========
 
 .. automodule:: ixmdd
    :members:

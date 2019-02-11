@@ -1,0 +1,571 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ixmdd &mdash; PyMDD 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PyMDD 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ixmdd</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">mdd</span> <span class="kn">import</span> <span class="n">MDD</span>
+<div class="viewcode-block" id="IxTuple"><a class="viewcode-back" href="../index.html#ixmdd.IxTuple">[docs]</a><span class="k">class</span> <span class="nc">IxTuple</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IxTuple represents info about one type of -ix at one MDDNode.</span>
+
+<span class="sd">    IxTuple represents information about one type of prefix or suffix</span>
+<span class="sd">    for a single MDDNode.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        node (MDDNode): associated node</span>
+<span class="sd">        ixtype (str): type of ix</span>
+<span class="sd">        weight (float): weight of -ix</span>
+<span class="sd">        nextarc (MDDArc): next arc of optimal -ix (default: None)</span>
+<span class="sd">        need_check(bool): True if optimal -ix may have changed (default: True)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">ixtype</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">nextarc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">need_check</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct a new IxTuple object.&quot;&quot;&quot;</span>
+        <span class="c1">#if not need_check:</span>
+        <span class="c1">#    print(&#39;\tSet {}.{} to ({}, {}, {})&#39;.format(node, ixtype, weight, nextarc, need_check))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ixtype</span> <span class="o">=</span> <span class="n">ixtype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nextarc</span> <span class="o">=</span> <span class="n">nextarc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_need_check</span> <span class="o">=</span> <span class="n">need_check</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span>
+
+    <span class="nd">@weight.setter</span>
+    <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="c1">#print(&#39;\tSet {}.weight to {}&#39;.format(self.ixtype, value))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nextarc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nextarc</span>
+
+    <span class="nd">@nextarc.setter</span>
+    <span class="k">def</span> <span class="nf">nextarc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="c1">#print(&#39;\tSet {}.nextarc to {}&#39;.format(self.ixtype, value))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nextarc</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">need_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_check</span>
+
+    <span class="nd">@need_check.setter</span>
+    <span class="k">def</span> <span class="nf">need_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="c1">#if not value:</span>
+        <span class="c1">#    print(&#39;\tConfirm {}.{} is ({}, {}, {})&#39;.format(self.node, self.ixtype, self.weight, self.nextarc, value))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_need_check</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextarc</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_check</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;*&#39;</span>
+        <span class="k">return</span> <span class="n">s</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;IxTuple(&#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixtype</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextarc</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">need_check</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span></div>
+
+<div class="viewcode-block" id="IxInfo"><a class="viewcode-back" href="../index.html#ixmdd.IxInfo">[docs]</a><span class="k">class</span> <span class="nc">IxInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IxInfo represents -ix information about a single MDDNode.</span>
+
+<span class="sd">    IxInfo reprsents prefix and suffix information about a single MDDNode.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        node (MDDNode): associated node</span>
+<span class="sd">        min_suffix (IxTuple): minimum weight suffix</span>
+<span class="sd">        max_suffix (IxTuple): maximum weight suffix</span>
+<span class="sd">        min_prefix (IxTuple): minimum weight prefix</span>
+<span class="sd">        max_prefix (IxTuple): maximum weight prefix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">min_suffix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_suffix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">min_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_suffix</span> <span class="o">=</span> <span class="n">min_suffix</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_suffix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_suffix</span> <span class="o">=</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;min_suffix&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_suffix</span> <span class="o">=</span> <span class="n">max_suffix</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_suffix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_suffix</span> <span class="o">=</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;max_suffix&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_prefix</span> <span class="o">=</span> <span class="n">min_prefix</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_prefix</span> <span class="o">=</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;min_prefix&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_prefix</span> <span class="o">=</span> <span class="n">max_prefix</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_prefix</span> <span class="o">=</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;max_prefix&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="IxParam"><a class="viewcode-back" href="../index.html#ixmdd.IxParam">[docs]</a><span class="k">class</span> <span class="nc">IxParam</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IxParam stores parameters specific to each IxInfo.</span>
+
+<span class="sd">    IxParam stores parameters specific to each IxInfo.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ixType (str): type of ixinfo</span>
+<span class="sd">        numNodeLayers: current number of node layers in MDD</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_ix_types</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;min_suffix&#39;</span><span class="p">,</span> <span class="s1">&#39;max_suffix&#39;</span><span class="p">,</span> <span class="s1">&#39;min_prefix&#39;</span><span class="p">,</span> <span class="s1">&#39;max_prefix&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">numNodeLayers</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ixType</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown ixType: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ixType</span><span class="p">)</span>
+        <span class="n">isSuffix</span> <span class="o">=</span> <span class="p">(</span><span class="n">ixType</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;suffix&#39;</span><span class="p">)</span>
+        <span class="n">isMin</span> <span class="o">=</span> <span class="p">(</span><span class="n">ixType</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;min&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">ixType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">otherEnd</span> <span class="o">=</span> <span class="s1">&#39;head&#39;</span> <span class="k">if</span> <span class="n">isSuffix</span> <span class="k">else</span> <span class="s1">&#39;tail&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nextArcs</span> <span class="o">=</span> <span class="s1">&#39;outgoing&#39;</span> <span class="k">if</span> <span class="n">isSuffix</span> <span class="k">else</span> <span class="s1">&#39;incoming&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastNodeLayer</span> <span class="o">=</span> <span class="n">numNodeLayers</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">isSuffix</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterDir</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">isSuffix</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limVal</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">isMin</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limCmp</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)</span> <span class="k">if</span> <span class="n">isMin</span> <span class="k">else</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recEnd</span> <span class="o">=</span> <span class="s1">&#39;tail&#39;</span> <span class="k">if</span> <span class="n">isSuffix</span> <span class="k">else</span> <span class="s1">&#39;head&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recArcs</span> <span class="o">=</span> <span class="s1">&#39;incoming&#39;</span> <span class="k">if</span> <span class="n">isSuffix</span> <span class="k">else</span> <span class="s1">&#39;outgoing&#39;</span></div>
+
+<div class="viewcode-block" id="IxMDD"><a class="viewcode-back" href="../index.html#ixmdd.IxMDD">[docs]</a><span class="k">class</span> <span class="nc">IxMDD</span><span class="p">(</span><span class="n">MDD</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IxMDD is an MDD that maintains the optimal -ix at every node.</span>
+
+<span class="sd">    IxMDD is an extension of the MDD class that maintains the minimum and</span>
+<span class="sd">    maximum prefix and suffix at every node.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): name of IxMDD (default: &#39;ixmdd&#39;)</span>
+<span class="sd">        nodes (List[Dict[MDDNode, MDDNodeInfo]]): nodes of MDD;</span>
+<span class="sd">            if None (default), set to empty list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ixmdd&#39;</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct a new &#39;IXMDD&#39; object.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">IxInfo</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes</span><span class="p">()}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_ixinfo_all</span><span class="p">()</span>
+
+    <span class="c1"># Fundamental getters</span>
+    <span class="k">def</span> <span class="nf">_opt_ixweight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return weight of optimal ix associated with node.</span>
+
+<span class="sd">        Return weight of optimal ix associated with node. Note</span>
+<span class="sd">        this function does NOT verify if optimal ix needs to be</span>
+<span class="sd">        checked!</span>
+<span class="sd">        Args:</span>
+<span class="sd">            ixType (str): type of ix</span>
+<span class="sd">            node (MDDNode): node being queried</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: next arc of optimal ix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">ixType</span><span class="p">)</span><span class="o">.</span><span class="n">weight</span>
+    <span class="k">def</span> <span class="nf">_opt_ixarc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return next arc of optimal ix associated with node.</span>
+<span class="sd">        </span>
+<span class="sd">        Return next arc of optimal ix associated with node, or None</span>
+<span class="sd">        if there is no such arc. Make sure any function that uses this</span>
+<span class="sd">        takes into account that ixarc may be None!!!</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ixType (str): type of ix</span>
+<span class="sd">            node (MDDNode): node being queried</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            MDDArc: next arc of optimal ix (or None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">ixType</span><span class="p">)</span><span class="o">.</span><span class="n">nextarc</span>
+    <span class="k">def</span> <span class="nf">_opt_ixcheck</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return if optimal ix associated with node needs to be checked.</span>
+
+<span class="sd">        Return if optimal ix associated with node needs to be checked.</span>
+<span class="sd">        If True, the optimal ix associated with this node may not be accurate,</span>
+<span class="sd">        and should be found by MDD traversal instead of lookup.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ixType (str): type of ix</span>
+<span class="sd">            node (MDDNode): node being queried</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if optimal ix needs to be checked</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">ixType</span><span class="p">)</span><span class="o">.</span><span class="n">need_check</span>
+    <span class="k">def</span> <span class="nf">_opt_ixpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return optimal ix associate with node.</span>
+
+<span class="sd">        NOTE: This function returns an error if the total weight of the</span>
+<span class="sd">        traversed path does not match the optimal ix weight of node. It also</span>
+<span class="sd">        does not verify whether node ixes need to be checked.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ixType (str): type of ix</span>
+<span class="sd">            node (MDDNode): node being queried</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, List[object]]: optimal weight and ix path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">currLayer</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">layer</span>
+        <span class="n">nextarc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">.</span><span class="n">nextarc</span>
+        <span class="k">while</span> <span class="n">nextarc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nextNode</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nextarc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">otherEnd</span><span class="p">)</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nextarc</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">w</span> <span class="o">+=</span> <span class="n">nextarc</span><span class="o">.</span><span class="n">weight</span>
+            <span class="n">currLayer</span> <span class="o">=</span> <span class="n">nextNode</span><span class="o">.</span><span class="n">layer</span>
+            <span class="n">nextarc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixarc</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">nextNode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">currLayer</span> <span class="o">!=</span> <span class="n">ixp</span><span class="o">.</span><span class="n">lastNodeLayer</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">limVal</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="n">w</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Internal error: weight of path is not optimal weight!&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IxMDD.opt_ixweight"><a class="viewcode-back" href="../index.html#ixmdd.IxMDD.opt_ixweight">[docs]</a>    <span class="k">def</span> <span class="nf">opt_ixweight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return weight of optimal ix associated with node.</span>
+
+<span class="sd">        Return weight of optimal ix associated with node.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            ixType (str): type of ix</span>
+<span class="sd">            node (MDDNode): node being queried</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: next arc of optimal ix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ixType</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IxParam</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown ixType: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ixType</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixcheck</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;{} needs check: reverting to explicit search&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_optix</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IxMDD.opt_ixpath"><a class="viewcode-back" href="../index.html#ixmdd.IxMDD.opt_ixpath">[docs]</a>    <span class="k">def</span> <span class="nf">opt_ixpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return optimal ix associate with node.</span>
+
+<span class="sd">        NOTE: This function returns an error if the total weight of the</span>
+<span class="sd">        traversed path does not match the optimal ix weight of node. It also</span>
+<span class="sd">        does not verify that the ixes are checked.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ixType (str): type of ix</span>
+<span class="sd">            node (MDDNode): node being queried</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, List[object]]: optimal weight and ix path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixcheck</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;{} needs check: reverting to explicit search&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_optix</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nextarc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">.</span><span class="n">nextarc</span>
+        <span class="k">while</span> <span class="n">nextarc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nextNode</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nextarc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">otherEnd</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixcheck</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">nextNode</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;{} needs check: reverting to explicit search&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nextNode</span><span class="p">))</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_optix</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nextarc</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">w</span> <span class="o">+=</span> <span class="n">nextarc</span><span class="o">.</span><span class="n">weight</span>
+            <span class="n">nextarc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">nextNode</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">.</span><span class="n">nextarc</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_find_optix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Internal function that calls _find_optimal_ix of MDD.&quot;&quot;&quot;</span>
+        <span class="n">suffixes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ixType</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;suffix&#39;</span><span class="p">)</span>
+        <span class="n">longest</span> <span class="o">=</span> <span class="p">(</span><span class="n">ixType</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_find_optimal_ix</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffixes</span><span class="p">,</span> <span class="n">longest</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_find_optimal_ix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">suffixes</span><span class="p">,</span> <span class="n">longest</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replaces _find_optimal_ix of MDD to look at cached value first.&quot;&quot;&quot;</span>
+        <span class="n">ixType</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;max&#39;</span> <span class="k">if</span> <span class="n">longest</span> <span class="k">else</span> <span class="s1">&#39;min&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;_suffix&#39;</span> <span class="k">if</span> <span class="n">suffixes</span> <span class="k">else</span> <span class="s1">&#39;_prefix&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_ixpath</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+
+    <span class="c1">###########################</span>
+    <span class="c1"># IxInfo Update Functions #</span>
+    <span class="c1">###########################</span>
+
+    <span class="k">def</span> <span class="nf">_reset_ixinfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clear IxInfo for all nodes in IxMDD.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">IxInfo</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes</span><span class="p">()}</span>
+
+<div class="viewcode-block" id="IxMDD.update_ixinfo_all"><a class="viewcode-back" href="../index.html#ixmdd.IxMDD.update_ixinfo_all">[docs]</a>    <span class="k">def</span> <span class="nf">update_ixinfo_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update IxInfo for all nodes via bottom-up/top-down passes.&quot;&quot;&quot;</span>
+        <span class="c1"># Reset ixinfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_ixinfo</span><span class="p">()</span>
+        <span class="c1"># Update each ixinfo</span>
+        <span class="k">for</span> <span class="n">ixType</span> <span class="ow">in</span> <span class="n">IxParam</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_ixinfo_bylayer</span><span class="p">(</span><span class="n">ixType</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_update_ixinfo_bylayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">termLayer</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update IxInfo layer by layer.</span>
+
+<span class="sd">        Update IxInfo, by layer up to termLayer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ixType (str): type of ix</span>
+<span class="sd">            termLayer (int): one layer beyond last layer to update ixinfo;</span>
+<span class="sd">                if termLayer &lt; 0 or termlayer &gt; self.numNodeLayers,</span>
+<span class="sd">                update all layers (default: -1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+        <span class="n">terminal_layer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="o">-</span><span class="n">ixp</span><span class="o">.</span><span class="n">lastNodeLayer</span><span class="o">+</span><span class="n">ixp</span><span class="o">.</span><span class="n">iterDir</span> <span class="k">if</span> <span class="n">termLayer</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">termLayer</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span> <span class="k">else</span> <span class="n">termLayer</span> <span class="o">+</span> <span class="n">ixp</span><span class="o">.</span><span class="n">iterDir</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">lastNodeLayer</span><span class="p">,</span> <span class="n">terminal_layer</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">iterDir</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ui</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodeitems_in_layer</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">ixp</span><span class="o">.</span><span class="n">lastNodeLayer</span><span class="p">:</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+                    <span class="c1">#assert 0 == self._find_optix(ixp.type, u)[0]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ui</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">nextArcs</span><span class="p">):</span>
+                        <span class="n">new_weight</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">otherEnd</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">ixp</span><span class="o">.</span><span class="n">limCmp</span><span class="p">(</span><span class="n">new_weight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">u</span><span class="p">)):</span>
+                            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">new_weight</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="bp">True</span><span class="p">))</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">),</span> <span class="s1">&#39;need_check&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+                    <span class="c1">#assert self._opt_ixweight(ixp.type, u) == self._find_optix(ixp.type, u)[0]</span>
+
+    <span class="k">def</span> <span class="nf">_update_ixinfo_bynode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ixType</span><span class="p">,</span> <span class="n">nodeList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update IxInfo recursively from list of nodes.</span>
+
+<span class="sd">        Update IxInfo recursively from nodes in &#39;nodeList&#39;. If IxInfo is</span>
+<span class="sd">        updated, all nodes in the subtree of the optimal ixtree must also</span>
+<span class="sd">        be updated; this is done recursively. Note that &#39;nodeList&#39; can only</span>
+<span class="sd">        contain nodes from a single layer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ixType (str): type of ix</span>
+<span class="sd">            nodeList (List[MDDNode]): initial list of nodes to update</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: &#39;nodeList&#39; cannot contain nodes from different layers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check all nodes in nodeList are on same layer</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">layer</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nodeList</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;nodeList cannot contain nodes from different layers: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodeList</span><span class="p">))</span>
+
+        <span class="c1"># Adjust path weights of nodes in optimal subtree</span>
+        <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+        <span class="n">updateNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nodeList</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">updateNodes</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">),</span> <span class="s1">&#39;need_check&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateNodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">nextUpdateNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">updateNodes</span><span class="p">:</span>
+                <span class="c1"># If node requires a check, peform a full update</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixcheck</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+                    <span class="n">old_weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+                    <span class="n">old_ixtuple</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">limVal</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">True</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">u</span><span class="o">.</span><span class="n">layer</span> <span class="o">==</span> <span class="n">ixp</span><span class="o">.</span><span class="n">lastNodeLayer</span><span class="p">:</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+                        <span class="c1">#assert 0 == self._find_optix(ixp.type, u)[0]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">currNextArcs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_node_info</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">ixp</span><span class="o">.</span><span class="n">nextArcs</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">currNextArcs</span><span class="p">:</span>
+                            <span class="n">nextNode</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">otherEnd</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixcheck</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">nextNode</span><span class="p">):</span>
+                                <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;node in closer layer not checked; performing layer update&#39;</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_update_ixinfo_bylayer</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">nextNode</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
+                            <span class="n">new_weight</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">nextNode</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">ixp</span><span class="o">.</span><span class="n">limCmp</span><span class="p">(</span><span class="n">new_weight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">u</span><span class="p">)):</span>
+                                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">new_weight</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="bp">True</span><span class="p">))</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">),</span> <span class="s1">&#39;need_check&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+                        <span class="c1">#assert self._opt_ixweight(ixp.type, u) == self._find_optix(ixp.type, u)[0]</span>
+                <span class="c1"># Recursing down the optimal subtree, add nodes that need to be updated</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_node_info</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recArcs</span><span class="p">):</span>
+                    <span class="c1"># Inefficient but correct</span>
+                    <span class="c1">#recNode = getattr(a, ixp.recEnd)</span>
+                    <span class="c1">#setattr(getattr(self.ixinfo[recNode], ixp.type), &#39;need_check&#39;, True)</span>
+                    <span class="c1">#nextUpdateNodes.add(recNode)</span>
+
+                    <span class="c1"># More efficient, but is it correct?</span>
+                    <span class="n">recNode</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recEnd</span><span class="p">)</span>
+                    <span class="n">curr_weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">recNode</span><span class="p">)</span>
+                    <span class="n">new_weight</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixcheck</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">recNode</span><span class="p">):</span>
+                        <span class="c1"># If a node needs to be checked, add it to be fully updated</span>
+                        <span class="n">nextUpdateNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">recNode</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">ixp</span><span class="o">.</span><span class="n">limCmp</span><span class="p">(</span><span class="n">new_weight</span><span class="p">,</span> <span class="n">curr_weight</span><span class="p">):</span>
+                        <span class="c1"># If a node is checked AND new_weight is better, we can do a simple update</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">recNode</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">recNode</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">new_weight</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+                        <span class="c1">#assert self._opt_ixweight(ixp.type, recNode) == self._find_optix(ixp.type, recNode)[0]</span>
+                        <span class="c1">#if self._opt_ixweight(ixp.type, recNode) == ixp.limVal:</span>
+                        <span class="c1">#    print(&#39;\t\t!!!Node {}: Incoming = {}, Outgoing = {}&#39;.format(recNode, self._get_node_info(recNode).incoming, self._get_node_info(recNode).outgoing))</span>
+                        <span class="c1"># This assert won&#39;t always be true, but when the iteration ends it will be true.</span>
+                        <span class="c1">##setattr(getattr(self.ixinfo[recNode], ixp.type), &#39;need_check&#39;, True)</span>
+                        <span class="n">nextUpdateNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">recNode</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">ixp</span><span class="o">.</span><span class="n">limCmp</span><span class="p">(</span><span class="n">curr_weight</span><span class="p">,</span> <span class="n">new_weight</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixarc</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">recNode</span><span class="p">)</span> <span class="o">==</span> <span class="n">a</span><span class="p">:</span>
+                        <span class="c1"># If a node is checked AND new_weight is worse, we only need to update if its optimal arc is a</span>
+                        <span class="c1"># If ixarc == None, something is wrong: since we&#39;re only checking nodes that have optimal arcs, ixarc should never be None here.</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">recNode</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">),</span> <span class="s1">&#39;need_check&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+                        <span class="n">nextUpdateNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">recNode</span><span class="p">)</span>
+
+            <span class="n">updateNodes</span> <span class="o">=</span> <span class="n">nextUpdateNodes</span>
+
+    <span class="c1">################################</span>
+    <span class="c1"># Incremental update functions #</span>
+    <span class="c1">################################</span>
+    <span class="c1"># The following set of functions are all augmented versions of functions</span>
+    <span class="c1"># in MDD, in order to maintain the IxInfo invariant every time the MDD</span>
+    <span class="c1"># is changed.</span>
+
+    <span class="k">def</span> <span class="nf">_add_arc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newarc</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_add_arc</span><span class="p">(</span><span class="n">newarc</span><span class="p">)</span>
+        <span class="c1">#print(&#39;Adding arc {}&#39;.format(newarc))</span>
+        <span class="k">for</span> <span class="n">ixType</span> <span class="ow">in</span> <span class="n">IxParam</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+            <span class="n">newWeight</span> <span class="o">=</span> <span class="n">newarc</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">newarc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">otherEnd</span><span class="p">))</span>
+            <span class="n">currWeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixweight</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">newarc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recEnd</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ixp</span><span class="o">.</span><span class="n">limCmp</span><span class="p">(</span><span class="n">newWeight</span><span class="p">,</span> <span class="n">currWeight</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_ixinfo_bynode</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">newarc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recEnd</span><span class="p">)])</span>
+
+    <span class="k">def</span> <span class="nf">_remove_arc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmvarc</span><span class="p">):</span>
+        <span class="n">toProcess</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ixType</span> <span class="ow">in</span> <span class="n">IxParam</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+            <span class="n">toProcess</span><span class="p">[</span><span class="n">ixType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">optArc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixarc</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rmvarc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recEnd</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">optArc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">optArc</span> <span class="o">==</span> <span class="n">rmvarc</span><span class="p">:</span>
+                <span class="n">toProcess</span><span class="p">[</span><span class="n">ixType</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">rmvarc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recEnd</span><span class="p">))</span>
+        <span class="c1">#print(&#39;Removing arc {}&#39;.format(rmvarc))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_remove_arc</span><span class="p">(</span><span class="n">rmvarc</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ixType</span> <span class="ow">in</span> <span class="n">IxParam</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_ixinfo_bynode</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">toProcess</span><span class="p">[</span><span class="n">ixType</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newnode</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_add_node</span><span class="p">(</span><span class="n">newnode</span><span class="p">)</span>
+        <span class="c1">#print(&#39;Adding node {}&#39;.format(newnode))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">newnode</span><span class="p">]</span> <span class="o">=</span> <span class="n">IxInfo</span><span class="p">(</span><span class="n">newnode</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ixType</span> <span class="ow">in</span> <span class="n">IxParam</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">newnode</span><span class="o">.</span><span class="n">layer</span> <span class="o">==</span> <span class="n">ixp</span><span class="o">.</span><span class="n">lastNodeLayer</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">newnode</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">newnode</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+                <span class="c1">#assert 0 == self._find_optix(ixp.type, newnode)[0]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">newnode</span><span class="p">],</span> <span class="n">ixType</span><span class="p">),</span> <span class="s1">&#39;need_check&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+                <span class="c1">#assert self._opt_ixweight(ixType, newnode) == self._find_optix(ixType, newnode)[0]</span>
+
+    <span class="k">def</span> <span class="nf">_remove_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmvnode</span><span class="p">):</span>
+        <span class="n">toProcess</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ixType</span> <span class="ow">in</span> <span class="n">IxParam</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+            <span class="n">toProcess</span><span class="p">[</span><span class="n">ixType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># Look at all relevant arcs to be removed...</span>
+            <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_node_info</span><span class="p">(</span><span class="n">rmvnode</span><span class="p">),</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recArcs</span><span class="p">):</span>
+                <span class="c1"># If any of these arcs are optimal ix arcs for the node</span>
+                <span class="c1"># on the opposite side, that node needs to be updated.</span>
+                <span class="n">optArc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_ixarc</span><span class="p">(</span><span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recEnd</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">optArc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">optArc</span> <span class="o">==</span> <span class="n">arc</span><span class="p">:</span>
+                    <span class="c1">#self._update_ixinfo_bynode(ixp.type, [getattr(arc, ixp.recEnd)])</span>
+                    <span class="n">toProcess</span><span class="p">[</span><span class="n">ixType</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">arc</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">recEnd</span><span class="p">))</span>
+        <span class="c1">#print(&#39;Removing node {}&#39;.format(rmvnode))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_remove_node</span><span class="p">(</span><span class="n">rmvnode</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ixType</span> <span class="ow">in</span> <span class="n">IxParam</span><span class="o">.</span><span class="n">all_ix_types</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_ixinfo_bynode</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="n">toProcess</span><span class="p">[</span><span class="n">ixType</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_append_new_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_append_new_layer</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ixType</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;min_suffix&#39;</span><span class="p">,</span> <span class="s1">&#39;max_suffix&#39;</span><span class="p">):</span>
+            <span class="n">ixp</span> <span class="o">=</span> <span class="n">IxParam</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodeLayers</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">IxTuple</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ixp</span><span class="o">.</span><span class="n">limVal</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+                <span class="c1">#assert ixp.limVal == self._find_optix(ixp.type, u)[0]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_ixinfo_bynode</span><span class="p">(</span><span class="n">ixType</span><span class="p">,</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allnodes_in_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numArcLayers</span><span class="o">-</span><span class="mi">1</span><span class="p">)])</span>
+
+    <span class="k">def</span> <span class="nf">_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ixinfo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+<span class="c1">#    def _remove_nodes(self, rmvnodes):</span>
+<span class="c1">#    def add_node(self, newnode):</span>
+<span class="c1">#    def remove_node(self, rmvnode):</span>
+<span class="c1">#    def add_arc(self, newarc):</span>
+<span class="c1">#    def remove_arc(self, rmvarc):</span>
+<span class="c1">#    def _merge_nodes_internal(self, mnodes, mlayer, nodefun, inarcfun=None, outarcfun=None):</span>
+<span class="c1">#    def _merge_nodes(self, mnodes, mlayer, nsfun, awinfun=None, awoutfun=None):</span>
+<span class="c1">#    def merge_nodes(self, mnodes, nsfun, awinfun=None, awoutfun=None):</span>
+<span class="c1">#    def _redirect_incoming_arcs(self, old_head, new_head):</span>
+<span class="c1">#    def prune_all(self):</span>
+<span class="c1">#    def prune_recursive(self, origNodeList):</span>
+<span class="c1">#    def compile_top_down(self, numLayers, domainFunc, trFunc, costFunc, rootState, isFeas, maxWidth=None, mergeFunc=None, adjFunc=None, nodeSelFunc=None):</span>
+<span class="c1">#    def compile_trivial(self, numLayers, domainFunc, costFunc, nodeStateFunc):</span>
+<span class="c1">#    def filter_and_refine_constraint(self, trFunc, rootState, isFeas, nodeStateFunc, maxWidth=None):</span>
+<span class="c1">#    def compile_pathlist(self, pathList, minArcCostFunc=None, nodeStateFunc=None):</span>
+<span class="c1">#    def reduce_bottom_up(self, mergeFunc, adjInFunc=None, adjOutFunc=None, ignoreLastLayer=False):</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Ryo Kimura.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
