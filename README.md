@@ -12,6 +12,11 @@ At present, it can do the following:
 * Save/load the MDD to a JSON file for archiving/reconstruction.
 
 # Installation
+To install for all users, navigate to root directory and call
+```python
+pip install .
+```
+If you only want to install locally, use [virtualenv](https://pypi.org/project/virtualenv/) or [venv](https://docs.python.org/3/library/venv.html) (Python 3 only). Alternatively, you can perform the following steps manually:
 1. Create a new directory named `pymdd/` in your working directory.
 2. Create a copy of `mdd.py` in `pymdd/`.
 3. If you using Python 2, create an empty file called `__init__.py` in `pymdd/`
