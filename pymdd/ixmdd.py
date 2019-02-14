@@ -224,7 +224,7 @@ class IxMDD(mdd.MDD):
         if ixType not in IxParam.all_ix_types:
             raise ValueError('unknown ixType: %s' % ixType)
         if self._opt_ixcheck(ixType, node):
-            raise RuntimeWarning('{} needs check: reverting to explicit search'.format(node))
+            raise RuntimeWarning('%s needs check: reverting to explicit search' % str(node))
             return self._find_optix(ixType, node)[0]
         else:
             return self._opt_ixweight(ixType, node)
@@ -246,7 +246,7 @@ class IxMDD(mdd.MDD):
         """
         ixp = IxParam(ixType, self.numNodeLayers)
         if self._opt_ixcheck(ixType, node):
-            raise RuntimeWarning('{} needs check: reverting to explicit search'.format(node))
+            raise RuntimeWarning('%s needs check: reverting to explicit search' % str(node))
             return self._find_optix(ixType, node)
         path = []
         w = 0
@@ -254,7 +254,7 @@ class IxMDD(mdd.MDD):
         while nextarc is not None:
             nextNode = getattr(nextarc, ixp.otherEnd)
             if self._opt_ixcheck(ixp.type, nextNode):
-                raise RuntimeWarning('{} needs check: reverting to explicit search'.format(nextNode))
+                raise RuntimeWarning('%s needs check: reverting to explicit search' % str(nextNode))
                 return self._find_optix(ixType, node)
             path.append(nextarc.label)
             w += nextarc.weight
@@ -333,7 +333,7 @@ class IxMDD(mdd.MDD):
         """
         # Check all nodes in nodeList are on same layer
         if len(set(v.layer for v in nodeList)) > 1:
-            raise ValueError('nodeList cannot contain nodes from different layers: {}'.format(nodeList))
+            raise ValueError('nodeList cannot contain nodes from different layers: %s' % str(nodeList))
 
         # Adjust path weights of nodes in optimal subtree
         ixp = IxParam(ixType, self.numNodeLayers)

@@ -1231,14 +1231,14 @@ class MDD(object):
     # Default functions/args for GraphViz output
     @staticmethod
     def _default_ndf(state, lyr):
-        return 'label="{}"'.format(state)
+        return 'label="%s"' % str(state)
 
     @staticmethod
     def _default_adf(label, weight, lyr):
         if label == 0:
-            return 'style=dotted,label="{}"'.format(weight)
+            return 'style=dotted,label="%g"' % weight
         else:
-            return 'label="{}"'.format(weight)
+            return 'label="%g"' % weight
 
     _default_asa =  {'key': lambda a: a.label}
     _default_nsa = {'key': lambda v: v.state, 'reverse': True}
@@ -1284,31 +1284,31 @@ class MDD(object):
             iterRange = range(self.numArcLayers)
             (nextArcAttr, srcAttr, destAttr) = ('outgoing', 'tail', 'head')
 
-        outf = open('{}.gv'.format(self.name), 'w')
-        outf.write('digraph "{}" {{\n'.format(self.name))
+        outf = open('%s.gv' % self.name, 'w')
+        outf.write('digraph "%s" {{\n' % self.name)
         if reverseDir:
             outf.write('edge [dir=back];\n')
         if arcSortArgs is not None:
             outf.write('ordering=out;\n')
         for v in self.allnodes():
-            outf.write('{}[{}];\n'.format(hash(v), nodeDotFunc(v.state, v.layer)))
+            outf.write('%d[%s];\n' % (hash(v), nodeDotFunc(v.state, v.layer)))
         for j in iterRange:
             for (u, ui) in self.allnodeitems_in_layer(j):
                 arcsinlayer = [a for a in getattr(ui, nextArcAttr)]
                 if arcSortArgs is not None:
                     arcsinlayer.sort(**arcSortArgs)
                 for arc in arcsinlayer:
-                    outf.write('{} -> {}[{}];\n'.format(hash(getattr(arc, srcAttr)), hash(getattr(arc, destAttr)), arcDotFunc(arc.label, arc.weight, arc.tail.layer)))
+                    outf.write('%d -> %d[%s];\n' % (hash(getattr(arc, srcAttr)), hash(getattr(arc, destAttr)), arcDotFunc(arc.label, arc.weight, arc.tail.layer)))
         if nodeSortArgs is not None:
             for j in range(self.numNodeLayers):
                 nodesinlayer = [v for v in self.allnodes_in_layer(j)]
                 if len(nodesinlayer) > 1:
                     nodesinlayer.sort(**nodeSortArgs)
                     for i in range(len(nodesinlayer) - 1):
-                        outf.write('{} -> {}[style=invis];\n'.format(hash(nodesinlayer[i]), hash(nodesinlayer[i+1])))
+                        outf.write('%d -> %d[style=invis];\n' % (hash(nodesinlayer[i]), hash(nodesinlayer[i+1])))
                     outf.write('{rank=same')
                     for v in nodesinlayer:
-                        outf.write(';{}'.format(hash(v)))
+                        outf.write(';%d' % hash(v))
                     outf.write('}\n')
         outf.write('}')
         outf.close()
