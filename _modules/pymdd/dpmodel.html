@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pymdd.dpmodel &mdash; PyMDD 0.0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="PyMDD 0.0.2 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymdd.dpmodel</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<div class="viewcode-block" id="DPModel"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel">[docs]</a><span class="k">class</span> <span class="nc">DPModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">number_of_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">root_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DPModel.domain_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.domain_function">[docs]</a>    <span class="k">def</span> <span class="nf">domain_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DPModel.transition_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.transition_function">[docs]</a>    <span class="k">def</span> <span class="nf">transition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">domain_value</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DPModel.weight_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.weight_function">[docs]</a>    <span class="k">def</span> <span class="nf">weight_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">domain_value</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">next_state</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DPModel.is_feasible"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.is_feasible">[docs]</a>    <span class="k">def</span> <span class="nf">is_feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="DPModel.node_selection_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.node_selection_function">[docs]</a>    <span class="k">def</span> <span class="nf">node_selection_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_list</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span></div>
+
+<div class="viewcode-block" id="DPModel.state_merge_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.state_merge_function">[docs]</a>    <span class="k">def</span> <span class="nf">state_merge_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_list</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span></div>
+
+<div class="viewcode-block" id="DPModel.adjusted_weight_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.adjusted_weight_function">[docs]</a>    <span class="k">def</span> <span class="nf">adjusted_weight_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_weight</span><span class="p">,</span> <span class="n">old_head_state</span><span class="p">,</span> <span class="n">merged_head_state</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">old_weight</span></div>
+
+<div class="viewcode-block" id="DPModel.buffer_root_state"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.buffer_root_state">[docs]</a>    <span class="k">def</span> <span class="nf">buffer_root_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span></div>
+
+<div class="viewcode-block" id="DPModel.buffer_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.DPModel.buffer_function">[docs]</a>    <span class="k">def</span> <span class="nf">buffer_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">transition_list</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span></div></div>
+
+<div class="viewcode-block" id="KnapsackDP"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.KnapsackDP">[docs]</a><span class="k">class</span> <span class="nc">KnapsackDP</span><span class="p">(</span><span class="n">DPModel</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numItems</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">profit</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numItems</span> <span class="o">=</span> <span class="n">numItems</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">profit</span> <span class="o">=</span> <span class="n">profit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numItems</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span>
+
+<div class="viewcode-block" id="KnapsackDP.domain_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.KnapsackDP.domain_function">[docs]</a>    <span class="k">def</span> <span class="nf">domain_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="KnapsackDP.transition_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.KnapsackDP.transition_function">[docs]</a>    <span class="k">def</span> <span class="nf">transition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span> <span class="o">-</span> <span class="n">d</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KnapsackDP.weight_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.KnapsackDP.weight_function">[docs]</a>    <span class="k">def</span> <span class="nf">weight_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">ns</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">d</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">profit</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KnapsackDP.is_feasible"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.KnapsackDP.is_feasible">[docs]</a>    <span class="k">def</span> <span class="nf">is_feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="KnapsackDP.state_merge_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.KnapsackDP.state_merge_function">[docs]</a>    <span class="k">def</span> <span class="nf">state_merge_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slist</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">slist</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="MaxIndepSetDP"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxIndepSetDP">[docs]</a><span class="k">class</span> <span class="nc">MaxIndepSetDP</span><span class="p">(</span><span class="n">DPModel</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adjacencyMatrix</span><span class="p">,</span> <span class="n">nodeWeight</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numNodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodeWeight</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">nodeWeight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbors</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numNodes</span><span class="p">)</span> <span class="k">if</span> <span class="n">adjacencyMatrix</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numNodes</span><span class="p">)</span> <span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numNodes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">frozenset</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numNodes</span><span class="p">))</span>
+
+<div class="viewcode-block" id="MaxIndepSetDP.domain_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxIndepSetDP.domain_function">[docs]</a>    <span class="k">def</span> <span class="nf">domain_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MaxIndepSetDP.transition_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxIndepSetDP.transition_function">[docs]</a>    <span class="k">def</span> <span class="nf">transition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">s</span> <span class="o">-</span> <span class="p">{</span><span class="n">j</span><span class="p">}</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighbors</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span><span class="o">-</span> <span class="p">{</span><span class="n">j</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="MaxIndepSetDP.weight_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxIndepSetDP.weight_function">[docs]</a>    <span class="k">def</span> <span class="nf">weight_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">ns</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">d</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">j</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="MaxIndepSetDP.is_feasible"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxIndepSetDP.is_feasible">[docs]</a>    <span class="k">def</span> <span class="nf">is_feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span></div>
+
+<div class="viewcode-block" id="MaxIndepSetDP.node_selection_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxIndepSetDP.node_selection_function">[docs]</a>    <span class="k">def</span> <span class="nf">node_selection_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vlist</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">vlist</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">vlist</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="MaxIndepSetDP.state_merge_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxIndepSetDP.state_merge_function">[docs]</a>    <span class="k">def</span> <span class="nf">state_merge_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slist</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">frozenset</span><span class="p">(</span><span class="nb">set</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">slist</span><span class="p">)))</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">buffer_root_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="MaxIndepSetDP.buffer_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxIndepSetDP.buffer_function">[docs]</a>    <span class="k">def</span> <span class="nf">buffer_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">transition_list</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">pst</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="p">(</span><span class="n">pst</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="ow">in</span> <span class="n">transition_list</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="MaxCutDP"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxCutDP">[docs]</a><span class="k">class</span> <span class="nc">MaxCutDP</span><span class="p">(</span><span class="n">DPModel</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numVertices</span><span class="p">,</span> <span class="n">arcWeight</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span> <span class="o">=</span> <span class="n">numVertices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">arcWeight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootValue</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">arcWeight</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numVertices</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numVertices</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="mi">0</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span><span class="p">))</span>
+
+<div class="viewcode-block" id="MaxCutDP.domain_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxCutDP.domain_function">[docs]</a>    <span class="k">def</span> <span class="nf">domain_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="MaxCutDP.transition_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxCutDP.transition_function">[docs]</a>    <span class="k">def</span> <span class="nf">transition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="k">if</span> <span class="n">l</span> <span class="o">&gt;</span> <span class="n">k</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="k">if</span> <span class="n">l</span> <span class="o">&gt;</span> <span class="n">k</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MaxCutDP.weight_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxCutDP.weight_function">[docs]</a>    <span class="k">def</span> <span class="nf">weight_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">ns</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootValue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">l</span><span class="p">]),</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]))</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">l</span><span class="p">]),</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]))</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MaxCutDP.is_feasible"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxCutDP.is_feasible">[docs]</a>    <span class="k">def</span> <span class="nf">is_feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span></div>
+
+<div class="viewcode-block" id="MaxCutDP.state_merge_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxCutDP.state_merge_function">[docs]</a>    <span class="k">def</span> <span class="nf">state_merge_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slist</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="n">newstate</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="n">k</span><span class="p">:</span>
+                <span class="n">newstate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">slist</span><span class="p">):</span>
+                <span class="n">newstate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span> <span class="n">u</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">slist</span> <span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">slist</span><span class="p">):</span>
+                <span class="n">newstate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span> <span class="nb">abs</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">l</span><span class="p">])</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">slist</span> <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newstate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">newstate</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MaxCutDP.adjusted_weight_function"><a class="viewcode-back" href="../../pymdd.dpmodel.html#pymdd.dpmodel.MaxCutDP.adjusted_weight_function">[docs]</a>    <span class="k">def</span> <span class="nf">adjusted_weight_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">os</span><span class="p">,</span> <span class="n">ms</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">w</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">os</span><span class="p">[</span><span class="n">l</span><span class="p">])</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ms</span><span class="p">[</span><span class="n">l</span><span class="p">])</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numVertices</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Ryo Kimura.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

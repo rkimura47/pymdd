@@ -4,19 +4,12 @@ User Documentation for pymdd
 `pymdd Github repository <https://github.com/rkimura47/pymdd>`_
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
-pymdd.mdd
-=========
+   pymdd
 
-.. automodule:: mdd
-   :members:
 
-pymdd.ixmdd
-===========
 
-.. automodule:: ixmdd
-   :members:
 
 
 

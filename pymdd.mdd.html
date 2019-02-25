@@ -1,0 +1,751 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pymdd.mdd module &mdash; PyMDD 0.0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyMDD 0.0.2 documentation" href="index.html" />
+    <link rel="up" title="pymdd package" href="pymdd.html" />
+    <link rel="next" title="pymdd.ixmdd module" href="pymdd.ixmdd.html" />
+    <link rel="prev" title="pymdd package" href="pymdd.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pymdd.mdd">
+<span id="pymdd-mdd-module"></span><h1>pymdd.mdd module<a class="headerlink" href="#module-pymdd.mdd" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pymdd.mdd.MDD">
+<em class="property">class </em><code class="descclassname">pymdd.mdd.</code><code class="descname">MDD</code><span class="sig-paren">(</span><em>name='mdd'</em>, <em>nodes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>MDD represents a multivalued decision diagram (MDD).</p>
+<p>MDD represents a multivalued decision diagram, or MDD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of MDD (default: &#8216;mdd&#8217;)</li>
+<li><strong>nodes</strong> (<em>List[Dict[MDDNode, MDDNodeInfo]]</em>) &#8211; nodes of MDD;
+if None (default), set to empty list</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pymdd.mdd.MDD.add_arc">
+<code class="descname">add_arc</code><span class="sig-paren">(</span><em>newarc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.add_arc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.add_arc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an arc to the MDD.</p>
+<p>Add an arc to the MDD (with sanity checks).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>newarc</strong> (<a class="reference internal" href="#pymdd.mdd.MDDArc" title="pymdd.mdd.MDDArc"><em>MDDArc</em></a>) &#8211; arc to be added</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#RuntimeError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code></a> &#8211;
+head/tail node of arc does not exist</li>
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> &#8211;
+head and tail nodes must be one layer apart</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.add_node">
+<code class="descname">add_node</code><span class="sig-paren">(</span><em>newnode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.add_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.add_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new node to the MDD.</p>
+<p>Add a new node to the MDD (with sanity checks).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>newnode</strong> (<a class="reference internal" href="#pymdd.mdd.MDDNode" title="pymdd.mdd.MDDNode"><em>MDDNode</em></a>) &#8211; node to be added</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#IndexError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">IndexError</span></code></a> &#8211;
+the MDD does not contain the specified node layer</li>
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> &#8211;
+a duplicate node already exists in the MDD</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.allincomingarcs">
+<code class="descname">allincomingarcs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.allincomingarcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.allincomingarcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all incoming arcs in the MDD.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.allnodeitems_in_layer">
+<code class="descname">allnodeitems_in_layer</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.allnodeitems_in_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.allnodeitems_in_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all (MDDNode, MDDNodeInfo) pairs in a particular layer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.allnodes">
+<code class="descname">allnodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.allnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.allnodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all MDDNodes in the MDD.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.allnodes_in_layer">
+<code class="descname">allnodes_in_layer</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.allnodes_in_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.allnodes_in_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all MDDNodes in a particular layer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.alloutgoingarcs">
+<code class="descname">alloutgoingarcs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.alloutgoingarcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.alloutgoingarcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all outgoing arcs in the MDD.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.compile_pathlist">
+<code class="descname">compile_pathlist</code><span class="sig-paren">(</span><em>pathList</em>, <em>minArcCostFunc=None</em>, <em>nodeStateFunc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.compile_pathlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.compile_pathlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile an MDD from a list of paths.</p>
+<p>Compile an MDD based on a list of paths (and their associated weights).
+The weight of each arc is determined according to the canonical arc
+cost construction. If &#8216;minArcCost(k)&#8217; is &#8216;L&#8217;, then in the constructed
+MDD the weight of every arc in layer &#8216;k&#8217; will be at least &#8216;L&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pathList</strong> (<em>List[Tuple[float, List[object]]]</em>) &#8211; list of tuples of
+path weights and paths</li>
+<li><strong>minArcCostFunc</strong> (<em>Callable[[int], float]</em>) &#8211; minArcCostFunc(j) returns
+the desired minimum arc weight in layer &#8216;j&#8217; of the constructed
+MDD (layer 0 is not considered); if None (default), returns
+0.0 for every layer</li>
+<li><strong>nodeStateFunc</strong> (<em>Callable[[int,int], object]</em>) &#8211; nodeStateFunc(j,k)
+returns the node state of the &#8216;k&#8217;th node in layer &#8216;j&#8217;; if
+None (default), returns the tuple &#8216;(j,k)&#8217;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/exceptions.html#RuntimeError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code></a> &#8211;
+numLayers is not consistent with pathList</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.compile_top_down">
+<code class="descname">compile_top_down</code><span class="sig-paren">(</span><em>numLayers</em>, <em>domainFunc</em>, <em>trFunc</em>, <em>costFunc</em>, <em>rootState</em>, <em>isFeas</em>, <em>maxWidth=None</em>, <em>mergeFunc=None</em>, <em>adjFunc=None</em>, <em>nodeSelFunc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.compile_top_down"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.compile_top_down" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile the MDD top-down according to a DP formulation.</p>
+<p>Perform a top-down compilation of the MDD according to a dynamic
+programming (DP) formulation.  For the DP-specifying functions
+domainFunc, trFunc, and costFunc, layers should be numbered
+0, 1, ..., numLayers-1.</p>
+<p>Note that &#8216;mergeFunc&#8217;, &#8216;adjFunc&#8217;, and &#8216;nodeSelFunc&#8217; are only used
+when compiling restricted/relaxed MDDs, so if &#8216;maxWidth&#8217; is None,
+(i.e., compiling an exact MDD), they do not need to be set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>numLayers</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; number of (arc) layers (i.e., variables)</li>
+<li><strong>domainFunc</strong> (<em>Callable[[int], List[int]]</em>) &#8211; domainFunc(j) returns the
+domain of layer &#8216;j&#8217;</li>
+<li><strong>trFunc</strong> (<em>Callable[[object, int, int], object]</em>) &#8211; trFunc(s,d,j)
+returns the state transitioned to when domain value &#8216;d&#8217; is
+selected at current state &#8216;s&#8217;, current layer &#8216;j&#8217;</li>
+<li><strong>costFunc</strong> (<em>Callable[[object, int, int, object], float]</em>) &#8211; costFunc(s,d,j,ns) returns the cost of selecting domain value
+&#8216;d&#8217; at current state &#8216;s&#8217;, current layer &#8216;j&#8217;, resulting in next
+state &#8216;ns&#8217; (i.e., the output of trFunc(s,d,j))</li>
+<li><strong>rootState</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) &#8211; state of the root node</li>
+<li><strong>isFeas</strong> (<em>Callable[[object, int], bool]</em>) &#8211; isFeas(s,j) returns True if
+node state &#8216;s&#8217; in layer &#8216;j&#8217; is feasible and False otherwise</li>
+<li><strong>maxWidth</strong> (<em>Callable[[int], int]</em>) &#8211; maxWidth(j) returns the maximum
+allowable width for layer &#8216;j&#8217; of the MDD; if None (default),
+the maximum width is set to +inf and compile_top_down(...)
+returns an exact MDD</li>
+<li><strong>mergeFunc</strong> (<em>Callable[[List[object], int], object]</em>) &#8211; mergeFunc(slist,j) returns the node state resulting from
+merging node states in &#8216;slist&#8217; in layer &#8216;j&#8217; (default: None)</li>
+<li><strong>adjFunc</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; adjFunc(w,os,ms,j) returns the adjusted weight of an arc with
+weight &#8216;w&#8217;, old head node state &#8216;os&#8217;, and new head node (i.e.,
+merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217; (default: None)</li>
+<li><strong>nodeSelFunc</strong> (<em>Callable[[List[MDDNode], int], List[MDDNode]]</em>) &#8211; nodeSelFunc(vlist,j) returns a list of nodes selected from
+&#8216;vlist&#8217; in layer &#8216;j&#8217; to be either merged (if mergeFunc and
+adjFunc are defined) or removed (if mergeFunc and adjFunc
+are None); if nodeSelFunc is None (default), it picks either
+two (if merging) or one (if removing) node(s) at random</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#RuntimeError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code></a> &#8211;
+mergeFunc and adjFunc must be defined together</li>
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#RuntimeError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code></a> &#8211;
+no more nodes to remove/merge but currWidth &gt; maxWidth</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.compile_trivial">
+<code class="descname">compile_trivial</code><span class="sig-paren">(</span><em>numLayers</em>, <em>domainFunc</em>, <em>costFunc</em>, <em>nodeStateFunc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.compile_trivial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.compile_trivial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile a trivial MDD.</p>
+<p>Compile a trivial MDD, i.e., one that represents all possible solutions
+based on the given domains and costs.  This MDD contains one node in
+each layer, and an arc for every possible domain value.  For domainFunc
+costFunc, and nodeStateFunc, the layers should be numbered 0, 1, ...,
+numLayers-1.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>numLayers</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; number of (arc) layers (i.e., variables)</li>
+<li><strong>domainFunc</strong> (<em>Callable[[int], List[int]]</em>) &#8211; domainFunc(j) returns the
+domain of layer &#8216;j&#8217;</li>
+<li><strong>costFunc</strong> (<em>Callable[[int, int], float]</em>) &#8211; costFunc(d,j) returns the
+cost of selecting domain value &#8216;d&#8217; at current layer &#8216;j&#8217;</li>
+<li><strong>nodeStateFunc</strong> (<em>Callable[[int], object]</em>) &#8211; nodeStateFunc(j) returns
+the node state of the node in layer &#8216;j&#8217;</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.dumpJSON">
+<code class="descname">dumpJSON</code><span class="sig-paren">(</span><em>fname=None</em>, <em>stateDumpFunc=&lt;built-in function repr&gt;</em>, <em>labelDumpFunc=&lt;built-in function repr&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.dumpJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.dumpJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump the MDD into a JSON file.</p>
+<p>Dump the contents of the MDD into a JSON file for later retrieval.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of json file (default: self.name + &#8216;.json&#8217;)</li>
+<li><strong>stateDumpFunc</strong> (<em>Callable[[object], str]</em>) &#8211; stateDumpFunc(s) returns
+a string representation of the node state &#8216;s&#8217; (default: repr)</li>
+<li><strong>labelDumpFunc</strong> (<em>Callable[[object], str]</em>) &#8211; labelDumpFunc(l) returns
+a string representation of the arc label &#8216;l&#8217; (default: repr)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.enumerate_all_paths">
+<code class="descname">enumerate_all_paths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.enumerate_all_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.enumerate_all_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumerate all root-terminal paths in the MDD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of path weights/paths</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[Tuple[float, List[object]]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.enumerate_all_prefixes">
+<code class="descname">enumerate_all_prefixes</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.enumerate_all_prefixes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.enumerate_all_prefixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumerate all prefixes of a node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<a class="reference internal" href="#pymdd.mdd.MDDNode" title="pymdd.mdd.MDDNode"><em>MDDNode</em></a>) &#8211; node to examine</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of prefix weights/prefixes</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[Tuple[float, List[object]]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.enumerate_all_suffixes">
+<code class="descname">enumerate_all_suffixes</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.enumerate_all_suffixes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.enumerate_all_suffixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumerate all suffixes of a node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<a class="reference internal" href="#pymdd.mdd.MDDNode" title="pymdd.mdd.MDDNode"><em>MDDNode</em></a>) &#8211; node to examine</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of suffix weights/suffixes</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[Tuple[float, List[object]]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.filter_and_refine_constraint">
+<code class="descname">filter_and_refine_constraint</code><span class="sig-paren">(</span><em>trFunc</em>, <em>rootState</em>, <em>isFeas</em>, <em>nodeStateFunc</em>, <em>maxWidth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.filter_and_refine_constraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.filter_and_refine_constraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter and refine MDD for a constraint.</p>
+<p>Perform incremental refinement of a particular constraint on the MDD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>trFunc</strong> (<em>Callable[[object, int, int], object]</em>) &#8211; trFunc(s,d,j) returns
+the state transitioned to when domain value &#8216;d&#8217; is selected at
+current state &#8216;s&#8217;, current layer &#8216;j&#8217;</li>
+<li><strong>rootState</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) &#8211; state assigned to root node</li>
+<li><strong>isFeas</strong> (<em>Callable[[object, int], bool]</em>) &#8211; isFeas(s,j) returns True if
+node state &#8216;s&#8217; in layer &#8216;j&#8217; is feasible and False otherwise</li>
+<li><strong>nodeStateFunc</strong> (<em>Callable[[object, int], object]</em>) &#8211; nodeStateFunc(s,j)
+returns the node state resulting from transitioning to state
+&#8216;s&#8217; in layer &#8216;j&#8217;</li>
+<li><strong>maxWidth</strong> (<em>Callable[[int], int]</em>) &#8211; maxWidth(j) returns the maximum
+allowable width for layer &#8216;j&#8217; of the MDD; if None (default),
+the maximum width is set to 100 for all layers</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.find_longest_path">
+<code class="descname">find_longest_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.find_longest_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.find_longest_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find a longest root-terminal path in the MDD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">maximum weight and longest path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Tuple[float, List[object]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.find_shortest_path">
+<code class="descname">find_shortest_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.find_shortest_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.find_shortest_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find a shortest root-terminal path in the MDD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">minimum weight and shortest path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Tuple[float, List[object]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.loadJSON">
+<code class="descname">loadJSON</code><span class="sig-paren">(</span><em>fname</em>, <em>stateLoadFunc=&lt;built-in function eval&gt;</em>, <em>labelLoadFunc=&lt;built-in function eval&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.loadJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.loadJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an MDD from a JSON file.</p>
+<p>Load the contents of an MDD from a JSON file.
+NOTE: Since node states and arc labels can be arbitrary python
+objects, loadJSON uses eval() by default to construct these attributes.
+THIS ALLOWS FOR ARBITRARY CODE EXECUTION! USE RESPONSIBLY!!!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of input file (e.g., mdd.json)</li>
+<li><strong>stateLoadFunc</strong> (<em>Callable[[str], object]</em>) &#8211; stateLoadFunc(s) returns
+the node state corresponding to string &#8216;s&#8217; (default: eval)</li>
+<li><strong>labelLoadFunc</strong> (<em>Callable[[str], object]</em>) &#8211; labelLoadFunc(s) returns
+the arc label corresponding to string &#8216;s&#8217; (default: eval)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> &#8211;
+unknown item type (e.g., incorrect input file format)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.mdd.MDD.maxWidth">
+<code class="descname">maxWidth</code><a class="headerlink" href="#pymdd.mdd.MDD.maxWidth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of nodes in a single node layer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.merge_nodes">
+<code class="descname">merge_nodes</code><span class="sig-paren">(</span><em>mnodes</em>, <em>nsfun</em>, <em>awinfun=None</em>, <em>awoutfun=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.merge_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.merge_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge specified nodes into a new node.</p>
+<p>Merge nodes in mnodes into a new supernode.  The state of the new
+merged node is specified by nsfun, while the weights of incoming
+and/or outgoing arcs are specified by awinfun/awoutfun.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mnodes</strong> (<em>List[MDDNode]</em>) &#8211; nodes to be merged together</li>
+<li><strong>nsfun</strong> (<em>Callable[[List[object], int], object]</em>) &#8211; nsfun(slist, j) returns the node state resulting from merging
+node states in &#8216;slist&#8217; in layer &#8216;j&#8217;</li>
+<li><strong>awinfun</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; awinfun(w,os,ms,j) returns the adjusted weight of an arc with
+weight &#8216;w&#8217;, old head node state &#8216;os&#8217;, and new head node (i.e.,
+merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217;;
+if awinfun is None (default), the original weight is used</li>
+<li><strong>awoutfun</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; awoutfun(w,os,ms,j) returns the adjusted weight of an arc with
+weight &#8216;w&#8217;, old tail node state &#8216;os&#8217;, and new tail node (i.e.,
+merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217;;
+if awoutfun is None (default), the original weight is used</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new merged supernode</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#pymdd.mdd.MDDNode" title="pymdd.mdd.MDDNode">MDDNode</a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> &#8211;
+cannot merge nodes in different layers</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.mdd.MDD.numArcLayers">
+<code class="descname">numArcLayers</code><a class="headerlink" href="#pymdd.mdd.MDD.numArcLayers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of arc layers; equal to number of &#8216;variables&#8217;.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.mdd.MDD.numNodeLayers">
+<code class="descname">numNodeLayers</code><a class="headerlink" href="#pymdd.mdd.MDD.numNodeLayers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of node layers; equal to number of &#8216;variables&#8217; + 1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.output_to_dot">
+<code class="descname">output_to_dot</code><span class="sig-paren">(</span><em>nodeDotFunc=None</em>, <em>arcDotFunc=None</em>, <em>arcSortArgs=None</em>, <em>nodeSortArgs=None</em>, <em>reverseDir=False</em>, <em>fname=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.output_to_dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.output_to_dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the graphical structure of the MDD to a file.</p>
+<p>Write the graphical structure of the MDD to a file (&lt;MDDName&gt;.gv) in
+the DOT language.  The MDD can then be visualized with GraphViz.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nodeDotFunc</strong> (<em>Callable[[object, int], str]</em>) &#8211; nodeDotFunc(s,j)
+returns a string with the DOT options to use given node state
+&#8216;s&#8217; in layer &#8216;j&#8217;; if None (default), a sensible default is used</li>
+<li><strong>arcDotFunc</strong> (<em>Callable[[object, float, int], str]</em>) &#8211; arcDotFunc(l,w,j)
+returns a string with the DOT options to use given arc label
+&#8216;l&#8217;, arc weight &#8216;w&#8217;, and tail node layer &#8216;j&#8217;; if None (default),
+a sensible default is used</li>
+<li><strong>arcSortArgs</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; arguments specifying how to sort a list of arcs
+via list.sort() (i.e., &#8216;key&#8217; and, optionally, &#8216;reverse&#8217;);
+GraphViz then attempts to order the arcs accordingly in the
+output graph; if arcSortArgs is None (default), no such order
+is enforced</li>
+<li><strong>nodeSortArgs</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; arguments specifying how to sort a list of
+nodes via list.sort() (i.e., &#8216;key&#8217; and, optionally, &#8216;reverse&#8217;);
+GraphViz then attempts to order the nodes accordingly in the
+output graph; if nodeSortArgs is None (default), no such order
+is enforced</li>
+<li><strong>reverseDir</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; if True, show the MDD with arcs oriented in the
+opposite direction, so the terminal node appears at the top and
+the root node at the bottom (default: False)</li>
+<li><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of output file; if None, default to &lt;MDDName&gt;.gv</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.prune_all">
+<code class="descname">prune_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.prune_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.prune_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune all dead nodes with no root/terminal path.</p>
+<p>Prune all nodes from the MDD that do not have a path to the first or
+last layer.  This procedure employs two passes to prune all dead nodes
+in the MDD.  To prune more selectively (e.g., after removing a small
+number of nodes/arcs), use prune_recusive(...).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.prune_recursive">
+<code class="descname">prune_recursive</code><span class="sig-paren">(</span><em>origNodeList</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.prune_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.prune_recursive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively prune dead nodes with no root/terminal path.</p>
+<p>Recursively prune nodes from the MDD that do not have a path to the
+first or last layer.  Specifically, this procedure first initializes a
+FIFO queue of nodes to be pruned from &#8216;origNodeList&#8217;.  Then, it pops a
+node &#8216;u&#8217; from the queue, removes it from the MDD, then adds any nodes
+&#8216;v&#8217; neighboring &#8216;u&#8217; to the queue if the removal of &#8216;u&#8217; results in &#8216;v&#8217;
+having no incoming or outgoing arcs.  The process is repeated until
+the queue is empty.  Note that if one wishes to prune all dead nodes,
+prune_all() may be more efficient.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>origNodeList</strong> (<em>List[MDDNode]</em>) &#8211; nodes to be potentially pruned</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.reduce_bottom_up">
+<code class="descname">reduce_bottom_up</code><span class="sig-paren">(</span><em>mergeFunc</em>, <em>adjInFunc=None</em>, <em>adjOutFunc=None</em>, <em>ignoreLastLayer=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.reduce_bottom_up"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.reduce_bottom_up" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduce the MDD bottom-up by merging equivalent nodes.</p>
+<p>Merge all equivalent nodes in the MDD, i.e., nodes which have the same
+suffix set.  The state of the new node is determined by mergeFunc, and
+the weight of incoming and outgoing arcs of the new node is adjusted by
+adjInFunc and adjOutFunc respectively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mergeFunc</strong> (<em>Callable[[List[object], int], object]</em>) &#8211; mergeFunc(slist,j) returns the node state resulting from merging
+node states in &#8216;slist&#8217; in layer &#8216;j&#8217;</li>
+<li><strong>adjInFunc</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; adjInFunc(w,os,ms,j) returns the adjusted weight of an arc with
+weight &#8216;w&#8217;, old head node state &#8216;os&#8217;, and new head node (i.e.,
+merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217; (default: None)</li>
+<li><strong>adjOutFunc</strong> (<em>Callable[[float, object, object, int], float]</em>) &#8211; adjOutFunc(w,os,ms,j) returns the adjusted weight of an arc with
+weight &#8216;w&#8217;, old tail node state &#8216;os&#8217;, and new tail node (i.e.,
+merged supernode in layer &#8216;j&#8217;) state &#8216;ms&#8217; (default: None)</li>
+<li><strong>ignoreLastLayer</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; whether to avoid merging last layer (i.e.,
+merge all terminal nodes into one) or not (default: False)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.remove_arc">
+<code class="descname">remove_arc</code><span class="sig-paren">(</span><em>rmvarc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.remove_arc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.remove_arc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an arc from the MDD.</p>
+<p>Remove an arc from the MDD (with sanity checks).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rmvarc</strong> (<a class="reference internal" href="#pymdd.mdd.MDDArc" title="pymdd.mdd.MDDArc"><em>MDDArc</em></a>) &#8211; arc to be removed</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#RuntimeError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code></a> &#8211;
+head/tail node of arc does not exist</li>
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#KeyError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">KeyError</span></code></a> &#8211;
+no such incoming/outgoing arc exists in the MDD</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymdd.mdd.MDD.remove_node">
+<code class="descname">remove_node</code><span class="sig-paren">(</span><em>rmvnode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDD.remove_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDD.remove_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a node from the MDD.</p>
+<p>Remove a node from the MDD (with sanity checks).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rmvnode</strong> (<a class="reference internal" href="#pymdd.mdd.MDDNode" title="pymdd.mdd.MDDNode"><em>MDDNode</em></a>) &#8211; node to be removed</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#IndexError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">IndexError</span></code></a> &#8211;
+the MDD does not contain the specified node layer</li>
+<li><a class="reference external" href="https://docs.python.org/library/exceptions.html#KeyError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">KeyError</span></code></a> &#8211;
+no such node exists in the MDD</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.mdd.MDD.widthList">
+<code class="descname">widthList</code><a class="headerlink" href="#pymdd.mdd.MDD.widthList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of nodes in each layer</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pymdd.mdd.MDDArc">
+<em class="property">class </em><code class="descclassname">pymdd.mdd.</code><code class="descname">MDDArc</code><span class="sig-paren">(</span><em>label</em>, <em>weight</em>, <em>tail</em>, <em>head</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDDArc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDDArc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>MDDArc represents a single arc in the MDD.</p>
+<p>MDDArc represents a single arc in the MDD.  An MDDArc is uniquely
+identified by its head/tail nodes, label, and weight.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>label</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) &#8211; label of arc (e.g., assigned value)</li>
+<li><strong>weight</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) &#8211; weight of arc (e.g., coefficient)</li>
+<li><strong>tail</strong> (<a class="reference internal" href="#pymdd.mdd.MDDNode" title="pymdd.mdd.MDDNode"><em>MDDNode</em></a>) &#8211; tail/source node</li>
+<li><strong>head</strong> (<a class="reference internal" href="#pymdd.mdd.MDDNode" title="pymdd.mdd.MDDNode"><em>MDDNode</em></a>) &#8211; head/destination node</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymdd.mdd.MDDNode">
+<em class="property">class </em><code class="descclassname">pymdd.mdd.</code><code class="descname">MDDNode</code><span class="sig-paren">(</span><em>layer</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDDNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDDNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>MDDNode represents a single node in the MDD.</p>
+<p>MDDNode represents a single node in the MDD.  An MDDNode is uniquely
+identified by its layer and state.  The (node) state must be a hashable
+object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>layer</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; layer the node is in</li>
+<li><strong>state</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) &#8211; state associated with node</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymdd.mdd.MDDNodeInfo">
+<em class="property">class </em><code class="descclassname">pymdd.mdd.</code><code class="descname">MDDNodeInfo</code><span class="sig-paren">(</span><em>incoming=None</em>, <em>outgoing=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/mdd.html#MDDNodeInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.mdd.MDDNodeInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>MDDNodeInfo represents information associated with an MDDNode.</p>
+<p>MDDNodeInfo represents information associated with an MDDNode.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>incoming</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#set" title="(in Python v3.7)"><em>set</em></a>) &#8211; set of incoming arcs (default: set())</li>
+<li><strong>outgoing</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#set" title="(in Python v3.7)"><em>set</em></a>) &#8211; set of outgoing arcs (default: set())</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pymdd.html">pymdd package</a><ul>
+      <li>Previous: <a href="pymdd.html" title="previous chapter">pymdd package</a></li>
+      <li>Next: <a href="pymdd.ixmdd.html" title="next chapter">pymdd.ixmdd module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Ryo Kimura.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

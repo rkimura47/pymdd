@@ -1,0 +1,296 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pymdd.dpmodel module &mdash; PyMDD 0.0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyMDD 0.0.2 documentation" href="index.html" />
+    <link rel="up" title="pymdd package" href="pymdd.html" />
+    <link rel="next" title="pymdd.ixmdd module" href="pymdd.ixmdd.html" />
+    <link rel="prev" title="pymdd package" href="pymdd.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pymdd.dpmodel">
+<span id="pymdd-dpmodel-module"></span><h1>pymdd.dpmodel module<a class="headerlink" href="#module-pymdd.dpmodel" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pymdd.dpmodel.DPModel">
+<em class="property">class </em><code class="descclassname">pymdd.dpmodel.</code><code class="descname">DPModel</code><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.adjusted_weight_function">
+<code class="descname">adjusted_weight_function</code><span class="sig-paren">(</span><em>old_weight</em>, <em>old_head_state</em>, <em>merged_head_state</em>, <em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.adjusted_weight_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.adjusted_weight_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.buffer_function">
+<code class="descname">buffer_function</code><span class="sig-paren">(</span><em>state</em>, <em>transition_list</em>, <em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.buffer_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.buffer_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.buffer_root_state">
+<code class="descname">buffer_root_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.buffer_root_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.buffer_root_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.domain_function">
+<code class="descname">domain_function</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.domain_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.domain_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.is_feasible">
+<code class="descname">is_feasible</code><span class="sig-paren">(</span><em>state</em>, <em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.is_feasible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.is_feasible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.node_selection_function">
+<code class="descname">node_selection_function</code><span class="sig-paren">(</span><em>node_list</em>, <em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.node_selection_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.node_selection_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.DPModel.number_of_layers">
+<code class="descname">number_of_layers</code><a class="headerlink" href="#pymdd.dpmodel.DPModel.number_of_layers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.DPModel.root_state">
+<code class="descname">root_state</code><a class="headerlink" href="#pymdd.dpmodel.DPModel.root_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.state_merge_function">
+<code class="descname">state_merge_function</code><span class="sig-paren">(</span><em>state_list</em>, <em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.state_merge_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.state_merge_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.transition_function">
+<code class="descname">transition_function</code><span class="sig-paren">(</span><em>state</em>, <em>domain_value</em>, <em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.transition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.transition_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.DPModel.weight_function">
+<code class="descname">weight_function</code><span class="sig-paren">(</span><em>state</em>, <em>domain_value</em>, <em>layer</em>, <em>next_state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#DPModel.weight_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.DPModel.weight_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pymdd.dpmodel.KnapsackDP">
+<em class="property">class </em><code class="descclassname">pymdd.dpmodel.</code><code class="descname">KnapsackDP</code><span class="sig-paren">(</span><em>numItems</em>, <em>capacity</em>, <em>profit</em>, <em>weight</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#KnapsackDP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.KnapsackDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymdd.dpmodel.DPModel" title="pymdd.dpmodel.DPModel"><code class="xref py py-class docutils literal"><span class="pre">pymdd.dpmodel.DPModel</span></code></a></p>
+<dl class="method">
+<dt id="pymdd.dpmodel.KnapsackDP.domain_function">
+<code class="descname">domain_function</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#KnapsackDP.domain_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.KnapsackDP.domain_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.KnapsackDP.is_feasible">
+<code class="descname">is_feasible</code><span class="sig-paren">(</span><em>s</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#KnapsackDP.is_feasible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.KnapsackDP.is_feasible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.KnapsackDP.number_of_layers">
+<code class="descname">number_of_layers</code><a class="headerlink" href="#pymdd.dpmodel.KnapsackDP.number_of_layers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.KnapsackDP.root_state">
+<code class="descname">root_state</code><a class="headerlink" href="#pymdd.dpmodel.KnapsackDP.root_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.KnapsackDP.state_merge_function">
+<code class="descname">state_merge_function</code><span class="sig-paren">(</span><em>slist</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#KnapsackDP.state_merge_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.KnapsackDP.state_merge_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.KnapsackDP.transition_function">
+<code class="descname">transition_function</code><span class="sig-paren">(</span><em>s</em>, <em>d</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#KnapsackDP.transition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.KnapsackDP.transition_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.KnapsackDP.weight_function">
+<code class="descname">weight_function</code><span class="sig-paren">(</span><em>s</em>, <em>d</em>, <em>i</em>, <em>ns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#KnapsackDP.weight_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.KnapsackDP.weight_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pymdd.dpmodel.MaxCutDP">
+<em class="property">class </em><code class="descclassname">pymdd.dpmodel.</code><code class="descname">MaxCutDP</code><span class="sig-paren">(</span><em>numVertices</em>, <em>arcWeight</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxCutDP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymdd.dpmodel.DPModel" title="pymdd.dpmodel.DPModel"><code class="xref py py-class docutils literal"><span class="pre">pymdd.dpmodel.DPModel</span></code></a></p>
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxCutDP.adjusted_weight_function">
+<code class="descname">adjusted_weight_function</code><span class="sig-paren">(</span><em>w</em>, <em>os</em>, <em>ms</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxCutDP.adjusted_weight_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP.adjusted_weight_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxCutDP.domain_function">
+<code class="descname">domain_function</code><span class="sig-paren">(</span><em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxCutDP.domain_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP.domain_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxCutDP.is_feasible">
+<code class="descname">is_feasible</code><span class="sig-paren">(</span><em>s</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxCutDP.is_feasible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP.is_feasible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.MaxCutDP.number_of_layers">
+<code class="descname">number_of_layers</code><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP.number_of_layers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.MaxCutDP.root_state">
+<code class="descname">root_state</code><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP.root_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxCutDP.state_merge_function">
+<code class="descname">state_merge_function</code><span class="sig-paren">(</span><em>slist</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxCutDP.state_merge_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP.state_merge_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxCutDP.transition_function">
+<code class="descname">transition_function</code><span class="sig-paren">(</span><em>s</em>, <em>d</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxCutDP.transition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP.transition_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxCutDP.weight_function">
+<code class="descname">weight_function</code><span class="sig-paren">(</span><em>s</em>, <em>d</em>, <em>k</em>, <em>ns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxCutDP.weight_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxCutDP.weight_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pymdd.dpmodel.MaxIndepSetDP">
+<em class="property">class </em><code class="descclassname">pymdd.dpmodel.</code><code class="descname">MaxIndepSetDP</code><span class="sig-paren">(</span><em>adjacencyMatrix</em>, <em>nodeWeight</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxIndepSetDP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymdd.dpmodel.DPModel" title="pymdd.dpmodel.DPModel"><code class="xref py py-class docutils literal"><span class="pre">pymdd.dpmodel.DPModel</span></code></a></p>
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.buffer_function">
+<code class="descname">buffer_function</code><span class="sig-paren">(</span><em>state</em>, <em>transition_list</em>, <em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxIndepSetDP.buffer_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.buffer_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.buffer_root_state">
+<code class="descname">buffer_root_state</code><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.buffer_root_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.domain_function">
+<code class="descname">domain_function</code><span class="sig-paren">(</span><em>j</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxIndepSetDP.domain_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.domain_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.is_feasible">
+<code class="descname">is_feasible</code><span class="sig-paren">(</span><em>s</em>, <em>j</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxIndepSetDP.is_feasible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.is_feasible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.node_selection_function">
+<code class="descname">node_selection_function</code><span class="sig-paren">(</span><em>vlist</em>, <em>j</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxIndepSetDP.node_selection_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.node_selection_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.number_of_layers">
+<code class="descname">number_of_layers</code><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.number_of_layers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.root_state">
+<code class="descname">root_state</code><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.root_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.state_merge_function">
+<code class="descname">state_merge_function</code><span class="sig-paren">(</span><em>slist</em>, <em>j</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxIndepSetDP.state_merge_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.state_merge_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.transition_function">
+<code class="descname">transition_function</code><span class="sig-paren">(</span><em>s</em>, <em>d</em>, <em>j</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxIndepSetDP.transition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.transition_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pymdd.dpmodel.MaxIndepSetDP.weight_function">
+<code class="descname">weight_function</code><span class="sig-paren">(</span><em>s</em>, <em>d</em>, <em>j</em>, <em>ns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymdd/dpmodel.html#MaxIndepSetDP.weight_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymdd.dpmodel.MaxIndepSetDP.weight_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pymdd.html">pymdd package</a><ul>
+      <li>Previous: <a href="pymdd.html" title="previous chapter">pymdd package</a></li>
+      <li>Next: <a href="pymdd.ixmdd.html" title="next chapter">pymdd.ixmdd module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Ryo Kimura.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

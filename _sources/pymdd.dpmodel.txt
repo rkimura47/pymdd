@@ -1,0 +1,7 @@
+pymdd.dpmodel module
+====================
+
+.. automodule:: pymdd.dpmodel
+    :members:
+    :undoc-members:
+    :show-inheritance:
