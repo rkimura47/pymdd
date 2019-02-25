@@ -1243,7 +1243,7 @@ class MDD(object):
     _default_asa =  {'key': lambda a: a.label}
     _default_nsa = {'key': lambda v: v.state, 'reverse': True}
 
-    def output_to_dot(self, nodeDotFunc=None, arcDotFunc=None, arcSortArgs=None, nodeSortArgs=None, reverseDir=False):
+    def output_to_dot(self, nodeDotFunc=None, arcDotFunc=None, arcSortArgs=None, nodeSortArgs=None, reverseDir=False, fname=None):
         """Write the graphical structure of the MDD to a file.
 
         Write the graphical structure of the MDD to a file (<MDDName>.gv) in
@@ -1270,6 +1270,7 @@ class MDD(object):
             reverseDir (bool): if True, show the MDD with arcs oriented in the
                 opposite direction, so the terminal node appears at the top and
                 the root node at the bottom (default: False)
+            fname (str): name of output file; if None, default to <MDDName>.gv
         """
 
         # Use default output functions if unspecified
@@ -1283,8 +1284,10 @@ class MDD(object):
         else:
             iterRange = range(self.numArcLayers)
             (nextArcAttr, srcAttr, destAttr) = ('outgoing', 'tail', 'head')
+        if fname is None:
+            fname = '%s.gv' % self.name
 
-        outf = open('%s.gv' % self.name, 'w')
+        outf = open(fname, 'w')
         outf.write('digraph "%s" {\n' % self.name)
         if reverseDir:
             outf.write('edge [dir=back];\n')
