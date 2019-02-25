@@ -484,7 +484,7 @@ cannot merge nodes in different layers</p>
 
 <dl class="method">
 <dt id="mdd.MDD.output_to_dot">
-<code class="descname">output_to_dot</code><span class="sig-paren">(</span><em>nodeDotFunc=None</em>, <em>arcDotFunc=None</em>, <em>arcSortArgs=None</em>, <em>nodeSortArgs=None</em>, <em>reverseDir=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.output_to_dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.output_to_dot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">output_to_dot</code><span class="sig-paren">(</span><em>nodeDotFunc=None</em>, <em>arcDotFunc=None</em>, <em>arcSortArgs=None</em>, <em>nodeSortArgs=None</em>, <em>reverseDir=False</em>, <em>fname=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mdd.html#MDD.output_to_dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mdd.MDD.output_to_dot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the graphical structure of the MDD to a file.</p>
 <p>Write the graphical structure of the MDD to a file (&lt;MDDName&gt;.gv) in
 the DOT language.  The MDD can then be visualized with GraphViz.</p>
@@ -513,6 +513,7 @@ is enforced</li>
 <li><strong>reverseDir</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; if True, show the MDD with arcs oriented in the
 opposite direction, so the terminal node appears at the top and
 the root node at the bottom (default: False)</li>
+<li><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of output file; if None, default to &lt;MDDName&gt;.gv</li>
 </ul>
 </td>
 </tr>
@@ -701,146 +702,8 @@ object.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ixmdd">
-<span id="pymdd-ixmdd"></span><h1>pymdd.ixmdd<a class="headerlink" href="#module-ixmdd" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="ixmdd.IxInfo">
-<em class="property">class </em><code class="descclassname">ixmdd.</code><code class="descname">IxInfo</code><span class="sig-paren">(</span><em>node</em>, <em>min_suffix=None</em>, <em>max_suffix=None</em>, <em>min_prefix=None</em>, <em>max_prefix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ixmdd.html#IxInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ixmdd.IxInfo" title="Permalink to this definition">¶</a></dt>
-<dd><p>IxInfo represents -ix information about a single MDDNode.</p>
-<p>IxInfo reprsents prefix and suffix information about a single MDDNode.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>node</strong> (<a class="reference internal" href="#mdd.MDDNode" title="mdd.MDDNode"><em>MDDNode</em></a>) &#8211; associated node</li>
-<li><strong>min_suffix</strong> (<a class="reference internal" href="#ixmdd.IxTuple" title="ixmdd.IxTuple"><em>IxTuple</em></a>) &#8211; minimum weight suffix</li>
-<li><strong>max_suffix</strong> (<a class="reference internal" href="#ixmdd.IxTuple" title="ixmdd.IxTuple"><em>IxTuple</em></a>) &#8211; maximum weight suffix</li>
-<li><strong>min_prefix</strong> (<a class="reference internal" href="#ixmdd.IxTuple" title="ixmdd.IxTuple"><em>IxTuple</em></a>) &#8211; minimum weight prefix</li>
-<li><strong>max_prefix</strong> (<a class="reference internal" href="#ixmdd.IxTuple" title="ixmdd.IxTuple"><em>IxTuple</em></a>) &#8211; maximum weight prefix</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="class">
-<dt id="ixmdd.IxMDD">
-<em class="property">class </em><code class="descclassname">ixmdd.</code><code class="descname">IxMDD</code><span class="sig-paren">(</span><em>name='ixmdd'</em>, <em>nodes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ixmdd.html#IxMDD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ixmdd.IxMDD" title="Permalink to this definition">¶</a></dt>
-<dd><p>IxMDD is an MDD that maintains the optimal -ix at every node.</p>
-<p>IxMDD is an extension of the MDD class that maintains the minimum and
-maximum prefix and suffix at every node.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; name of IxMDD (default: &#8216;ixmdd&#8217;)</li>
-<li><strong>nodes</strong> (<em>List[Dict[MDDNode, MDDNodeInfo]]</em>) &#8211; nodes of MDD;
-if None (default), set to empty list</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<dl class="method">
-<dt id="ixmdd.IxMDD.opt_ixpath">
-<code class="descname">opt_ixpath</code><span class="sig-paren">(</span><em>ixType</em>, <em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ixmdd.html#IxMDD.opt_ixpath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ixmdd.IxMDD.opt_ixpath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return optimal ix associate with node.</p>
-<p>NOTE: This function returns an error if the total weight of the
-traversed path does not match the optimal ix weight of node. It also
-does not verify that the ixes are checked.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ixType</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; type of ix</li>
-<li><strong>node</strong> (<a class="reference internal" href="#mdd.MDDNode" title="mdd.MDDNode"><em>MDDNode</em></a>) &#8211; node being queried</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">optimal weight and ix path</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Tuple[float, List[object]]</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ixmdd.IxMDD.opt_ixweight">
-<code class="descname">opt_ixweight</code><span class="sig-paren">(</span><em>ixType</em>, <em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ixmdd.html#IxMDD.opt_ixweight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ixmdd.IxMDD.opt_ixweight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return weight of optimal ix associated with node.</p>
-<p>Return weight of optimal ix associated with node.
-:param ixType: type of ix
-:type ixType: str
-:param node: node being queried</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">next arc of optimal ix</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v3.7)">float</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ixmdd.IxMDD.update_ixinfo_all">
-<code class="descname">update_ixinfo_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ixmdd.html#IxMDD.update_ixinfo_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ixmdd.IxMDD.update_ixinfo_all" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update IxInfo for all nodes via bottom-up/top-down passes.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ixmdd.IxParam">
-<em class="property">class </em><code class="descclassname">ixmdd.</code><code class="descname">IxParam</code><span class="sig-paren">(</span><em>ixType</em>, <em>numNodeLayers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ixmdd.html#IxParam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ixmdd.IxParam" title="Permalink to this definition">¶</a></dt>
-<dd><p>IxParam stores parameters specific to each IxInfo.</p>
-<p>IxParam stores parameters specific to each IxInfo.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ixType</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; type of ixinfo</li>
-<li><strong>numNodeLayers</strong> &#8211; current number of node layers in MDD</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="class">
-<dt id="ixmdd.IxTuple">
-<em class="property">class </em><code class="descclassname">ixmdd.</code><code class="descname">IxTuple</code><span class="sig-paren">(</span><em>node</em>, <em>ixtype</em>, <em>weight</em>, <em>nextarc=None</em>, <em>need_check=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ixmdd.html#IxTuple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ixmdd.IxTuple" title="Permalink to this definition">¶</a></dt>
-<dd><p>IxTuple represents info about one type of -ix at one MDDNode.</p>
-<p>IxTuple represents information about one type of prefix or suffix
-for a single MDDNode.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>node</strong> (<a class="reference internal" href="#mdd.MDDNode" title="mdd.MDDNode"><em>MDDNode</em></a>) &#8211; associated node</li>
-<li><strong>ixtype</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; type of ix</li>
-<li><strong>weight</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) &#8211; weight of -ix</li>
-<li><strong>nextarc</strong> (<a class="reference internal" href="#mdd.MDDArc" title="mdd.MDDArc"><em>MDDArc</em></a>) &#8211; next arc of optimal -ix (default: None)</li>
-<li><strong>need_check</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; True if optimal -ix may have changed (default: True)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="pymdd-ixmdd">
+<h1>pymdd.ixmdd<a class="headerlink" href="#pymdd-ixmdd" title="Permalink to this headline">¶</a></h1>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -861,7 +724,7 @@ for a single MDDNode.</p>
   <ul>
 <li><a class="reference internal" href="#">User Documentation for pymdd</a></li>
 <li><a class="reference internal" href="#module-mdd">pymdd.mdd</a></li>
-<li><a class="reference internal" href="#module-ixmdd">pymdd.ixmdd</a></li>
+<li><a class="reference internal" href="#pymdd-ixmdd">pymdd.ixmdd</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 <div class="relations">
