@@ -1,4 +1,4 @@
-from pymdd import mdd
+from . import mdd
 class IxTuple(object):
     """IxTuple represents info about one type of -ix at one MDDNode.
 
