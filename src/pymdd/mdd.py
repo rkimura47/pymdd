@@ -204,9 +204,9 @@ class MDD(object):
         if showLong:
             # Long form
             s += '# Nodes\n'
-            for j in range(len(self.nodes)):
+            for (j, lyr) in enumerate(self.nodes):
                 s += 'L' + str(j) + ':\n'
-                for v in self.nodes[j]:
+                for v in lyr:
                     s += '\t' + str(v) + ': <'
                     s += 'in={' + ', '.join(str(a) for a in self.nodes[j][v].incoming) + '}, '
                     s += 'out={' + ', '.join(str(a) for a in self.nodes[j][v].outgoing) + '}'
@@ -219,7 +219,7 @@ class MDD(object):
         else:
             # Short form
             s += '# Nodes\n'
-            for j in range(len(self.nodes)):
+            for (j, lyr) in enumerate(self.nodes):
                 s += 'L' + str(j) + ': '
                 s += ', '.join(str(v) for v in self.allnodes_in_layer(j)) + '\n'
             s += '# (Outgoing) Arcs\n'
