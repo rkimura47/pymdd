@@ -129,7 +129,6 @@ class IxMDD(mdd.MDD):
     """
     def __init__(self, name='ixmdd', nodes=None):
         """Construct a new 'IXMDD' object."""
-        #super().__init__(name, nodes)
         mdd.MDD.__init__(self, name, nodes)
         self.ixinfo = {v: IxInfo(v) for v in self.allnodes()}
         self.update_ixinfo_all()
@@ -265,7 +264,6 @@ class IxMDD(mdd.MDD):
         """Internal function that calls _find_optimal_ix of MDD."""
         suffixes = (ixType[-6:] == 'suffix')
         longest = (ixType[:3] == 'max')
-        #return super()._find_optimal_ix(node, suffixes, longest)
         return mdd.MDD._find_optimal_ix(self, node, suffixes, longest)
 
     def _find_optimal_ix(self, node, suffixes, longest):
@@ -370,7 +368,7 @@ class IxMDD(mdd.MDD):
                     #setattr(getattr(self.ixinfo[recNode], ixp.type), 'need_check', True)
                     #nextUpdateNodes.add(recNode)
 
-                    # More efficient, but is it correct?
+                    # More efficient, but harder to see why it's correct
                     recNode = getattr(a, ixp.recEnd)
                     curr_weight = self._opt_ixweight(ixp.type, recNode)
                     new_weight = a.weight + self._opt_ixweight(ixp.type, u)
@@ -402,7 +400,6 @@ class IxMDD(mdd.MDD):
     # is changed.
 
     def _add_arc(self, newarc):
-        #super()._add_arc(newarc)
         mdd.MDD._add_arc(self, newarc)
         #print('Adding arc {}'.format(newarc))
         for ixType in IxParam.all_ix_types:
@@ -421,13 +418,11 @@ class IxMDD(mdd.MDD):
             if optArc is not None and optArc == rmvarc:
                 toProcess[ixType].append(getattr(rmvarc, ixp.recEnd))
         #print('Removing arc {}'.format(rmvarc))
-        #super()._remove_arc(rmvarc)
         mdd.MDD._remove_arc(self, rmvarc)
         for ixType in IxParam.all_ix_types:
             self._update_ixinfo_bynode(ixType, toProcess[ixType])
 
     def _add_node(self, newnode):
-        #super()._add_node(newnode)
         mdd.MDD._add_node(self, newnode)
         #print('Adding node {}'.format(newnode))
         self.ixinfo[newnode] = IxInfo(newnode)
@@ -454,14 +449,12 @@ class IxMDD(mdd.MDD):
                     #self._update_ixinfo_bynode(ixp.type, [getattr(arc, ixp.recEnd)])
                     toProcess[ixType].append(getattr(arc, ixp.recEnd))
         #print('Removing node {}'.format(rmvnode))
-        #super()._remove_node(rmvnode)
         mdd.MDD._remove_node(self, rmvnode)
         for ixType in IxParam.all_ix_types:
             self._update_ixinfo_bynode(ixType, toProcess[ixType])
 
 
     def _append_new_layer(self):
-        #super()._append_new_layer()
         mdd.MDD._append_new_layer(self)
         for ixType in ('min_suffix', 'max_suffix'):
             ixp = IxParam(ixType, self.numNodeLayers)
@@ -471,7 +464,6 @@ class IxMDD(mdd.MDD):
             self._update_ixinfo_bynode(ixType, [u for u in self.allnodes_in_layer(self.numArcLayers-1)])
 
     def _clear(self):
-        #super()._clear()
         mdd.MDD._clear(self)
         self.ixinfo.clear()
 
